@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#102213"/>
+  <g transform="translate(128,80)">
+    <!-- Lightning bolt -->
+    <path d="M160 0 L60 180 H120 L96 352 L240 140 H170 Z" fill="#2bee4b"/>
+  </g>
+  <!-- Text -->
+  <text x="256" y="440" font-family="sans-serif" font-weight="800" font-size="56" fill="white" text-anchor="middle">ChopMeter</text>
+</svg>

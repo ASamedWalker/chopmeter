@@ -1,0 +1,65 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
+/**
+ * PWA Install prompt banner.
+ * Shows when the browser fires the `beforeinstallprompt` event.
+ */
+export default function InstallPrompt() {
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  if (!deferredPrompt || dismissed) return null;
+
+  const handleInstall = async () => {
+    await deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === "accepted") {
+      setDeferredPrompt(null);
+    }
+    setDismissed(true);
+  };
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 bg-primary/95 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="material-symbols-outlined text-bg-dark text-2xl shrink-0">
+          install_mobile
+        </span>
+        <p className="text-bg-dark font-bold text-sm truncate">
+          Install ChopMeter for offline use!
+        </p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={() => setDismissed(true)}
+          className="text-bg-dark/60 text-sm font-medium hover:text-bg-dark"
+        >
+          Later
+        </button>
+        <button
+          onClick={handleInstall}
+          className="bg-bg-dark text-primary px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-bg-dark/90 transition-colors"
+        >
+          Install
+        </button>
+      </div>
+    </div>
+  );
+}

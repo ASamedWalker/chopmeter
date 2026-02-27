@@ -1,0 +1,281 @@
+"use client";
+
+import { useState } from "react";
+import type { EnergyTip } from "@/lib/types";
+import BottomNav from "@/components/BottomNav";
+
+const TIPS: EnergyTip[] = [
+  {
+    id: "1",
+    title: "Set AC to 25\u00B0C",
+    description:
+      "Don\u2019t freeze yourself! 25\u00B0C is cool enough and saves big cash. Every degree lower chops more units.",
+    category: "cooling",
+    icon: "ac_unit",
+    iconColor: "text-blue-400",
+  },
+  {
+    id: "2",
+    title: "Check Fridge Seals",
+    description:
+      "Loose seals leak cold air. If a paper slides out easily when the door is closed, your money is leaking too.",
+    category: "kitchen",
+    icon: "kitchen",
+    iconColor: "text-cyan-400",
+  },
+  {
+    id: "3",
+    title: "Iron in Bulk",
+    description:
+      "Iron all your shirts at once. Heating up the iron repeatedly just wastes units. Do it one time!",
+    category: "appliances",
+    icon: "iron",
+    iconColor: "text-orange-400",
+  },
+  {
+    id: "4",
+    title: "Use LED Bulbs",
+    description:
+      "Switch to LEDs. They shine bright but chop very little current compared to those old yellow bulbs.",
+    category: "lighting",
+    icon: "lightbulb",
+    iconColor: "text-yellow-400",
+  },
+  {
+    id: "5",
+    title: "Unplug Chargers",
+    description:
+      "Phone full? Comot the plug. Even if not charging, the charger still chops small small power.",
+    category: "habits",
+    icon: "power_off",
+    iconColor: "text-red-400",
+  },
+  {
+    id: "6",
+    title: "Fan Over AC",
+    description:
+      "Ceiling fans use way less power than AC. Try the fan first before you turn on the big machine.",
+    category: "cooling",
+    icon: "mode_fan",
+    iconColor: "text-teal-400",
+  },
+  {
+    id: "7",
+    title: "Cool Food First",
+    description:
+      "Don\u2019t put hot Jollof inside the fridge. Let it cool down outside first, or your fridge will overwork.",
+    category: "kitchen",
+    icon: "soup_kitchen",
+    iconColor: "text-rose-400",
+  },
+  {
+    id: "8",
+    title: "Full Loads Only",
+    description:
+      "Wait until you have plenty dirty clothes. Running the machine for two shirts is a waste of cash.",
+    category: "appliances",
+    icon: "local_laundry_service",
+    iconColor: "text-indigo-400",
+  },
+];
+
+const CATEGORIES = [
+  { key: "all", label: "All Tips", icon: "" },
+  { key: "kitchen", label: "Kitchen", icon: "kitchen" },
+  { key: "cooling", label: "Cooling", icon: "ac_unit" },
+  { key: "lighting", label: "Lighting", icon: "lightbulb" },
+  { key: "appliances", label: "Appliances", icon: "devices" },
+];
+
+const ICON_STYLES: Record<
+  string,
+  { bg: string; text: string; hoverBg: string }
+> = {
+  "text-blue-400": {
+    bg: "bg-blue-500/10",
+    text: "text-blue-400",
+    hoverBg: "group-hover:bg-blue-500",
+  },
+  "text-cyan-400": {
+    bg: "bg-cyan-500/10",
+    text: "text-cyan-400",
+    hoverBg: "group-hover:bg-cyan-500",
+  },
+  "text-orange-400": {
+    bg: "bg-orange-500/10",
+    text: "text-orange-400",
+    hoverBg: "group-hover:bg-orange-500",
+  },
+  "text-yellow-400": {
+    bg: "bg-yellow-500/10",
+    text: "text-yellow-400",
+    hoverBg: "group-hover:bg-yellow-500",
+  },
+  "text-red-400": {
+    bg: "bg-red-500/10",
+    text: "text-red-400",
+    hoverBg: "group-hover:bg-red-500",
+  },
+  "text-teal-400": {
+    bg: "bg-teal-500/10",
+    text: "text-teal-400",
+    hoverBg: "group-hover:bg-teal-500",
+  },
+  "text-rose-400": {
+    bg: "bg-rose-500/10",
+    text: "text-rose-400",
+    hoverBg: "group-hover:bg-rose-500",
+  },
+  "text-indigo-400": {
+    bg: "bg-indigo-500/10",
+    text: "text-indigo-400",
+    hoverBg: "group-hover:bg-indigo-500",
+  },
+};
+
+export default function TipsPage() {
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [search, setSearch] = useState("");
+
+  const filtered = TIPS.filter((tip) => {
+    const matchesCategory =
+      activeCategory === "all" || tip.category === activeCategory;
+    const matchesSearch =
+      search === "" ||
+      tip.title.toLowerCase().includes(search.toLowerCase()) ||
+      tip.description.toLowerCase().includes(search.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  return (
+    <div className="min-h-screen flex flex-col bg-bg-dark font-display text-slate-100">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full backdrop-blur-md border-b border-surface-border bg-surface-dark/50">
+        <div className="px-4 sm:px-6 max-w-[1200px] mx-auto flex items-center justify-between py-4">
+          <div className="flex items-center gap-3">
+            <div className="size-8 flex items-center justify-center rounded-lg bg-primary/20 text-primary">
+              <span className="material-symbols-outlined text-2xl">bolt</span>
+            </div>
+            <h2 className="text-white text-xl font-extrabold tracking-tight">
+              ChopMeter
+            </h2>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 px-4 sm:px-6 py-6 max-w-[1200px] mx-auto w-full pb-24">
+        {/* Hero Banner */}
+        <div className="rounded-2xl bg-gradient-to-r from-surface-dark to-bg-dark border border-surface-border p-6 md:p-10 relative overflow-hidden mb-6">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+          <div className="relative z-10 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4 border border-primary/20">
+              <span className="material-symbols-outlined text-sm">
+                tips_and_updates
+              </span>
+              Chop Smart
+            </div>
+            <h1 className="text-white text-3xl md:text-4xl font-black leading-tight mb-3">
+              Make your meter{" "}
+              <span className="text-primary">run slow</span> like tortoise
+            </h1>
+            <p className="text-slate-400 text-base md:text-lg font-medium mb-6 max-w-lg">
+              Cut down your electricity bill with these simple changes. Save
+              money for better things, charley!
+            </p>
+            <div className="relative w-full max-w-lg">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+                <span className="material-symbols-outlined">search</span>
+              </div>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search tips (e.g., 'Fridge', 'AC', 'Ironing')..."
+                className="block w-full p-3.5 pl-12 text-sm text-white bg-surface-dark/80 border border-surface-border rounded-xl placeholder-slate-500 shadow-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Category Filters */}
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide mb-6">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.key}
+              onClick={() => setActiveCategory(cat.key)}
+              className={`flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 text-sm font-bold transition-all ${
+                activeCategory === cat.key
+                  ? "bg-primary text-bg-dark shadow-lg shadow-primary/20"
+                  : "bg-surface-dark border border-surface-border text-slate-300 hover:border-primary/50 hover:text-white"
+              }`}
+            >
+              {cat.icon && (
+                <span className="material-symbols-outlined text-lg">
+                  {cat.icon}
+                </span>
+              )}
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tips Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filtered.map((tip) => {
+            const iconStyle = ICON_STYLES[tip.iconColor] ?? {
+              bg: "bg-slate-500/10",
+              text: "text-slate-400",
+              hoverBg: "group-hover:bg-slate-500",
+            };
+
+            return (
+              <div
+                key={tip.id}
+                className="flex flex-col gap-4 rounded-xl border border-surface-border bg-surface-dark p-5 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all group"
+              >
+                <div
+                  className={`size-12 rounded-lg flex items-center justify-center ${iconStyle.bg} ${iconStyle.text} ${iconStyle.hoverBg} group-hover:text-white transition-colors`}
+                >
+                  <span className="material-symbols-outlined text-3xl">
+                    {tip.icon}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-white text-lg font-bold leading-tight group-hover:text-primary transition-colors">
+                    {tip.title}
+                  </h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    {tip.description}
+                  </p>
+                </div>
+                <div className="mt-auto pt-4 flex items-center justify-between border-t border-surface-border">
+                  <span className="text-xs font-bold text-primary uppercase tracking-wider">
+                    {tip.category}
+                  </span>
+                  <button className="text-slate-500 hover:text-white transition-colors">
+                    <span className="material-symbols-outlined">bookmark</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Empty State */}
+        {filtered.length === 0 && (
+          <div className="text-center py-12">
+            <span className="material-symbols-outlined text-slate-600 text-5xl mb-4 block">
+              search_off
+            </span>
+            <p className="text-slate-400">
+              No tips found. Try a different search term.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <BottomNav active="tips" />
+    </div>
+  );
+}
