@@ -164,7 +164,7 @@ export default function ScannerPage() {
           onClick={() => {
             stopCamera();
             stopAutoScan();
-            router.back();
+            router.push("/dashboard");
           }}
           className="flex items-center justify-center size-10 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-colors"
         >
