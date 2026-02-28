@@ -10,11 +10,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#00FF41",
-        danger: "#FF3B30",
-        "bg-dark": "#0F2F1A",
-        "surface-dark": "#183824",
-        "surface-border": "#244D30",
+        primary: "#3B82F6",
+        "primary-violet": "#8B5CF6",
+        secondary: "#F59E0B",
+        success: "#10B981",
+        danger: "#EF4444",
+        "bg-dark": "#0A0E1A",
+        "surface-dark": "#111827",
+        "surface-2": "#1F2937",
+        "surface-border": "rgba(255,255,255,0.08)",
       },
       fontFamily: {
         display: ["Manrope", "sans-serif"],
@@ -50,8 +54,13 @@ const config: Config = {
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(0, 255, 65, 0.4)" },
-          "50%": { boxShadow: "0 0 20px 4px rgba(0, 255, 65, 0.2)" },
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(59, 130, 246, 0.4)" },
+          "50%": { boxShadow: "0 0 20px 4px rgba(59, 130, 246, 0.2)" },
+        },
+        "number-pop": {
+          "0%": { transform: "scale(0.95)", opacity: "0.7" },
+          "50%": { transform: "scale(1.02)" },
+          "100%": { transform: "scale(1)", opacity: "1" },
         },
       },
       animation: {
@@ -61,6 +70,7 @@ const config: Config = {
         "scale-in": "scale-in 0.3s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
+        "number-pop": "number-pop 0.8s ease-out",
       },
     },
   },

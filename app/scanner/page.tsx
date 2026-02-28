@@ -114,11 +114,9 @@ export default function ScannerPage() {
       setAutoScan(false);
     } else {
       setAutoScan(true);
-      // Start scanning every 3 seconds
       autoScanRef.current = setInterval(() => {
         captureAndScan();
       }, 3000);
-      // Also scan immediately
       captureAndScan();
     }
   }, [autoScan, stopAutoScan, captureAndScan]);
@@ -177,8 +175,8 @@ export default function ScannerPage() {
           onClick={toggleFlash}
           className={`flex items-center justify-center size-10 rounded-full backdrop-blur-md transition-colors ${
             flashOn
-              ? "bg-primary text-black"
-              : "bg-white/10 text-white hover:bg-primary hover:text-black"
+              ? "bg-gradient-to-r from-blue-500 to-violet-500 text-white"
+              : "bg-white/10 text-white hover:bg-blue-500/30 hover:text-white"
           }`}
           title="Toggle Flash"
         >
@@ -190,26 +188,26 @@ export default function ScannerPage() {
       {scanState !== "manual" && (
         <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 w-full">
           <div className="relative w-full aspect-[4/3] max-h-[300px] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/20">
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-lg z-20" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-lg z-20" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-lg z-20" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-lg z-20" />
+            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-lg z-20" />
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-lg z-20" />
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-lg z-20" />
+            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-lg z-20" />
 
-            <div className="absolute inset-x-0 top-0 h-0.5 bg-primary/80 shadow-[0_0_15px_rgba(0,255,65,0.8)] animate-scan z-10 w-full" />
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-blue-500/80 shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-scan z-10 w-full" />
             <div className="absolute inset-0 bg-transparent ring-[1000px] ring-black/50 pointer-events-none" />
 
             {/* Progress bar */}
             {scanState === "scanning" && (
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/50 z-30">
                 <div
-                  className="h-full bg-primary transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
             )}
 
             <div className="absolute bottom-4 left-0 right-0 text-center z-20">
-              <span className="inline-block px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full text-xs font-medium text-primary uppercase tracking-wider">
+              <span className="inline-block px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full text-xs font-medium text-blue-400 uppercase tracking-wider">
                 {scanState === "scanning"
                   ? `Scanning... ${progress}%`
                   : scanState === "success"
@@ -223,7 +221,7 @@ export default function ScannerPage() {
             <p className="text-white text-lg font-bold mb-2">
               {autoScan ? "Auto-scanning..." : "Position meter, then tap capture"}
             </p>
-            <p className="text-slate-300 text-sm leading-relaxed">
+            <p className="text-gray-300 text-sm leading-relaxed">
               {autoScan
                 ? "Scanning every 3 seconds. Hold your phone steady."
                 : "Align the meter display in the frame and tap the button below."}
@@ -235,13 +233,13 @@ export default function ScannerPage() {
           )}
 
           {scanState === "success" && (
-            <div className="mt-4 bg-surface-dark/90 backdrop-blur-md border border-primary/30 rounded-xl p-4 w-full max-w-xs">
-              <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">
+            <div className="mt-4 bg-white/[0.05] backdrop-blur-xl border border-blue-500/30 rounded-xl p-4 w-full max-w-xs">
+              <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">
                 Detected Reading
               </p>
               <p className="text-white text-3xl font-bold tracking-wider text-center">
                 {scannedValue}{" "}
-                <span className="text-lg text-slate-400">kWh</span>
+                <span className="text-lg text-gray-400">kWh</span>
               </p>
               <div className="flex gap-2 mt-4">
                 <button
@@ -249,13 +247,13 @@ export default function ScannerPage() {
                     setScanState("idle");
                     setScannedValue("");
                   }}
-                  className="flex-1 py-2 rounded-lg border border-surface-border text-white text-sm font-bold hover:bg-surface-border transition-colors"
+                  className="flex-1 py-2 rounded-lg border border-white/[0.06] text-white text-sm font-bold hover:bg-white/[0.05] transition-colors"
                 >
                   Rescan
                 </button>
                 <button
                   onClick={() => handleSave(scannedValue, "ocr")}
-                  className="flex-1 py-2 rounded-lg bg-primary text-bg-dark text-sm font-bold hover:brightness-110 transition-colors"
+                  className="flex-1 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-violet-500 text-white text-sm font-bold hover:shadow-lg hover:shadow-blue-500/20 transition-all"
                 >
                   Save
                 </button>
@@ -270,7 +268,7 @@ export default function ScannerPage() {
                 onClick={toggleAutoScan}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${
                   autoScan
-                    ? "bg-primary text-bg-dark"
+                    ? "bg-gradient-to-r from-blue-500 to-violet-500 text-white"
                     : "bg-white/10 text-white border border-white/20"
                 }`}
               >
@@ -286,7 +284,7 @@ export default function ScannerPage() {
                   onClick={captureAndScan}
                   className="size-16 rounded-full border-4 border-white/20 flex items-center justify-center group transition-all hover:scale-105 active:scale-95"
                 >
-                  <div className="size-12 rounded-full bg-white group-hover:bg-primary transition-colors shadow-lg" />
+                  <div className="size-12 rounded-full bg-white group-hover:bg-blue-400 transition-colors shadow-lg" />
                 </button>
               )}
             </div>
@@ -299,13 +297,13 @@ export default function ScannerPage() {
         <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6">
           <div className="w-full max-w-xs space-y-6">
             <div className="text-center">
-              <span className="material-symbols-outlined text-primary text-5xl mb-4 block">
+              <span className="material-symbols-outlined text-blue-400 text-5xl mb-4 block">
                 keyboard
               </span>
               <h3 className="text-white text-xl font-bold mb-2">
                 Enter Reading Manually
               </h3>
-              <p className="text-slate-400 text-sm">
+              <p className="text-gray-400 text-sm">
                 Type the number shown on your meter display.
               </p>
             </div>
@@ -316,7 +314,7 @@ export default function ScannerPage() {
               value={manualValue}
               onChange={(e) => setManualValue(e.target.value)}
               placeholder="e.g. 2450.5"
-              className="w-full h-16 rounded-xl bg-surface-dark border border-surface-border text-white text-2xl font-bold text-center placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary"
+              className="w-full h-16 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-2xl font-bold text-center placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
 
             {error && (
@@ -325,7 +323,7 @@ export default function ScannerPage() {
 
             <button
               onClick={() => handleSave(manualValue, "manual")}
-              className="w-full h-14 rounded-xl bg-primary text-bg-dark font-bold text-lg hover:brightness-110 transition-colors shadow-lg shadow-primary/20"
+              className="w-full h-14 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-lg hover:shadow-lg hover:shadow-blue-500/20 transition-all"
             >
               Save Reading
             </button>
@@ -336,7 +334,7 @@ export default function ScannerPage() {
                 setError("");
                 startCamera();
               }}
-              className="w-full text-center text-primary text-sm font-bold hover:underline"
+              className="w-full text-center text-blue-400 text-sm font-bold hover:underline"
             >
               Try Camera Again
             </button>
@@ -356,17 +354,17 @@ export default function ScannerPage() {
               }}
               className="w-full flex items-center justify-center gap-3 h-14 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-white font-bold text-base hover:bg-white/20 active:bg-white/5 transition-all group"
             >
-              <span className="material-symbols-outlined text-primary group-hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-blue-400 group-hover:text-white transition-colors">
                 keyboard
               </span>
               <span>Enter Code Manually</span>
             </button>
-            <p className="text-center text-xs text-slate-500 mt-4">
+            <p className="text-center text-xs text-gray-500 mt-4">
               Powered by ChopMeter Intelligence
             </p>
           </>
         ) : (
-          <p className="text-center text-xs text-slate-500">
+          <p className="text-center text-xs text-gray-500">
             Powered by ChopMeter Intelligence
           </p>
         )}

@@ -17,18 +17,18 @@ export default function BottomNav({ active }: BottomNavProps) {
   const router = useRouter();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-bg-dark/95 backdrop-blur-md border-t border-surface-border pb-safe">
-      <div className="max-w-2xl mx-auto flex items-center justify-around py-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-safe mb-1">
+      <div className="max-w-2xl mx-auto flex items-center justify-around py-2.5 rounded-2xl bg-white/[0.05] backdrop-blur-xl border border-white/[0.08] shadow-lg shadow-black/30">
         {NAV_ITEMS.map((item) => {
           const isActive = active === item.key;
           return (
             <button
               key={item.key}
               onClick={() => router.push(item.href)}
-              className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors ${
+              className={`flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 ${
                 isActive
-                  ? "text-primary"
-                  : "text-slate-500 hover:text-slate-300"
+                  ? "bg-gradient-to-r from-blue-500/20 to-violet-500/20 text-white"
+                  : "text-gray-500 hover:text-gray-300"
               }`}
             >
               <span
@@ -38,7 +38,13 @@ export default function BottomNav({ active }: BottomNavProps) {
               >
                 {item.icon}
               </span>
-              <span className="text-[10px] font-bold">{item.label}</span>
+              <span
+                className={`text-[10px] font-semibold ${
+                  isActive ? "text-white" : ""
+                }`}
+              >
+                {item.label}
+              </span>
             </button>
           );
         })}

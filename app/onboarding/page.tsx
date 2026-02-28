@@ -88,10 +88,10 @@ function WelcomeScreen({
   onSkip: () => void;
 }) {
   return (
-    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-primary/10">
+    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-white/[0.06]">
       <header className="flex items-center justify-between px-6 py-5 z-20">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center size-8 rounded-lg bg-primary/20 text-primary">
+          <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
             <span className="material-symbols-outlined text-xl">
               electric_bolt
             </span>
@@ -102,7 +102,7 @@ function WelcomeScreen({
         </div>
         <button
           onClick={onSkip}
-          className="text-sm font-medium text-slate-400 hover:text-primary transition-colors"
+          className="text-sm font-medium text-gray-400 hover:text-blue-400 transition-colors"
         >
           Skip
         </button>
@@ -111,25 +111,25 @@ function WelcomeScreen({
       <main className="flex-1 flex flex-col relative z-10 px-6 pb-6 overflow-y-auto">
         <div className="flex-1 flex items-center justify-center min-h-[300px] py-4 relative">
           <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-            <div className="w-64 h-64 bg-primary/30 rounded-full blur-3xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            <div className="w-64 h-64 bg-blue-500/30 rounded-full blur-3xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
           </div>
 
-          <div className="relative w-full aspect-[4/5] max-h-[400px] rounded-2xl overflow-hidden bg-gradient-to-b from-primary/5 to-primary/10 border border-primary/10 shadow-lg">
+          <div className="relative w-full aspect-[4/5] max-h-[400px] rounded-2xl overflow-hidden bg-gradient-to-b from-blue-500/5 to-violet-500/10 border border-white/[0.06] shadow-lg">
             <div className="absolute inset-0 bg-gradient-to-t from-bg-dark/80 via-transparent to-transparent" />
             <div className="absolute inset-0 flex items-center justify-center">
               <span
-                className="material-symbols-outlined text-primary/20"
+                className="material-symbols-outlined text-blue-500/20"
                 style={{ fontSize: 120, fontVariationSettings: "'FILL' 1" }}
               >
                 electric_meter
               </span>
             </div>
-            <div className="absolute bottom-4 left-4 right-4 bg-bg-dark/60 backdrop-blur-md border border-primary/20 rounded-xl p-3 flex items-center gap-3">
-              <div className="size-10 rounded-full bg-primary flex items-center justify-center text-bg-dark shrink-0">
+            <div className="absolute bottom-4 left-4 right-4 bg-bg-dark/60 backdrop-blur-md border border-white/[0.08] rounded-xl p-3 flex items-center gap-3">
+              <div className="size-10 rounded-full bg-gradient-to-r from-blue-500 to-violet-500 flex items-center justify-center text-white shrink-0">
                 <span className="material-symbols-outlined">savings</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-primary font-bold uppercase tracking-wider">
+                <span className="text-xs text-blue-400 font-bold uppercase tracking-wider">
                   Smart Tracking
                 </span>
                 <span className="text-sm text-white font-medium">
@@ -143,9 +143,9 @@ function WelcomeScreen({
         <div className="flex flex-col items-center text-center mt-4 mb-2 space-y-4">
           <h1 className="text-3xl font-extrabold text-white leading-tight tracking-tight">
             No more meter dey{" "}
-            <span className="text-primary">chop your money</span>
+            <span className="gradient-primary-text">chop your money</span>
           </h1>
-          <p className="text-slate-400 text-base leading-relaxed max-w-xs mx-auto">
+          <p className="text-gray-400 text-base leading-relaxed max-w-xs mx-auto">
             Take control of your electricity. Track usage in real-time and stop
             overpaying for your utilities today.
           </p>
@@ -156,13 +156,13 @@ function WelcomeScreen({
         <StepDots current={0} total={4} />
         <button
           onClick={onNext}
-          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary/90 transition-all duration-300 shadow-[0_0_20px_rgba(0,255,65,0.3)] hover:shadow-[0_0_30px_rgba(0,255,65,0.5)]"
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]"
         >
           <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-          <span className="text-bg-dark text-lg font-bold tracking-wide mr-2 relative z-10">
+          <span className="text-white text-lg font-bold tracking-wide mr-2 relative z-10">
             Get Started
           </span>
-          <span className="material-symbols-outlined text-bg-dark relative z-10 transition-transform group-hover:translate-x-1">
+          <span className="material-symbols-outlined text-white relative z-10 transition-transform group-hover:translate-x-1">
             arrow_forward
           </span>
         </button>
@@ -184,11 +184,11 @@ function CountryScreen({
   onBack: () => void;
 }) {
   return (
-    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-primary/10">
+    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-white/[0.06]">
       <header className="flex items-center justify-between px-6 py-5 z-20">
         <button
           onClick={onBack}
-          className="flex items-center justify-center size-10 rounded-full bg-surface-dark text-slate-300 hover:text-white transition-colors"
+          className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-300 hover:text-white transition-colors"
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
@@ -203,7 +203,7 @@ function CountryScreen({
           <h1 className="text-2xl font-extrabold text-white mb-2">
             Where are you?
           </h1>
-          <p className="text-slate-400 text-sm">
+          <p className="text-gray-400 text-sm">
             We&apos;ll set your currency and default electricity rate.
           </p>
         </div>
@@ -217,19 +217,19 @@ function CountryScreen({
                 onClick={() => onSelect(country)}
                 className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
                   isSelected
-                    ? "border-primary bg-primary/10 shadow-lg shadow-primary/10"
-                    : "border-surface-border bg-surface-dark hover:border-primary/40"
+                    ? "border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/10"
+                    : "border-white/[0.06] bg-white/[0.03] hover:border-blue-500/40"
                 }`}
               >
                 <span className="text-4xl">{country.flag}</span>
                 <span className="text-white font-bold text-sm">
                   {country.name}
                 </span>
-                <span className="text-slate-400 text-xs">
+                <span className="text-gray-400 text-xs">
                   {country.currencySymbol}/kWh
                 </span>
                 {isSelected && (
-                  <span className="material-symbols-outlined text-primary text-lg">
+                  <span className="material-symbols-outlined text-blue-400 text-lg">
                     check_circle
                   </span>
                 )}
@@ -243,12 +243,12 @@ function CountryScreen({
         <StepDots current={1} total={4} />
         <button
           onClick={onNext}
-          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary/90 transition-all duration-300 shadow-[0_0_20px_rgba(0,255,65,0.3)]"
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)]"
         >
-          <span className="text-bg-dark text-lg font-bold tracking-wide mr-2 relative z-10">
+          <span className="text-white text-lg font-bold tracking-wide mr-2 relative z-10">
             Continue
           </span>
-          <span className="material-symbols-outlined text-bg-dark relative z-10">
+          <span className="material-symbols-outlined text-white relative z-10">
             arrow_forward
           </span>
         </button>
@@ -282,11 +282,11 @@ function MeterSetupScreen({
   const balanceValid = balance !== "" && parseFloat(balance) >= 0;
 
   return (
-    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-primary/10">
+    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-white/[0.06]">
       <header className="flex items-center justify-between px-6 py-5 z-20">
         <button
           onClick={onBack}
-          className="flex items-center justify-center size-10 rounded-full bg-surface-dark text-slate-300 hover:text-white transition-colors"
+          className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-300 hover:text-white transition-colors"
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
@@ -298,14 +298,14 @@ function MeterSetupScreen({
 
       <main className="flex-1 flex flex-col px-6 pb-6 overflow-y-auto">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-3 border border-primary/20">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold mb-3 border border-blue-500/20">
             <span className="text-lg">{country.flag}</span>
             {country.name}
           </div>
           <h1 className="text-2xl font-extrabold text-white mb-2">
             Set up your meter
           </h1>
-          <p className="text-slate-400 text-sm">
+          <p className="text-gray-400 text-sm">
             Enter your current balance to start tracking.
           </p>
         </div>
@@ -313,27 +313,27 @@ function MeterSetupScreen({
         <div className="space-y-5">
           {/* Meter Number (optional) */}
           <div>
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
               Meter Number{" "}
-              <span className="text-slate-600 normal-case">(optional)</span>
+              <span className="text-gray-600 normal-case">(optional)</span>
             </label>
             <input
               type="text"
               value={meterNumber}
               onChange={(e) => setMeterNumber(e.target.value)}
               placeholder="e.g. 01234567890"
-              className="w-full h-14 rounded-xl bg-surface-dark border border-surface-border text-white text-lg font-bold px-4 placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary"
+              className="w-full h-14 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-lg font-bold px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
           {/* Current Balance (required) */}
           <div>
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
               Current Balance{" "}
-              <span className="text-primary">*</span>
+              <span className="text-blue-400">*</span>
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">
                 {country.currencySymbol}
               </span>
               <input
@@ -342,7 +342,7 @@ function MeterSetupScreen({
                 value={balance}
                 onChange={(e) => setBalance(e.target.value)}
                 placeholder="0.00"
-                className="w-full h-14 rounded-xl bg-surface-dark border border-surface-border text-white text-lg font-bold pl-16 pr-4 placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="w-full h-14 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-lg font-bold pl-16 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
             {balance !== "" && !balanceValid && (
@@ -354,11 +354,11 @@ function MeterSetupScreen({
 
           {/* Tariff Rate */}
           <div>
-            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
               Tariff Rate (per kWh)
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">
                 {country.currencySymbol}
               </span>
               <input
@@ -367,10 +367,10 @@ function MeterSetupScreen({
                 step="0.01"
                 value={tariff}
                 onChange={(e) => setTariff(e.target.value)}
-                className="w-full h-14 rounded-xl bg-surface-dark border border-surface-border text-white text-lg font-bold pl-16 pr-4 placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="w-full h-14 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-lg font-bold pl-16 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
-            <p className="text-slate-500 text-xs mt-1">
+            <p className="text-gray-500 text-xs mt-1">
               Default: {country.currencySymbol} {country.defaultTariff} for{" "}
               {country.name}
             </p>
@@ -385,8 +385,8 @@ function MeterSetupScreen({
           disabled={!balanceValid}
           className={`w-full flex items-center justify-center rounded-xl h-14 font-bold text-lg transition-all ${
             balanceValid
-              ? "bg-primary text-bg-dark shadow-[0_0_20px_rgba(0,255,65,0.3)]"
-              : "bg-surface-dark text-slate-600 cursor-not-allowed"
+              ? "bg-gradient-to-r from-blue-500 to-violet-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+              : "bg-white/[0.03] text-gray-600 cursor-not-allowed"
           }`}
         >
           Continue
@@ -406,11 +406,11 @@ function ReadyScreen({
   onBack: () => void;
 }) {
   return (
-    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-primary/10">
+    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-white/[0.06]">
       <header className="flex items-center justify-between px-6 py-5 z-20">
         <button
           onClick={onBack}
-          className="flex items-center justify-center size-10 rounded-full bg-surface-dark text-slate-300 hover:text-white transition-colors"
+          className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-300 hover:text-white transition-colors"
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
@@ -422,10 +422,10 @@ function ReadyScreen({
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 pb-6">
         <div className="relative mb-8">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-full opacity-40 blur-3xl scale-150" />
-          <div className="relative z-10 flex flex-col items-center justify-center p-10 bg-surface-dark rounded-full shadow-2xl border border-surface-border size-56">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-violet-500/5 rounded-full opacity-40 blur-3xl scale-150" />
+          <div className="relative z-10 flex flex-col items-center justify-center p-10 glass-card rounded-full shadow-2xl size-56">
             <span
-              className="material-symbols-outlined text-primary"
+              className="material-symbols-outlined text-blue-400"
               style={{
                 fontSize: 80,
                 fontVariationSettings: "'FILL' 1, 'wght' 400",
@@ -433,7 +433,7 @@ function ReadyScreen({
             >
               rocket_launch
             </span>
-            <div className="absolute -z-10 w-full h-full border border-primary/20 rounded-full animate-pulse" />
+            <div className="absolute -z-10 w-full h-full border border-blue-500/20 rounded-full animate-pulse" />
           </div>
         </div>
 
@@ -441,7 +441,7 @@ function ReadyScreen({
           <h1 className="text-3xl font-extrabold text-white leading-tight">
             You&apos;re all set!
           </h1>
-          <p className="text-slate-400 text-base leading-relaxed">
+          <p className="text-gray-400 text-base leading-relaxed">
             Scan your meter, track your spending, and never be surprised by your
             electricity bill again.
           </p>
@@ -454,12 +454,12 @@ function ReadyScreen({
             ].map((item) => (
               <div
                 key={item.label}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-dark border border-surface-border"
+                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]"
               >
-                <span className="material-symbols-outlined text-primary text-2xl">
+                <span className="material-symbols-outlined text-blue-400 text-2xl">
                   {item.icon}
                 </span>
-                <span className="text-slate-300 text-xs font-bold">
+                <span className="text-gray-300 text-xs font-bold">
                   {item.label}
                 </span>
               </div>
@@ -472,13 +472,13 @@ function ReadyScreen({
         <StepDots current={3} total={4} />
         <button
           onClick={onFinish}
-          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary/90 transition-all duration-300 shadow-[0_0_20px_rgba(0,255,65,0.3)] hover:shadow-[0_0_30px_rgba(0,255,65,0.5)]"
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]"
         >
           <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-          <span className="text-bg-dark text-lg font-bold tracking-wide mr-2 relative z-10">
+          <span className="text-white text-lg font-bold tracking-wide mr-2 relative z-10">
             Launch Dashboard
           </span>
-          <span className="material-symbols-outlined text-bg-dark relative z-10 transition-transform group-hover:translate-x-1">
+          <span className="material-symbols-outlined text-white relative z-10 transition-transform group-hover:translate-x-1">
             arrow_forward
           </span>
         </button>
@@ -496,10 +496,10 @@ function StepDots({ current, total }: { current: number; total: number }) {
           key={i}
           className={`h-1.5 rounded-full transition-all duration-300 ${
             i === current
-              ? "w-6 bg-primary"
+              ? "w-6 bg-gradient-to-r from-blue-500 to-violet-500"
               : i < current
-              ? "w-3 bg-primary/40"
-              : "w-1.5 bg-slate-700"
+              ? "w-3 bg-blue-500/40"
+              : "w-1.5 bg-gray-700"
           }`}
         />
       ))}

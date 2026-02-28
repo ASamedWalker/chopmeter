@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "No more meter dey chop my money! Track your prepaid electricity meter in real-time.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0F2F1A",
-    theme_color: "#0F2F1A",
+    background_color: "#0A0E1A",
+    theme_color: "#0A0E1A",
     orientation: "portrait",
     categories: ["utilities", "finance"],
     icons: [

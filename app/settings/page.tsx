@@ -112,7 +112,7 @@ export default function SettingsPage() {
   if (!settings) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-screen bg-bg-dark">
-        <span className="material-symbols-outlined text-primary text-5xl animate-pulse">
+        <span className="material-symbols-outlined text-blue-400 text-5xl animate-pulse">
           electric_bolt
         </span>
       </div>
@@ -120,12 +120,12 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-dark font-display text-slate-100">
+    <div className="min-h-screen flex flex-col bg-bg-dark font-display text-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full backdrop-blur-md border-b border-surface-border bg-bg-dark/95">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-xl border-b border-white/[0.06] bg-bg-dark/80">
         <div className="px-4 sm:px-6 max-w-[600px] mx-auto flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
-            <div className="size-8 flex items-center justify-center rounded-lg bg-primary/20 text-primary">
+            <div className="size-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
               <span className="material-symbols-outlined text-2xl">
                 settings
               </span>
@@ -139,16 +139,16 @@ export default function SettingsPage() {
 
       {/* Flash message */}
       {saved && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-primary text-bg-dark font-bold text-sm rounded-full shadow-lg animate-fade-in-up">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm rounded-full shadow-lg animate-fade-in-up">
           {saved}
         </div>
       )}
 
       <div className="flex-1 px-4 sm:px-6 py-6 max-w-[600px] mx-auto w-full pb-28 space-y-6">
         {/* Country & Currency */}
-        <section className="rounded-2xl bg-surface-dark border border-surface-border p-5">
+        <section className="glass-card p-5">
           <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-lg">
+            <span className="material-symbols-outlined text-blue-400 text-lg">
               public
             </span>
             Country & Currency
@@ -156,19 +156,19 @@ export default function SettingsPage() {
 
           <button
             onClick={() => setShowCountryPicker(!showCountryPicker)}
-            className="w-full flex items-center justify-between p-3 rounded-xl bg-bg-dark border border-surface-border hover:border-primary/50 transition-colors"
+            className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-blue-500/50 transition-colors"
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl">{country.flag}</span>
               <div className="text-left">
                 <p className="text-white font-bold text-sm">{country.name}</p>
-                <p className="text-slate-400 text-xs">
+                <p className="text-gray-400 text-xs">
                   {country.currencySymbol} ({country.currencyCode})
                 </p>
               </div>
             </div>
             <span
-              className={`material-symbols-outlined text-slate-400 transition-transform ${
+              className={`material-symbols-outlined text-gray-400 transition-transform ${
                 showCountryPicker ? "rotate-180" : ""
               }`}
             >
@@ -184,14 +184,14 @@ export default function SettingsPage() {
                   onClick={() => handleCountryChange(c)}
                   className={`flex items-center gap-2 p-3 rounded-lg border transition-all text-left ${
                     c.code === country.code
-                      ? "border-primary bg-primary/10"
-                      : "border-surface-border hover:border-primary/40"
+                      ? "border-blue-500 bg-blue-500/10"
+                      : "border-white/[0.06] hover:border-blue-500/40"
                   }`}
                 >
                   <span className="text-xl">{c.flag}</span>
                   <div>
                     <p className="text-white text-xs font-bold">{c.name}</p>
-                    <p className="text-slate-400 text-[10px]">
+                    <p className="text-gray-400 text-[10px]">
                       {c.currencySymbol}
                     </p>
                   </div>
@@ -202,9 +202,9 @@ export default function SettingsPage() {
         </section>
 
         {/* Meter Details */}
-        <section className="rounded-2xl bg-surface-dark border border-surface-border p-5">
+        <section className="glass-card p-5">
           <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-lg">
+            <span className="material-symbols-outlined text-blue-400 text-lg">
               electric_meter
             </span>
             Meter Details
@@ -212,7 +212,7 @@ export default function SettingsPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1.5">
+              <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5">
                 Meter Number
               </label>
               <input
@@ -220,16 +220,16 @@ export default function SettingsPage() {
                 value={meterNumber}
                 onChange={(e) => setMeterNumber(e.target.value)}
                 placeholder="e.g. 01234567890"
-                className="w-full h-12 rounded-xl bg-bg-dark border border-surface-border text-white text-sm font-bold px-4 placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary"
+                className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1.5">
+              <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5">
                 Current Balance
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">
                   {country.currencySymbol}
                 </span>
                 <input
@@ -238,21 +238,21 @@ export default function SettingsPage() {
                   value={balance}
                   onChange={(e) => setBalance(e.target.value)}
                   placeholder="0.00"
-                  className="w-full h-12 rounded-xl bg-bg-dark border border-surface-border text-white text-sm font-bold pl-14 pr-4 placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-14 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </div>
-              <p className="text-slate-500 text-xs mt-1">
+              <p className="text-gray-500 text-xs mt-1">
                 Updating resets the balance date to now
               </p>
             </div>
 
             <div>
-              <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-1.5">
+              <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5">
                 Tariff Rate (per kWh)
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">
                     {country.currencySymbol}
                   </span>
                   <input
@@ -261,12 +261,12 @@ export default function SettingsPage() {
                     step="0.01"
                     value={tariff}
                     onChange={(e) => setTariff(e.target.value)}
-                    className="w-full h-12 rounded-xl bg-bg-dark border border-surface-border text-white text-sm font-bold pl-14 pr-4 placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary"
+                    className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-14 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <button
                   onClick={handleResetTariff}
-                  className="h-12 px-3 rounded-xl border border-surface-border text-slate-400 text-xs font-bold hover:border-primary/50 hover:text-white transition-colors"
+                  className="h-12 px-3 rounded-xl border border-white/[0.06] text-gray-400 text-xs font-bold hover:border-blue-500/50 hover:text-white transition-colors"
                   title="Reset to default"
                 >
                   <span className="material-symbols-outlined text-lg">
@@ -274,7 +274,7 @@ export default function SettingsPage() {
                   </span>
                 </button>
               </div>
-              <p className="text-slate-500 text-xs mt-1">
+              <p className="text-gray-500 text-xs mt-1">
                 Default: {country.currencySymbol} {country.defaultTariff} for{" "}
                 {country.name}
               </p>
@@ -282,7 +282,7 @@ export default function SettingsPage() {
 
             <button
               onClick={handleSaveMeter}
-              className="w-full h-12 rounded-xl bg-primary text-bg-dark font-bold text-sm hover:brightness-110 transition-all shadow-lg shadow-primary/20"
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
             >
               Update Meter Details
             </button>
@@ -290,9 +290,9 @@ export default function SettingsPage() {
         </section>
 
         {/* Data Management */}
-        <section className="rounded-2xl bg-surface-dark border border-surface-border p-5">
+        <section className="glass-card p-5">
           <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-lg">
+            <span className="material-symbols-outlined text-blue-400 text-lg">
               database
             </span>
             Data Management
@@ -301,29 +301,29 @@ export default function SettingsPage() {
           <div className="space-y-3">
             <button
               onClick={handleExportCSV}
-              className="w-full flex items-center justify-between p-3 rounded-xl bg-bg-dark border border-surface-border hover:border-primary/50 transition-colors"
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-blue-500/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-primary">
+                <span className="material-symbols-outlined text-blue-400">
                   download
                 </span>
                 <div className="text-left">
                   <p className="text-white text-sm font-bold">
                     Export Readings
                   </p>
-                  <p className="text-slate-400 text-xs">
+                  <p className="text-gray-400 text-xs">
                     Download as CSV file
                   </p>
                 </div>
               </div>
-              <span className="material-symbols-outlined text-slate-400">
+              <span className="material-symbols-outlined text-gray-400">
                 chevron_right
               </span>
             </button>
 
             <button
               onClick={() => setShowClearConfirm(true)}
-              className="w-full flex items-center justify-between p-3 rounded-xl bg-bg-dark border border-danger/20 hover:border-danger/50 transition-colors"
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-red-500/20 hover:border-red-500/50 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-danger">
@@ -333,25 +333,25 @@ export default function SettingsPage() {
                   <p className="text-danger text-sm font-bold">
                     Clear All Data
                   </p>
-                  <p className="text-slate-400 text-xs">
+                  <p className="text-gray-400 text-xs">
                     Remove all readings and settings
                   </p>
                 </div>
               </div>
-              <span className="material-symbols-outlined text-slate-400">
+              <span className="material-symbols-outlined text-gray-400">
                 chevron_right
               </span>
             </button>
 
             {showClearConfirm && (
-              <div className="p-4 rounded-xl bg-danger/10 border border-danger/30 animate-fade-in-up">
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 animate-fade-in-up">
                 <p className="text-white text-sm font-bold mb-3">
                   Are you sure? This cannot be undone.
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowClearConfirm(false)}
-                    className="flex-1 h-10 rounded-lg border border-surface-border text-slate-300 text-sm font-bold hover:bg-surface-dark transition-colors"
+                    className="flex-1 h-10 rounded-lg border border-white/[0.06] text-gray-300 text-sm font-bold hover:bg-white/[0.05] transition-colors"
                   >
                     Cancel
                   </button>
@@ -368,24 +368,24 @@ export default function SettingsPage() {
         </section>
 
         {/* About */}
-        <section className="rounded-2xl bg-surface-dark border border-surface-border p-5">
+        <section className="glass-card p-5">
           <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-lg">
+            <span className="material-symbols-outlined text-blue-400 text-lg">
               info
             </span>
             About
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-400">App</span>
+              <span className="text-gray-400">App</span>
               <span className="text-white font-bold">ChopMeter</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Version</span>
+              <span className="text-gray-400">Version</span>
               <span className="text-white font-bold">2.0.0</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Type</span>
+              <span className="text-gray-400">Type</span>
               <span className="text-white font-bold">PWA</span>
             </div>
           </div>

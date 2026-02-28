@@ -190,12 +190,12 @@ export default function TipsPage() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-dark font-display text-slate-100">
+    <div className="min-h-screen flex flex-col bg-bg-dark font-display text-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full backdrop-blur-md border-b border-surface-border bg-surface-dark/50">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-xl border-b border-white/[0.06] bg-bg-dark/80">
         <div className="px-4 sm:px-6 max-w-[1200px] mx-auto flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
-            <div className="size-8 flex items-center justify-center rounded-lg bg-primary/20 text-primary">
+            <div className="size-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
               <span className="material-symbols-outlined text-2xl">bolt</span>
             </div>
             <h2 className="text-white text-xl font-extrabold tracking-tight">
@@ -208,10 +208,10 @@ export default function TipsPage() {
       {/* Main Content */}
       <div className="flex-1 px-4 sm:px-6 py-6 max-w-[1200px] mx-auto w-full pb-24">
         {/* Hero Banner */}
-        <div className="rounded-2xl bg-gradient-to-r from-surface-dark to-bg-dark border border-surface-border p-6 md:p-10 relative overflow-hidden mb-6">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+        <div className="glass-card gradient-hero p-6 md:p-10 relative overflow-hidden mb-6">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
           <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4 border border-primary/20">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-wider mb-4 border border-blue-500/20">
               <span className="material-symbols-outlined text-sm">
                 tips_and_updates
               </span>
@@ -219,14 +219,14 @@ export default function TipsPage() {
             </div>
             <h1 className="text-white text-3xl md:text-4xl font-black leading-tight mb-3">
               Make your meter{" "}
-              <span className="text-primary">run slow</span> like tortoise
+              <span className="gradient-primary-text">run slow</span> like tortoise
             </h1>
-            <p className="text-slate-400 text-base md:text-lg font-medium mb-6 max-w-lg">
+            <p className="text-gray-400 text-base md:text-lg font-medium mb-6 max-w-lg">
               Cut down your electricity bill with these simple changes. Save
               money for better things, charley!
             </p>
             <div className="relative w-full max-w-lg">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
                 <span className="material-symbols-outlined">search</span>
               </div>
               <input
@@ -234,7 +234,7 @@ export default function TipsPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search tips (e.g., 'Fridge', 'AC', 'Ironing')..."
-                className="block w-full p-3.5 pl-12 text-sm text-white bg-surface-dark/80 border border-surface-border rounded-xl placeholder-slate-500 shadow-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="block w-full p-3.5 pl-12 text-sm text-white bg-white/[0.03] border border-white/[0.06] rounded-xl placeholder-gray-500 shadow-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -248,8 +248,8 @@ export default function TipsPage() {
               onClick={() => setActiveCategory(cat.key)}
               className={`flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 text-sm font-bold transition-all ${
                 activeCategory === cat.key
-                  ? "bg-primary text-bg-dark shadow-lg shadow-primary/20"
-                  : "bg-surface-dark border border-surface-border text-slate-300 hover:border-primary/50 hover:text-white"
+                  ? "bg-gradient-to-r from-blue-500 to-violet-500 text-white shadow-lg shadow-blue-500/20"
+                  : "bg-white/[0.03] border border-white/[0.06] text-gray-300 hover:border-blue-500/50 hover:text-white"
               }`}
             >
               {cat.icon && (
@@ -259,7 +259,7 @@ export default function TipsPage() {
               )}
               {cat.label}
               {cat.key === "saved" && bookmarks.size > 0 && (
-                <span className="text-xs bg-primary/20 text-primary rounded-full size-5 flex items-center justify-center">
+                <span className="text-xs bg-blue-500/20 text-blue-400 rounded-full size-5 flex items-center justify-center">
                   {bookmarks.size}
                 </span>
               )}
@@ -271,9 +271,9 @@ export default function TipsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((tip) => {
             const iconStyle = ICON_STYLES[tip.iconColor] ?? {
-              bg: "bg-slate-500/10",
-              text: "text-slate-400",
-              hoverBg: "group-hover:bg-slate-500",
+              bg: "bg-gray-500/10",
+              text: "text-gray-400",
+              hoverBg: "group-hover:bg-gray-500",
             };
             const isExpanded = expandedTip === tip.id;
             const isSaved = bookmarks.has(tip.id);
@@ -284,10 +284,10 @@ export default function TipsPage() {
                 onClick={() =>
                   setExpandedTip(isExpanded ? null : tip.id)
                 }
-                className={`flex flex-col gap-4 rounded-xl border p-5 transition-all group cursor-pointer active:scale-[0.98] ${
+                className={`flex flex-col gap-4 rounded-2xl border p-5 transition-all group cursor-pointer active:scale-[0.98] backdrop-blur-xl ${
                   isExpanded
-                    ? "border-primary/50 bg-surface-dark shadow-lg shadow-primary/5"
-                    : "border-surface-border bg-surface-dark hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5"
+                    ? "border-blue-500/50 bg-white/[0.05] shadow-lg shadow-blue-500/5"
+                    : "border-white/[0.06] bg-white/[0.03] hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/5"
                 }`}
               >
                 <div
@@ -298,24 +298,24 @@ export default function TipsPage() {
                   </span>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-white text-lg font-bold leading-tight group-hover:text-primary transition-colors">
+                  <h3 className="text-white text-lg font-bold leading-tight group-hover:text-blue-400 transition-colors">
                     {tip.title}
                   </h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
+                  <p className="text-gray-400 text-sm leading-relaxed">
                     {tip.description}
                   </p>
 
                   {/* Expanded content */}
                   {isExpanded && (
-                    <div className="mt-2 pt-3 border-t border-surface-border animate-fade-in-up">
-                      <p className="text-slate-300 text-sm leading-relaxed">
+                    <div className="mt-2 pt-3 border-t border-white/[0.06] animate-fade-in-up">
+                      <p className="text-gray-300 text-sm leading-relaxed">
                         {tip.extended}
                       </p>
                     </div>
                   )}
                 </div>
-                <div className="mt-auto pt-4 flex items-center justify-between border-t border-surface-border">
-                  <span className="text-xs font-bold text-primary uppercase tracking-wider">
+                <div className="mt-auto pt-4 flex items-center justify-between border-t border-white/[0.06]">
+                  <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">
                     {tip.category}
                   </span>
                   <button
@@ -325,8 +325,8 @@ export default function TipsPage() {
                     }}
                     className={`transition-colors ${
                       isSaved
-                        ? "text-primary"
-                        : "text-slate-500 hover:text-white"
+                        ? "text-blue-400"
+                        : "text-gray-500 hover:text-white"
                     }`}
                   >
                     <span
@@ -346,10 +346,10 @@ export default function TipsPage() {
         {/* Empty State */}
         {filtered.length === 0 && (
           <div className="text-center py-12">
-            <span className="material-symbols-outlined text-slate-600 text-5xl mb-4 block">
+            <span className="material-symbols-outlined text-gray-600 text-5xl mb-4 block">
               {activeCategory === "saved" ? "bookmark_border" : "search_off"}
             </span>
-            <p className="text-slate-400">
+            <p className="text-gray-400">
               {activeCategory === "saved"
                 ? "No saved tips yet. Tap the bookmark icon on any tip to save it."
                 : "No tips found. Try a different search term."}

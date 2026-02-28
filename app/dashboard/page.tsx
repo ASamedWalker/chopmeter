@@ -57,7 +57,6 @@ function computeMetrics(
     settings.lastBalance - elapsed * dailyBurnRate
   );
 
-  // null when no usage data yet
   const daysLeft =
     dailyBurnRate > 0 ? Math.round(currentBalance / dailyBurnRate) : null;
 
@@ -71,6 +70,11 @@ function computeMetrics(
   };
 }
 
+/** Easing: easeOutCubic */
+function easeOutCubic(t: number) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
@@ -79,7 +83,9 @@ export default function DashboardPage() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [expandedReading, setExpandedReading] = useState<string | null>(null);
   const [deletingReading, setDeletingReading] = useState<string | null>(null);
+  const [displayBalance, setDisplayBalance] = useState(0);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const animFrameRef = useRef<number | null>(null);
 
   const loadData = useCallback(() => {
     const s = getSettings();
@@ -96,6 +102,28 @@ export default function DashboardPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Animated balance counter
+  useEffect(() => {
+    if (!metrics) return;
+    const target = metrics.currentBalance;
+    const duration = 800;
+    const start = performance.now();
+
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      setDisplayBalance(target * easeOutCubic(progress));
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    animFrameRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [metrics]);
 
   const handleDeleteReading = (id: string) => {
     deleteReading(id);
@@ -122,12 +150,42 @@ export default function DashboardPage() {
     setExpandedCard(expandedCard === key ? null : key);
   };
 
+  // Skeleton loading state
   if (!metrics || !settings) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-bg-dark">
-        <span className="material-symbols-outlined text-primary text-5xl animate-pulse">
-          electric_bolt
-        </span>
+      <div className="flex flex-col min-h-screen bg-bg-dark">
+        {/* Skeleton header */}
+        <header className="sticky top-0 z-10 bg-bg-dark/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
+          <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-full skeleton-shimmer" />
+              <div className="h-5 w-28 rounded-lg skeleton-shimmer" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="size-10 rounded-full skeleton-shimmer" />
+              <div className="size-10 rounded-full skeleton-shimmer" />
+            </div>
+          </div>
+        </header>
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 pb-24">
+          {/* Skeleton hero */}
+          <div className="glass-card gradient-hero p-6 mb-4">
+            <div className="h-4 w-32 rounded skeleton-shimmer mb-4" />
+            <div className="h-10 w-48 rounded-lg skeleton-shimmer mb-6" />
+            <div className="h-12 w-full rounded-xl skeleton-shimmer" />
+          </div>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="glass-card p-5 h-32 skeleton-shimmer" />
+            <div className="glass-card p-5 h-32 skeleton-shimmer" />
+          </div>
+          <div className="h-5 w-36 rounded skeleton-shimmer mb-3" />
+          <div className="space-y-2">
+            <div className="glass-card p-4 h-16 skeleton-shimmer" />
+            <div className="glass-card p-4 h-16 skeleton-shimmer" />
+            <div className="glass-card p-4 h-16 skeleton-shimmer" />
+          </div>
+        </main>
+        <BottomNav active="dashboard" />
       </div>
     );
   }
@@ -138,7 +196,7 @@ export default function DashboardPage() {
   // Runway color
   const runwayColor =
     metrics.daysLeft === null
-      ? "text-slate-400"
+      ? "text-gray-500"
       : metrics.daysLeft <= 3
       ? "text-danger"
       : metrics.daysLeft <= 7
@@ -147,20 +205,20 @@ export default function DashboardPage() {
 
   const runwayBarColor =
     metrics.daysLeft === null
-      ? "bg-slate-600"
+      ? "bg-gray-700"
       : metrics.daysLeft <= 3
       ? "bg-danger"
       : metrics.daysLeft <= 7
       ? "bg-yellow-400"
-      : "bg-primary";
+      : "bg-gradient-to-r from-blue-500 to-violet-500";
 
   return (
-    <div className="flex h-full grow flex-col bg-bg-dark font-display min-h-screen text-slate-100">
+    <div className="flex h-full grow flex-col bg-bg-dark font-display min-h-screen text-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-bg-dark/95 backdrop-blur-md border-b border-surface-border px-4 py-3">
+      <header className="sticky top-0 z-10 bg-bg-dark/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center size-10 rounded-full bg-primary/20 text-primary">
+            <div className="flex items-center justify-center size-10 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
               <span className="material-symbols-outlined">electric_bolt</span>
             </div>
             <h2 className="text-white text-xl font-extrabold tracking-tight">
@@ -170,13 +228,13 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => router.push("/settings")}
-              className="flex items-center justify-center size-10 rounded-full bg-surface-dark text-slate-400 hover:text-white transition-colors"
+              className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-400 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">settings</span>
             </button>
             <button
               onClick={() => router.push("/scanner")}
-              className="flex items-center justify-center size-10 rounded-full bg-primary/20 text-primary hover:bg-primary/30 transition-colors"
+              className="flex items-center justify-center size-10 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400 hover:from-blue-500/30 hover:to-violet-500/30 transition-colors"
             >
               <span className="material-symbols-outlined">
                 qr_code_scanner
@@ -192,41 +250,43 @@ export default function DashboardPage() {
           {/* Main Balance Card */}
           <div
             onClick={() => toggleCard("balance")}
-            className="md:col-span-2 relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-dark to-bg-dark border border-surface-border p-6 shadow-xl cursor-pointer active:scale-[0.98] transition-transform"
+            className="md:col-span-2 relative overflow-hidden glass-card gradient-hero p-6 shadow-xl cursor-pointer active:scale-[0.98] transition-transform"
           >
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <span className="material-symbols-outlined text-8xl text-primary">
+            <div className="absolute top-0 right-0 p-4 opacity-[0.07]">
+              <span className="material-symbols-outlined text-8xl text-blue-400">
                 account_balance_wallet
               </span>
             </div>
             <div className="relative z-10 flex flex-col h-full justify-between">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-slate-400 text-sm font-medium uppercase tracking-wider">
+                  <p className="text-gray-400 text-sm font-medium uppercase tracking-wider">
                     Estimated Balance
                   </p>
                   <span
-                    className={`material-symbols-outlined text-slate-500 text-lg transition-transform ${
+                    className={`material-symbols-outlined text-gray-500 text-lg transition-transform ${
                       expandedCard === "balance" ? "rotate-180" : ""
                     }`}
                   >
                     expand_more
                   </span>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-2">
-                  <span className="text-xl font-bold text-slate-400 align-top mt-1 inline-block">
+                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-2 animate-number-pop">
+                  <span className="text-xl font-bold text-gray-500 align-top mt-1 inline-block">
                     {country.currencySymbol}
                   </span>{" "}
-                  {metrics.currentBalance.toFixed(2)}
+                  <span className="gradient-primary-text">
+                    {displayBalance.toFixed(2)}
+                  </span>
                 </h1>
               </div>
 
               {/* Expanded details */}
               {expandedCard === "balance" && (
-                <div className="mt-3 pt-3 border-t border-surface-border space-y-2 animate-fade-in-up">
+                <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2 animate-fade-in-up">
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Last updated</span>
-                    <span className="text-slate-200">
+                    <span className="text-gray-400">Last updated</span>
+                    <span className="text-gray-200">
                       {new Date(settings.lastBalanceDate).toLocaleDateString(
                         country.locale,
                         {
@@ -239,16 +299,16 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Daily burn rate</span>
-                    <span className="text-slate-200">
+                    <span className="text-gray-400">Daily burn rate</span>
+                    <span className="text-gray-200">
                       {hasData
                         ? `${country.currencySymbol} ${metrics.dailyBurnRate.toFixed(2)}/day`
                         : "No data yet"}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">Tariff</span>
-                    <span className="text-slate-200">
+                    <span className="text-gray-400">Tariff</span>
+                    <span className="text-gray-200">
                       {country.currencySymbol} {settings.tariffRate}/kWh
                     </span>
                   </div>
@@ -261,7 +321,7 @@ export default function DashboardPage() {
                     e.stopPropagation();
                     router.push("/scanner");
                   }}
-                  className="flex-1 bg-primary hover:brightness-110 text-bg-dark font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 active:scale-[0.98]"
                 >
                   <span className="material-symbols-outlined">
                     qr_code_scanner
@@ -277,14 +337,14 @@ export default function DashboardPage() {
             {/* Runway Card */}
             <div
               onClick={() => toggleCard("runway")}
-              className="flex-1 rounded-2xl bg-surface-dark border border-surface-border p-5 flex flex-col justify-center relative overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
+              className="flex-1 glass-card p-5 flex flex-col justify-center relative overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
             >
-              <div className="absolute -right-4 -bottom-4 size-28 bg-primary/10 rounded-full blur-2xl" />
+              <div className="absolute -right-4 -bottom-4 size-28 bg-blue-500/10 rounded-full blur-2xl" />
               <div className="flex items-center justify-between mb-3">
-                <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">
                   Est. Runway
                 </p>
-                <span className="material-symbols-outlined text-primary text-xl">
+                <span className="material-symbols-outlined text-blue-400 text-xl">
                   timelapse
                 </span>
               </div>
@@ -292,11 +352,11 @@ export default function DashboardPage() {
                 <h3 className={`text-3xl font-bold ${runwayColor}`}>
                   {metrics.daysLeft !== null ? `~${metrics.daysLeft}` : "--"}
                 </h3>
-                <span className="text-lg text-slate-400 font-medium">Days</span>
+                <span className="text-lg text-gray-400 font-medium">Days</span>
               </div>
 
               {metrics.daysLeft !== null ? (
-                <div className="w-full bg-bg-dark rounded-full h-2 mt-3">
+                <div className="w-full bg-white/[0.05] rounded-full h-2 mt-3">
                   <div
                     className={`${runwayBarColor} h-2 rounded-full transition-all`}
                     style={{
@@ -305,13 +365,13 @@ export default function DashboardPage() {
                   />
                 </div>
               ) : (
-                <p className="text-slate-500 text-xs mt-2">
+                <p className="text-gray-500 text-xs mt-2">
                   Scan meter to start tracking
                 </p>
               )}
 
               {expandedCard === "runway" && metrics.daysLeft !== null && (
-                <div className="mt-3 pt-3 border-t border-surface-border text-xs text-slate-400 space-y-1 animate-fade-in-up">
+                <div className="mt-3 pt-3 border-t border-white/[0.06] text-xs text-gray-400 space-y-1 animate-fade-in-up">
                   <p>
                     Based on {country.currencySymbol}{" "}
                     {metrics.dailyBurnRate.toFixed(2)}/day burn rate
@@ -333,13 +393,13 @@ export default function DashboardPage() {
             {/* Daily Avg Card */}
             <div
               onClick={() => toggleCard("daily")}
-              className="flex-1 rounded-2xl bg-surface-dark border border-surface-border p-5 flex flex-col justify-center cursor-pointer active:scale-[0.98] transition-transform"
+              className="flex-1 glass-card p-5 flex flex-col justify-center cursor-pointer active:scale-[0.98] transition-transform"
             >
               <div className="flex items-center justify-between mb-2">
-                <p className="text-slate-400 text-xs font-medium uppercase tracking-wider">
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">
                   Daily Avg
                 </p>
-                <span className="material-symbols-outlined text-primary text-xl">
+                <span className="material-symbols-outlined text-blue-400 text-xl">
                   monitoring
                 </span>
               </div>
@@ -348,25 +408,25 @@ export default function DashboardPage() {
                   {country.currencySymbol} {metrics.dailyBurnRate.toFixed(2)}
                 </h3>
               ) : (
-                <h3 className="text-2xl font-bold text-slate-500">--</h3>
+                <h3 className="text-2xl font-bold text-gray-500">--</h3>
               )}
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-gray-500 mt-1">
                 {hasData
                   ? "Per day estimated"
                   : "Add readings to see daily average"}
               </p>
 
               {expandedCard === "daily" && hasData && (
-                <div className="mt-3 pt-3 border-t border-surface-border text-xs text-slate-400 space-y-1 animate-fade-in-up">
+                <div className="mt-3 pt-3 border-t border-white/[0.06] text-xs text-gray-400 space-y-1 animate-fade-in-up">
                   <div className="flex justify-between">
                     <span>Weekly usage</span>
-                    <span className="text-slate-200">
+                    <span className="text-gray-200">
                       {metrics.weeklyUsage.toFixed(1)} kWh
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Today usage</span>
-                    <span className="text-slate-200">
+                    <span className="text-gray-200">
                       {metrics.todayUsage.toFixed(1)} kWh
                     </span>
                   </div>
@@ -402,11 +462,11 @@ export default function DashboardPage() {
                   >
                     {/* Delete Confirmation Overlay */}
                     {isDeleting && (
-                      <div className="absolute inset-0 z-20 bg-bg-dark/95 backdrop-blur-sm rounded-xl flex items-center justify-center gap-3 animate-fade-in-up">
-                        <span className="text-slate-400 text-sm">Delete?</span>
+                      <div className="absolute inset-0 z-20 bg-bg-dark/95 backdrop-blur-sm rounded-2xl flex items-center justify-center gap-3 animate-fade-in-up">
+                        <span className="text-gray-400 text-sm">Delete?</span>
                         <button
                           onClick={() => setDeletingReading(null)}
-                          className="px-4 py-2 rounded-lg border border-surface-border text-slate-300 text-sm font-bold hover:bg-surface-dark transition-colors"
+                          className="px-4 py-2 rounded-lg border border-white/[0.06] text-gray-300 text-sm font-bold hover:bg-white/[0.05] transition-colors"
                         >
                           Cancel
                         </button>
@@ -429,11 +489,11 @@ export default function DashboardPage() {
                       onMouseDown={() => handleLongPressStart(r.id)}
                       onMouseUp={handleLongPressEnd}
                       onMouseLeave={handleLongPressEnd}
-                      className="bg-surface-dark border border-surface-border rounded-xl p-4 cursor-pointer active:scale-[0.98] transition-all hover:border-primary/30"
+                      className="glass-card p-4 cursor-pointer active:scale-[0.98] transition-all hover:border-blue-500/30"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="size-10 rounded-lg bg-surface-border flex items-center justify-center text-slate-300">
+                          <div className="size-10 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center text-gray-300">
                             <span className="material-symbols-outlined">
                               {r.source === "ocr"
                                 ? "photo_camera"
@@ -444,7 +504,7 @@ export default function DashboardPage() {
                             <p className="text-white font-bold text-sm">
                               {r.value.toFixed(1)} kWh
                             </p>
-                            <p className="text-slate-400 text-xs">
+                            <p className="text-gray-500 text-xs">
                               {new Date(r.timestamp).toLocaleDateString(
                                 country.locale,
                                 {
@@ -460,15 +520,15 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           {delta !== null && (
-                            <span className="text-xs text-primary font-bold">
+                            <span className="text-xs text-blue-400 font-bold">
                               +{delta.toFixed(1)}
                             </span>
                           )}
                           <span
                             className={`text-xs font-bold uppercase px-2 py-1 rounded ${
                               r.source === "ocr"
-                                ? "bg-primary/10 text-primary"
-                                : "bg-slate-700 text-slate-300"
+                                ? "bg-blue-500/10 text-blue-400"
+                                : "bg-white/[0.05] text-gray-400"
                             }`}
                           >
                             {r.source}
@@ -478,10 +538,10 @@ export default function DashboardPage() {
 
                       {/* Expanded reading details */}
                       {isExpanded && (
-                        <div className="mt-3 pt-3 border-t border-surface-border text-xs text-slate-400 space-y-1 animate-fade-in-up">
+                        <div className="mt-3 pt-3 border-t border-white/[0.06] text-xs text-gray-400 space-y-1 animate-fade-in-up">
                           <div className="flex justify-between">
                             <span>Full timestamp</span>
-                            <span className="text-slate-200">
+                            <span className="text-gray-200">
                               {new Date(r.timestamp).toLocaleString(
                                 country.locale
                               )}
@@ -489,7 +549,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="flex justify-between">
                             <span>Source</span>
-                            <span className="text-slate-200">
+                            <span className="text-gray-200">
                               {r.source === "ocr"
                                 ? "Camera scan"
                                 : "Manual entry"}
@@ -498,13 +558,13 @@ export default function DashboardPage() {
                           {delta !== null && (
                             <div className="flex justify-between">
                               <span>Est. cost since previous</span>
-                              <span className="text-primary font-bold">
+                              <span className="text-blue-400 font-bold">
                                 {country.currencySymbol}{" "}
                                 {(delta * settings.tariffRate).toFixed(2)}
                               </span>
                             </div>
                           )}
-                          <p className="text-slate-500 pt-1">
+                          <p className="text-gray-600 pt-1">
                             Long-press to delete this reading
                           </p>
                         </div>
@@ -515,16 +575,16 @@ export default function DashboardPage() {
               })}
             </div>
           ) : (
-            <div className="bg-surface-dark border border-surface-border rounded-xl p-8 text-center">
-              <span className="material-symbols-outlined text-slate-600 text-4xl mb-3 block">
+            <div className="glass-card p-8 text-center">
+              <span className="material-symbols-outlined text-gray-600 text-4xl mb-3 block">
                 electric_meter
               </span>
-              <p className="text-slate-400 text-sm mb-4">
+              <p className="text-gray-400 text-sm mb-4">
                 No readings yet. Scan your meter to get started!
               </p>
               <button
                 onClick={() => router.push("/scanner")}
-                className="bg-primary text-bg-dark font-bold py-2 px-6 rounded-xl text-sm hover:brightness-110 transition-all"
+                className="bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold py-2 px-6 rounded-xl text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
               >
                 Scan Now
               </button>
