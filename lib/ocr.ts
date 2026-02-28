@@ -5,11 +5,20 @@ import Tesseract from "tesseract.js";
  * Uses Tesseract.js with digit-only whitelist for best accuracy on LCD displays.
  */
 export async function recognizeMeterReading(
-  imageSource: string | File | Blob
+  imageSource: string | File | Blob,
+  onProgress?: (progress: number) => void
 ): Promise<{ value: number | null; rawText: string; confidence: number }> {
   try {
     const result = await Tesseract.recognize(imageSource, "eng", {
-      logger: () => {}, // Suppress verbose logging
+      logger: (info: { status: string; progress: number }) => {
+        if (
+          onProgress &&
+          info.status === "recognizing text" &&
+          typeof info.progress === "number"
+        ) {
+          onProgress(Math.round(info.progress * 100));
+        }
+      },
     });
 
     const rawText = result.data.text.trim();

@@ -12,12 +12,15 @@ export default function ScannerPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const autoScanRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [scanState, setScanState] = useState<ScanState>("idle");
   const [scannedValue, setScannedValue] = useState<string>("");
   const [manualValue, setManualValue] = useState<string>("");
   const [flashOn, setFlashOn] = useState(false);
   const [error, setError] = useState<string>("");
+  const [autoScan, setAutoScan] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const startCamera = useCallback(async () => {
     try {
@@ -43,10 +46,20 @@ export default function ScannerPage() {
     }
   }, []);
 
+  const stopAutoScan = useCallback(() => {
+    if (autoScanRef.current) {
+      clearInterval(autoScanRef.current);
+      autoScanRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     startCamera();
-    return () => stopCamera();
-  }, [startCamera, stopCamera]);
+    return () => {
+      stopCamera();
+      stopAutoScan();
+    };
+  }, [startCamera, stopCamera, stopAutoScan]);
 
   const toggleFlash = async () => {
     if (!streamRef.current) return;
@@ -63,10 +76,11 @@ export default function ScannerPage() {
     }
   };
 
-  const captureAndScan = async () => {
+  const captureAndScan = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current) return;
     setScanState("scanning");
     setError("");
+    setProgress(0);
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -77,16 +91,37 @@ export default function ScannerPage() {
     ctx.drawImage(video, 0, 0);
 
     const dataUrl = canvas.toDataURL("image/png");
-    const result = await recognizeMeterReading(dataUrl);
+    const result = await recognizeMeterReading(dataUrl, (p) => setProgress(p));
 
     if (result.value !== null) {
       setScannedValue(result.value.toString());
       setScanState("success");
+      stopAutoScan();
+      navigator.vibrate?.(100);
     } else {
-      setError("Could not read meter. Try again or enter manually.");
+      if (!autoScan) {
+        setError("Could not read meter. Try again or enter manually.");
+      }
       setScanState("idle");
     }
-  };
+    setProgress(0);
+  }, [autoScan, stopAutoScan]);
+
+  // Auto-scan toggle
+  const toggleAutoScan = useCallback(() => {
+    if (autoScan) {
+      stopAutoScan();
+      setAutoScan(false);
+    } else {
+      setAutoScan(true);
+      // Start scanning every 3 seconds
+      autoScanRef.current = setInterval(() => {
+        captureAndScan();
+      }, 3000);
+      // Also scan immediately
+      captureAndScan();
+    }
+  }, [autoScan, stopAutoScan, captureAndScan]);
 
   const handleSave = (value: string, source: "ocr" | "manual") => {
     const numValue = parseFloat(value);
@@ -103,6 +138,7 @@ export default function ScannerPage() {
     });
 
     stopCamera();
+    stopAutoScan();
     router.push("/dashboard");
   };
 
@@ -127,6 +163,7 @@ export default function ScannerPage() {
         <button
           onClick={() => {
             stopCamera();
+            stopAutoScan();
             router.back();
           }}
           className="flex items-center justify-center size-10 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-colors"
@@ -161,10 +198,20 @@ export default function ScannerPage() {
             <div className="absolute inset-x-0 top-0 h-0.5 bg-primary/80 shadow-[0_0_15px_rgba(0,255,65,0.8)] animate-scan z-10 w-full" />
             <div className="absolute inset-0 bg-transparent ring-[1000px] ring-black/50 pointer-events-none" />
 
+            {/* Progress bar */}
+            {scanState === "scanning" && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/50 z-30">
+                <div
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            )}
+
             <div className="absolute bottom-4 left-0 right-0 text-center z-20">
               <span className="inline-block px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full text-xs font-medium text-primary uppercase tracking-wider">
                 {scanState === "scanning"
-                  ? "Scanning..."
+                  ? `Scanning... ${progress}%`
                   : scanState === "success"
                   ? "Reading Found!"
                   : "Align Display"}
@@ -172,12 +219,14 @@ export default function ScannerPage() {
             </div>
           </div>
 
-          <div className="mt-8 text-center max-w-[280px]">
+          <div className="mt-6 text-center max-w-[280px]">
             <p className="text-white text-lg font-bold mb-2">
-              Align Meter Here
+              {autoScan ? "Auto-scanning..." : "Position meter, then tap capture"}
             </p>
             <p className="text-slate-300 text-sm leading-relaxed">
-              Position the meter display within the frame to scan automatically.
+              {autoScan
+                ? "Scanning every 3 seconds. Hold your phone steady."
+                : "Align the meter display in the frame and tap the button below."}
             </p>
           </div>
 
@@ -215,12 +264,32 @@ export default function ScannerPage() {
           )}
 
           {scanState === "idle" && (
-            <button
-              onClick={captureAndScan}
-              className="mt-8 size-16 rounded-full border-4 border-white/20 flex items-center justify-center group transition-all hover:scale-105 active:scale-95"
-            >
-              <div className="size-12 rounded-full bg-white group-hover:bg-primary transition-colors shadow-lg" />
-            </button>
+            <div className="mt-6 flex flex-col items-center gap-4">
+              {/* Auto-scan toggle */}
+              <button
+                onClick={toggleAutoScan}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                  autoScan
+                    ? "bg-primary text-bg-dark"
+                    : "bg-white/10 text-white border border-white/20"
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg">
+                  {autoScan ? "stop_circle" : "play_circle"}
+                </span>
+                {autoScan ? "Stop Auto-Scan" : "Auto-Scan"}
+              </button>
+
+              {/* Manual capture button */}
+              {!autoScan && (
+                <button
+                  onClick={captureAndScan}
+                  className="size-16 rounded-full border-4 border-white/20 flex items-center justify-center group transition-all hover:scale-105 active:scale-95"
+                >
+                  <div className="size-12 rounded-full bg-white group-hover:bg-primary transition-colors shadow-lg" />
+                </button>
+              )}
+            </div>
           )}
         </main>
       )}
@@ -283,6 +352,7 @@ export default function ScannerPage() {
               onClick={() => {
                 setScanState("manual");
                 stopCamera();
+                stopAutoScan();
               }}
               className="w-full flex items-center justify-center gap-3 h-14 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-white font-bold text-base hover:bg-white/20 active:bg-white/5 transition-all group"
             >

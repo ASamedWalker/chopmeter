@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { EnergyTip } from "@/lib/types";
+import { toggleBookmark, getBookmarkedTipIds } from "@/lib/storage";
 import BottomNav from "@/components/BottomNav";
 
-const TIPS: EnergyTip[] = [
+const TIPS: (EnergyTip & { extended: string })[] = [
   {
     id: "1",
     title: "Set AC to 25\u00B0C",
     description:
       "Don\u2019t freeze yourself! 25\u00B0C is cool enough and saves big cash. Every degree lower chops more units.",
+    extended:
+      "Each degree below 25\u00B0C increases energy use by 3-5%. At 20\u00B0C your AC works nearly twice as hard. Use a fan alongside AC to feel cooler at a higher temp setting.",
     category: "cooling",
     icon: "ac_unit",
     iconColor: "text-blue-400",
@@ -19,6 +22,8 @@ const TIPS: EnergyTip[] = [
     title: "Check Fridge Seals",
     description:
       "Loose seals leak cold air. If a paper slides out easily when the door is closed, your money is leaking too.",
+    extended:
+      "A faulty fridge seal can increase energy use by 20-30%. Test with a dollar bill: close the door on it. If it slides out easily, replace the seal. Also keep the fridge at least 70% full for best efficiency.",
     category: "kitchen",
     icon: "kitchen",
     iconColor: "text-cyan-400",
@@ -28,6 +33,8 @@ const TIPS: EnergyTip[] = [
     title: "Iron in Bulk",
     description:
       "Iron all your shirts at once. Heating up the iron repeatedly just wastes units. Do it one time!",
+    extended:
+      "An iron uses 1000-3000W. Each heat-up cycle wastes 5-10 minutes of full power. Ironing everything in one session can save up to 30% of ironing energy. Start with delicates (low heat) and finish with heavy fabrics.",
     category: "appliances",
     icon: "iron",
     iconColor: "text-orange-400",
@@ -37,6 +44,8 @@ const TIPS: EnergyTip[] = [
     title: "Use LED Bulbs",
     description:
       "Switch to LEDs. They shine bright but chop very little current compared to those old yellow bulbs.",
+    extended:
+      "A 10W LED gives the same light as a 60W incandescent bulb \u2014 that\u2019s 83% less energy. LEDs last 25,000+ hours vs 1,000 for old bulbs. The upfront cost pays for itself within months.",
     category: "lighting",
     icon: "lightbulb",
     iconColor: "text-yellow-400",
@@ -46,6 +55,8 @@ const TIPS: EnergyTip[] = [
     title: "Unplug Chargers",
     description:
       "Phone full? Comot the plug. Even if not charging, the charger still chops small small power.",
+    extended:
+      "Standby power (phantom load) accounts for 5-10% of home electricity use. Phone chargers, TV boxes, game consoles \u2014 all draw power when plugged in. Use power strips to easily cut off multiple devices.",
     category: "habits",
     icon: "power_off",
     iconColor: "text-red-400",
@@ -55,6 +66,8 @@ const TIPS: EnergyTip[] = [
     title: "Fan Over AC",
     description:
       "Ceiling fans use way less power than AC. Try the fan first before you turn on the big machine.",
+    extended:
+      "A ceiling fan uses about 75W vs 1,500W+ for an AC. That\u2019s 20x less energy! Fans don\u2019t cool the air but create a wind-chill effect. In mild weather, a fan alone can keep you comfortable.",
     category: "cooling",
     icon: "mode_fan",
     iconColor: "text-teal-400",
@@ -64,6 +77,8 @@ const TIPS: EnergyTip[] = [
     title: "Cool Food First",
     description:
       "Don\u2019t put hot Jollof inside the fridge. Let it cool down outside first, or your fridge will overwork.",
+    extended:
+      "Hot food raises the fridge\u2019s internal temperature, forcing the compressor to work overtime. Let food cool to room temperature (within 2 hours for food safety) before refrigerating. This can reduce fridge energy use by 10-15%.",
     category: "kitchen",
     icon: "soup_kitchen",
     iconColor: "text-rose-400",
@@ -73,6 +88,8 @@ const TIPS: EnergyTip[] = [
     title: "Full Loads Only",
     description:
       "Wait until you have plenty dirty clothes. Running the machine for two shirts is a waste of cash.",
+    extended:
+      "A washing machine uses roughly the same energy whether it\u2019s quarter-full or completely full. Running full loads can cut your laundry energy use in half. Also, cold water washes save 75-90% of the energy used for heating water.",
     category: "appliances",
     icon: "local_laundry_service",
     iconColor: "text-indigo-400",
@@ -81,6 +98,7 @@ const TIPS: EnergyTip[] = [
 
 const CATEGORIES = [
   { key: "all", label: "All Tips", icon: "" },
+  { key: "saved", label: "Saved", icon: "bookmark" },
   { key: "kitchen", label: "Kitchen", icon: "kitchen" },
   { key: "cooling", label: "Cooling", icon: "ac_unit" },
   { key: "lighting", label: "Lighting", icon: "lightbulb" },
@@ -136,8 +154,32 @@ const ICON_STYLES: Record<
 export default function TipsPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
+  const [expandedTip, setExpandedTip] = useState<string | null>(null);
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+
+  // Load bookmarks on mount
+  useEffect(() => {
+    setBookmarks(new Set(getBookmarkedTipIds()));
+  }, []);
+
+  const handleBookmark = (tipId: string) => {
+    navigator.vibrate?.(30);
+    const nowBookmarked = toggleBookmark(tipId);
+    setBookmarks((prev) => {
+      const next = new Set(prev);
+      if (nowBookmarked) {
+        next.add(tipId);
+      } else {
+        next.delete(tipId);
+      }
+      return next;
+    });
+  };
 
   const filtered = TIPS.filter((tip) => {
+    if (activeCategory === "saved") {
+      return bookmarks.has(tip.id);
+    }
     const matchesCategory =
       activeCategory === "all" || tip.category === activeCategory;
     const matchesSearch =
@@ -216,6 +258,11 @@ export default function TipsPage() {
                 </span>
               )}
               {cat.label}
+              {cat.key === "saved" && bookmarks.size > 0 && (
+                <span className="text-xs bg-primary/20 text-primary rounded-full size-5 flex items-center justify-center">
+                  {bookmarks.size}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -228,11 +275,20 @@ export default function TipsPage() {
               text: "text-slate-400",
               hoverBg: "group-hover:bg-slate-500",
             };
+            const isExpanded = expandedTip === tip.id;
+            const isSaved = bookmarks.has(tip.id);
 
             return (
               <div
                 key={tip.id}
-                className="flex flex-col gap-4 rounded-xl border border-surface-border bg-surface-dark p-5 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all group"
+                onClick={() =>
+                  setExpandedTip(isExpanded ? null : tip.id)
+                }
+                className={`flex flex-col gap-4 rounded-xl border p-5 transition-all group cursor-pointer active:scale-[0.98] ${
+                  isExpanded
+                    ? "border-primary/50 bg-surface-dark shadow-lg shadow-primary/5"
+                    : "border-surface-border bg-surface-dark hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5"
+                }`}
               >
                 <div
                   className={`size-12 rounded-lg flex items-center justify-center ${iconStyle.bg} ${iconStyle.text} ${iconStyle.hoverBg} group-hover:text-white transition-colors`}
@@ -248,13 +304,38 @@ export default function TipsPage() {
                   <p className="text-slate-400 text-sm leading-relaxed">
                     {tip.description}
                   </p>
+
+                  {/* Expanded content */}
+                  {isExpanded && (
+                    <div className="mt-2 pt-3 border-t border-surface-border animate-fade-in-up">
+                      <p className="text-slate-300 text-sm leading-relaxed">
+                        {tip.extended}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="mt-auto pt-4 flex items-center justify-between border-t border-surface-border">
                   <span className="text-xs font-bold text-primary uppercase tracking-wider">
                     {tip.category}
                   </span>
-                  <button className="text-slate-500 hover:text-white transition-colors">
-                    <span className="material-symbols-outlined">bookmark</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBookmark(tip.id);
+                    }}
+                    className={`transition-colors ${
+                      isSaved
+                        ? "text-primary"
+                        : "text-slate-500 hover:text-white"
+                    }`}
+                  >
+                    <span
+                      className={`material-symbols-outlined ${
+                        isSaved ? "filled" : ""
+                      }`}
+                    >
+                      bookmark
+                    </span>
                   </button>
                 </div>
               </div>
@@ -266,10 +347,12 @@ export default function TipsPage() {
         {filtered.length === 0 && (
           <div className="text-center py-12">
             <span className="material-symbols-outlined text-slate-600 text-5xl mb-4 block">
-              search_off
+              {activeCategory === "saved" ? "bookmark_border" : "search_off"}
             </span>
             <p className="text-slate-400">
-              No tips found. Try a different search term.
+              {activeCategory === "saved"
+                ? "No saved tips yet. Tap the bookmark icon on any tip to save it."
+                : "No tips found. Try a different search term."}
             </p>
           </div>
         )}

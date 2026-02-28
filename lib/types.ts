@@ -13,9 +13,13 @@ export interface MeterReading {
 export interface UserSettings {
   onboardingComplete: boolean;
   meterNumber: string;
-  /** GHS per kWh — default ECG residential Tier 1 rate */
+  /** Currency per kWh — default from selected country */
   tariffRate: number;
-  /** Last known prepaid balance in GHS */
+  /** Whether the user manually overrode the default tariff */
+  tariffOverridden: boolean;
+  /** ISO country code (e.g. "GH", "NG") */
+  countryCode: string;
+  /** Last known prepaid balance in local currency */
   lastBalance: number;
   /** When lastBalance was recorded (Unix ms) */
   lastBalanceDate: number;
@@ -25,12 +29,17 @@ export interface UserSettings {
 export interface DashboardMetrics {
   currentBalance: number;
   dailyBurnRate: number;
-  daysLeft: number;
+  /** null when insufficient data */
+  daysLeft: number | null;
   lastReading: MeterReading | null;
   todayUsage: number;
   weeklyUsage: number;
-  spikeDetected: boolean;
-  spikePercent: number;
+}
+
+/** A bookmarked energy tip ID */
+export interface BookmarkedTip {
+  tipId: string;
+  timestamp: number;
 }
 
 /** Energy saving tip */

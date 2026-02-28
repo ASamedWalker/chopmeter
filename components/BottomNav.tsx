@@ -3,13 +3,14 @@
 import { useRouter } from "next/navigation";
 
 interface BottomNavProps {
-  active: "dashboard" | "scanner" | "tips";
+  active: "dashboard" | "scanner" | "tips" | "settings";
 }
 
 const NAV_ITEMS = [
   { key: "dashboard", label: "Home", icon: "home", href: "/dashboard" },
   { key: "scanner", label: "Scan", icon: "qr_code_scanner", href: "/scanner" },
   { key: "tips", label: "Tips", icon: "tips_and_updates", href: "/tips" },
+  { key: "settings", label: "Settings", icon: "settings", href: "/settings" },
 ] as const;
 
 export default function BottomNav({ active }: BottomNavProps) {

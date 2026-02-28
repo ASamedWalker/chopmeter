@@ -3,32 +3,84 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveSettings } from "@/lib/storage";
+import { COUNTRIES, type CountryConfig } from "@/lib/countries";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
+  const [selectedCountry, setSelectedCountry] = useState<CountryConfig>(
+    COUNTRIES[0]
+  );
+  const [meterNumber, setMeterNumber] = useState("");
+  const [balance, setBalance] = useState("");
+  const [tariff, setTariff] = useState(COUNTRIES[0].defaultTariff.toString());
+  const [tariffEdited, setTariffEdited] = useState(false);
 
   const handleFinish = () => {
-    saveSettings({ onboardingComplete: true });
+    const balanceNum = parseFloat(balance) || 0;
+    const tariffNum = parseFloat(tariff) || selectedCountry.defaultTariff;
+
+    saveSettings({
+      onboardingComplete: true,
+      countryCode: selectedCountry.code,
+      meterNumber,
+      lastBalance: balanceNum,
+      lastBalanceDate: Date.now(),
+      tariffRate: tariffNum,
+      tariffOverridden: tariffEdited,
+    });
     router.replace("/dashboard");
   };
 
-  const next = () => (step < 2 ? setStep(step + 1) : handleFinish());
+  const handleCountrySelect = (country: CountryConfig) => {
+    setSelectedCountry(country);
+    if (!tariffEdited) {
+      setTariff(country.defaultTariff.toString());
+    }
+  };
+
+  const next = () => {
+    if (step === 2 && !balance) return; // balance required
+    if (step < 3) setStep(step + 1);
+    else handleFinish();
+  };
+
   const back = () => step > 0 && setStep(step - 1);
 
   return (
     <div className="min-h-screen bg-bg-dark flex flex-col items-center justify-center">
-      {step === 0 && <Screen1 onNext={next} onSkip={handleFinish} />}
+      {step === 0 && <WelcomeScreen onNext={next} onSkip={handleFinish} />}
       {step === 1 && (
-        <Screen2 onNext={next} onBack={back} onSkip={handleFinish} />
+        <CountryScreen
+          selected={selectedCountry}
+          onSelect={handleCountrySelect}
+          onNext={next}
+          onBack={back}
+        />
       )}
-      {step === 2 && <Screen3 onFinish={handleFinish} onBack={back} />}
+      {step === 2 && (
+        <MeterSetupScreen
+          country={selectedCountry}
+          meterNumber={meterNumber}
+          setMeterNumber={setMeterNumber}
+          balance={balance}
+          setBalance={setBalance}
+          tariff={tariff}
+          setTariff={(v) => {
+            setTariff(v);
+            setTariffEdited(true);
+          }}
+          onNext={next}
+          onBack={back}
+        />
+      )}
+      {step === 3 && <ReadyScreen onFinish={handleFinish} onBack={back} />}
     </div>
   );
 }
 
-/* ======================== SCREEN 1 ======================== */
-function Screen1({
+/* ======================== SCREEN 0: WELCOME ======================== */
+function WelcomeScreen({
   onNext,
   onSkip,
 }: {
@@ -64,7 +116,6 @@ function Screen1({
 
           <div className="relative w-full aspect-[4/5] max-h-[400px] rounded-2xl overflow-hidden bg-gradient-to-b from-primary/5 to-primary/10 border border-primary/10 shadow-lg">
             <div className="absolute inset-0 bg-gradient-to-t from-bg-dark/80 via-transparent to-transparent" />
-            {/* Illustration placeholder */}
             <div className="absolute inset-0 flex items-center justify-center">
               <span
                 className="material-symbols-outlined text-primary/20"
@@ -79,10 +130,10 @@ function Screen1({
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-primary font-bold uppercase tracking-wider">
-                  Savings
+                  Smart Tracking
                 </span>
                 <span className="text-sm text-white font-medium">
-                  GH₵ 120.00 saved this month
+                  Know exactly where your money goes
                 </span>
               </div>
             </div>
@@ -102,18 +153,14 @@ function Screen1({
       </main>
 
       <footer className="px-6 pb-8 pt-2 w-full z-20">
-        <div className="flex justify-center gap-2 mb-6">
-          <div className="h-1.5 w-6 rounded-full bg-primary transition-all duration-300" />
-          <div className="h-1.5 w-1.5 rounded-full bg-slate-700" />
-          <div className="h-1.5 w-1.5 rounded-full bg-slate-700" />
-        </div>
+        <StepDots current={0} total={4} />
         <button
           onClick={onNext}
           className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary/90 transition-all duration-300 shadow-[0_0_20px_rgba(0,255,65,0.3)] hover:shadow-[0_0_30px_rgba(0,255,65,0.5)]"
         >
           <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
           <span className="text-bg-dark text-lg font-bold tracking-wide mr-2 relative z-10">
-            Next
+            Get Started
           </span>
           <span className="material-symbols-outlined text-bg-dark relative z-10 transition-transform group-hover:translate-x-1">
             arrow_forward
@@ -124,156 +171,234 @@ function Screen1({
   );
 }
 
-/* ======================== SCREEN 2 ======================== */
-function Screen2({
+/* ======================== SCREEN 1: COUNTRY ======================== */
+function CountryScreen({
+  selected,
+  onSelect,
   onNext,
   onBack,
-  onSkip,
 }: {
+  selected: CountryConfig;
+  onSelect: (c: CountryConfig) => void;
   onNext: () => void;
   onBack: () => void;
-  onSkip: () => void;
 }) {
   return (
-    <div className="w-full min-h-screen flex flex-col bg-bg-dark">
-      <header className="w-full border-b border-surface-border bg-bg-dark sticky top-0 z-50">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2 text-white">
-              <div className="size-8 bg-primary/20 rounded-lg flex items-center justify-center text-primary">
-                <span className="material-symbols-outlined text-2xl">
-                  electric_bolt
-                </span>
-              </div>
-              <h2 className="text-lg font-bold tracking-tight">ChopMeter</h2>
-            </div>
-            <button
-              onClick={onSkip}
-              className="flex items-center justify-center rounded-lg h-9 px-4 bg-primary text-bg-dark text-sm font-bold hover:brightness-110 transition-all"
-            >
-              Skip
-            </button>
-          </div>
-        </div>
+    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-primary/10">
+      <header className="flex items-center justify-between px-6 py-5 z-20">
+        <button
+          onClick={onBack}
+          className="flex items-center justify-center size-10 rounded-full bg-surface-dark text-slate-300 hover:text-white transition-colors"
+        >
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h2 className="text-white text-lg font-bold tracking-tight">
+          Your Country
+        </h2>
+        <div className="size-10" />
       </header>
 
-      <main className="flex-grow flex items-center justify-center py-10 px-4">
-        <div className="max-w-[960px] w-full flex flex-col gap-12 lg:gap-16">
-          <div className="flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-20">
-            <div className="flex-1 flex flex-col gap-6 text-center lg:text-left">
-              <div className="flex items-center justify-center lg:justify-start">
-                <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider border border-primary/20">
-                  Step 2 of 3
-                </span>
-              </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
-                Snap your meter, <br />
-                <span className="text-primary">track your units.</span>
-              </h1>
-              <p className="text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Simply take a photo of your digital electric meter to instantly
-                log your current usage. ChopMeter&apos;s smart scanning
-                technology does the heavy lifting, ensuring accurate tracking.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
-                <button
-                  onClick={onBack}
-                  className="w-full sm:w-auto min-w-[140px] h-12 rounded-xl border border-surface-border text-white font-bold hover:bg-surface-dark transition-colors flex items-center justify-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-[20px]">
-                    arrow_back
-                  </span>
-                  Back
-                </button>
-                <button
-                  onClick={onNext}
-                  className="w-full sm:w-auto min-w-[140px] h-12 rounded-xl bg-primary text-bg-dark font-bold hover:brightness-110 shadow-[0_0_20px_rgba(0,255,65,0.3)] transition-all flex items-center justify-center gap-2"
-                >
-                  Next
-                  <span className="material-symbols-outlined text-[20px]">
-                    arrow_forward
-                  </span>
-                </button>
-              </div>
-            </div>
+      <main className="flex-1 flex flex-col px-6 pb-6 overflow-y-auto">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-extrabold text-white mb-2">
+            Where are you?
+          </h1>
+          <p className="text-slate-400 text-sm">
+            We&apos;ll set your currency and default electricity rate.
+          </p>
+        </div>
 
-            <div className="flex-1 w-full max-w-[480px] lg:max-w-none relative group">
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-yellow-400/20 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
-              <div className="relative rounded-2xl overflow-hidden bg-neutral-900 border border-neutral-800 shadow-2xl aspect-[4/3] flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-t from-bg-dark via-transparent to-transparent" />
-                <div className="relative z-10 flex flex-col items-center animate-[pulse_4s_ease-in-out_infinite]">
-                  <div className="w-48 h-48 border-2 border-primary rounded-xl relative flex items-center justify-center bg-black/30 backdrop-blur-sm">
-                    <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-primary -mt-1 -ml-1" />
-                    <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-primary -mt-1 -mr-1" />
-                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-primary -mb-1 -ml-1" />
-                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-primary -mb-1 -mr-1" />
-                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_#00FF41] animate-scan" />
-                    <span className="text-white font-mono text-2xl font-bold tracking-widest drop-shadow-md">
-                      2450.5
-                    </span>
-                  </div>
-                  <div className="mt-4 flex justify-center">
-                    <div className="px-3 py-1 bg-black/60 rounded-full text-primary text-xs font-bold border border-primary/30 flex items-center gap-1 backdrop-blur-md">
-                      <span className="material-symbols-outlined text-sm">
-                        check_circle
-                      </span>
-                      Meter Found
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-10 border-t border-surface-border">
-            {[
-              {
-                icon: "center_focus_strong",
-                color: "bg-primary/10 text-primary",
-                title: "Instant Scan",
-                desc: "Point and shoot to capture meter readings instantly with 99% accuracy.",
-              },
-              {
-                icon: "auto_graph",
-                color: "bg-yellow-500/10 text-yellow-500",
-                title: "Auto-Log",
-                desc: "Your readings are automatically saved and graphed over time.",
-              },
-              {
-                icon: "notifications_active",
-                color: "bg-blue-500/10 text-blue-500",
-                title: "Usage Alerts",
-                desc: "Get notified immediately when your usage spikes unexpectedly.",
-              },
-            ].map((f) => (
-              <div
-                key={f.title}
-                className="flex flex-col gap-3 p-4 rounded-xl hover:bg-surface-dark/50 transition-colors"
+        <div className="grid grid-cols-2 gap-3">
+          {COUNTRIES.map((country) => {
+            const isSelected = selected.code === country.code;
+            return (
+              <button
+                key={country.code}
+                onClick={() => onSelect(country)}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                  isSelected
+                    ? "border-primary bg-primary/10 shadow-lg shadow-primary/10"
+                    : "border-surface-border bg-surface-dark hover:border-primary/40"
+                }`}
               >
-                <div
-                  className={`size-12 rounded-lg ${f.color} flex items-center justify-center mb-2`}
-                >
-                  <span className="material-symbols-outlined text-2xl">
-                    {f.icon}
+                <span className="text-4xl">{country.flag}</span>
+                <span className="text-white font-bold text-sm">
+                  {country.name}
+                </span>
+                <span className="text-slate-400 text-xs">
+                  {country.currencySymbol}/kWh
+                </span>
+                {isSelected && (
+                  <span className="material-symbols-outlined text-primary text-lg">
+                    check_circle
                   </span>
-                </div>
-                <h3 className="text-white text-lg font-bold mb-1">
-                  {f.title}
-                </h3>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  {f.desc}
-                </p>
-              </div>
-            ))}
-          </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       </main>
+
+      <footer className="px-6 pb-8 pt-2 w-full z-20">
+        <StepDots current={1} total={4} />
+        <button
+          onClick={onNext}
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary/90 transition-all duration-300 shadow-[0_0_20px_rgba(0,255,65,0.3)]"
+        >
+          <span className="text-bg-dark text-lg font-bold tracking-wide mr-2 relative z-10">
+            Continue
+          </span>
+          <span className="material-symbols-outlined text-bg-dark relative z-10">
+            arrow_forward
+          </span>
+        </button>
+      </footer>
     </div>
   );
 }
 
-/* ======================== SCREEN 3 ======================== */
-function Screen3({
+/* ======================== SCREEN 2: METER SETUP ======================== */
+function MeterSetupScreen({
+  country,
+  meterNumber,
+  setMeterNumber,
+  balance,
+  setBalance,
+  tariff,
+  setTariff,
+  onNext,
+  onBack,
+}: {
+  country: CountryConfig;
+  meterNumber: string;
+  setMeterNumber: (v: string) => void;
+  balance: string;
+  setBalance: (v: string) => void;
+  tariff: string;
+  setTariff: (v: string) => void;
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const balanceValid = balance !== "" && parseFloat(balance) >= 0;
+
+  return (
+    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-primary/10">
+      <header className="flex items-center justify-between px-6 py-5 z-20">
+        <button
+          onClick={onBack}
+          className="flex items-center justify-center size-10 rounded-full bg-surface-dark text-slate-300 hover:text-white transition-colors"
+        >
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h2 className="text-white text-lg font-bold tracking-tight">
+          Meter Setup
+        </h2>
+        <div className="size-10" />
+      </header>
+
+      <main className="flex-1 flex flex-col px-6 pb-6 overflow-y-auto">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-3 border border-primary/20">
+            <span className="text-lg">{country.flag}</span>
+            {country.name}
+          </div>
+          <h1 className="text-2xl font-extrabold text-white mb-2">
+            Set up your meter
+          </h1>
+          <p className="text-slate-400 text-sm">
+            Enter your current balance to start tracking.
+          </p>
+        </div>
+
+        <div className="space-y-5">
+          {/* Meter Number (optional) */}
+          <div>
+            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+              Meter Number{" "}
+              <span className="text-slate-600 normal-case">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={meterNumber}
+              onChange={(e) => setMeterNumber(e.target.value)}
+              placeholder="e.g. 01234567890"
+              className="w-full h-14 rounded-xl bg-surface-dark border border-surface-border text-white text-lg font-bold px-4 placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary"
+            />
+          </div>
+
+          {/* Current Balance (required) */}
+          <div>
+            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+              Current Balance{" "}
+              <span className="text-primary">*</span>
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">
+                {country.currencySymbol}
+              </span>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={balance}
+                onChange={(e) => setBalance(e.target.value)}
+                placeholder="0.00"
+                className="w-full h-14 rounded-xl bg-surface-dark border border-surface-border text-white text-lg font-bold pl-16 pr-4 placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            {balance !== "" && !balanceValid && (
+              <p className="text-danger text-xs mt-1">
+                Enter a valid balance amount
+              </p>
+            )}
+          </div>
+
+          {/* Tariff Rate */}
+          <div>
+            <label className="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">
+              Tariff Rate (per kWh)
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">
+                {country.currencySymbol}
+              </span>
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                value={tariff}
+                onChange={(e) => setTariff(e.target.value)}
+                className="w-full h-14 rounded-xl bg-surface-dark border border-surface-border text-white text-lg font-bold pl-16 pr-4 placeholder:text-slate-600 focus:border-primary focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <p className="text-slate-500 text-xs mt-1">
+              Default: {country.currencySymbol} {country.defaultTariff} for{" "}
+              {country.name}
+            </p>
+          </div>
+        </div>
+      </main>
+
+      <footer className="px-6 pb-8 pt-2 w-full z-20">
+        <StepDots current={2} total={4} />
+        <button
+          onClick={onNext}
+          disabled={!balanceValid}
+          className={`w-full flex items-center justify-center rounded-xl h-14 font-bold text-lg transition-all ${
+            balanceValid
+              ? "bg-primary text-bg-dark shadow-[0_0_20px_rgba(0,255,65,0.3)]"
+              : "bg-surface-dark text-slate-600 cursor-not-allowed"
+          }`}
+        >
+          Continue
+          <span className="material-symbols-outlined ml-2">arrow_forward</span>
+        </button>
+      </footer>
+    </div>
+  );
+}
+
+/* ======================== SCREEN 3: READY ======================== */
+function ReadyScreen({
   onFinish,
   onBack,
 }: {
@@ -281,91 +406,103 @@ function Screen3({
   onBack: () => void;
 }) {
   return (
-    <div className="w-full min-h-screen flex flex-col bg-bg-dark">
-      <header className="flex items-center justify-between whitespace-nowrap px-6 py-4 lg:px-10 max-w-[960px] mx-auto w-full">
-        <div className="flex items-center gap-3">
-          <div className="size-8 flex items-center justify-center text-primary">
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 32 }}
-            >
-              bolt
-            </span>
-          </div>
-          <h2 className="text-white text-xl font-bold leading-tight tracking-tight">
-            ChopMeter
-          </h2>
-        </div>
+    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-primary/10">
+      <header className="flex items-center justify-between px-6 py-5 z-20">
         <button
-          onClick={onFinish}
-          className="flex min-w-[84px] items-center justify-center rounded-lg h-10 px-4 text-white text-sm font-bold hover:bg-surface-dark transition-colors"
+          onClick={onBack}
+          className="flex items-center justify-center size-10 rounded-full bg-surface-dark text-slate-300 hover:text-white transition-colors"
         >
-          Skip
+          <span className="material-symbols-outlined">arrow_back</span>
         </button>
+        <h2 className="text-white text-lg font-bold tracking-tight">
+          ChopMeter
+        </h2>
+        <div className="size-10" />
       </header>
 
-      <div className="flex flex-col flex-1 items-center justify-center p-4 lg:p-8">
-        <div className="w-full max-w-md aspect-square relative mb-8 flex items-center justify-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-full opacity-20 blur-3xl" />
-          <div className="absolute w-2/3 h-2/3 bg-[#CE1126]/10 rounded-full blur-2xl top-1/4 left-1/4" />
-
-          <div className="relative z-10 flex flex-col items-center justify-center p-12 bg-surface-dark rounded-full shadow-2xl border border-surface-border aspect-square w-64 h-64 lg:w-80 lg:h-80">
-            <div className="relative">
-              <span
-                className="material-symbols-outlined text-[#FCD116] drop-shadow-[0_0_15px_rgba(252,209,22,0.4)]"
-                style={{
-                  fontSize: 120,
-                  fontVariationSettings: "'FILL' 1, 'wght' 400",
-                }}
-              >
-                notifications_active
-              </span>
-              <div className="absolute top-2 right-4 w-6 h-6 bg-[#CE1126] rounded-full border-4 border-surface-dark" />
-            </div>
-            <div className="absolute -z-10 w-full h-full border border-primary/20 rounded-full animate-pulse" />
-            <div className="absolute -z-10 w-[120%] h-[120%] border border-primary/10 rounded-full" />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 text-center max-w-lg mb-8">
-          <h1 className="text-white text-3xl md:text-4xl font-bold leading-tight">
-            Get alerts before your credit finishes
-          </h1>
-          <p className="text-slate-400 text-base md:text-lg font-normal leading-relaxed">
-            Avoid sudden blackouts. We notify you when your electricity credit
-            is running low so you can top up in time.
-          </p>
-        </div>
-
-        <div className="flex items-center justify-center gap-4 mb-8">
-          <button
-            onClick={onBack}
-            className="flex size-10 items-center justify-center text-slate-400 hover:text-white transition-colors"
-          >
-            <span className="material-symbols-outlined">chevron_left</span>
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="size-2.5 rounded-full bg-slate-700" />
-            <div className="size-2.5 rounded-full bg-slate-700" />
-            <div className="w-8 h-2.5 rounded-full bg-primary" />
-          </div>
-          <div className="size-10 opacity-0 pointer-events-none">
-            <span className="material-symbols-outlined">chevron_right</span>
-          </div>
-        </div>
-
-        <div className="w-full max-w-sm px-4">
-          <button
-            onClick={onFinish}
-            className="flex w-full items-center justify-center rounded-xl h-14 px-5 bg-primary text-bg-dark text-lg font-bold transition-all shadow-[0_0_20px_rgba(0,255,65,0.3)] hover:shadow-[0_0_30px_rgba(0,255,65,0.5)] transform hover:-translate-y-0.5"
-          >
-            Get Started
-            <span className="material-symbols-outlined ml-2 text-xl">
-              arrow_forward
+      <main className="flex-1 flex flex-col items-center justify-center px-6 pb-6">
+        <div className="relative mb-8">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-full opacity-40 blur-3xl scale-150" />
+          <div className="relative z-10 flex flex-col items-center justify-center p-10 bg-surface-dark rounded-full shadow-2xl border border-surface-border size-56">
+            <span
+              className="material-symbols-outlined text-primary"
+              style={{
+                fontSize: 80,
+                fontVariationSettings: "'FILL' 1, 'wght' 400",
+              }}
+            >
+              rocket_launch
             </span>
-          </button>
+            <div className="absolute -z-10 w-full h-full border border-primary/20 rounded-full animate-pulse" />
+          </div>
         </div>
-      </div>
+
+        <div className="flex flex-col items-center text-center space-y-4 max-w-sm">
+          <h1 className="text-3xl font-extrabold text-white leading-tight">
+            You&apos;re all set!
+          </h1>
+          <p className="text-slate-400 text-base leading-relaxed">
+            Scan your meter, track your spending, and never be surprised by your
+            electricity bill again.
+          </p>
+
+          <div className="grid grid-cols-3 gap-3 w-full pt-4">
+            {[
+              { icon: "qr_code_scanner", label: "Scan" },
+              { icon: "monitoring", label: "Track" },
+              { icon: "savings", label: "Save" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-surface-dark border border-surface-border"
+              >
+                <span className="material-symbols-outlined text-primary text-2xl">
+                  {item.icon}
+                </span>
+                <span className="text-slate-300 text-xs font-bold">
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      <footer className="px-6 pb-8 pt-2 w-full z-20">
+        <StepDots current={3} total={4} />
+        <button
+          onClick={onFinish}
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-primary hover:bg-primary/90 transition-all duration-300 shadow-[0_0_20px_rgba(0,255,65,0.3)] hover:shadow-[0_0_30px_rgba(0,255,65,0.5)]"
+        >
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
+          <span className="text-bg-dark text-lg font-bold tracking-wide mr-2 relative z-10">
+            Launch Dashboard
+          </span>
+          <span className="material-symbols-outlined text-bg-dark relative z-10 transition-transform group-hover:translate-x-1">
+            arrow_forward
+          </span>
+        </button>
+      </footer>
+    </div>
+  );
+}
+
+/* ======================== STEP DOTS ======================== */
+function StepDots({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="flex justify-center gap-2 mb-6">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={`h-1.5 rounded-full transition-all duration-300 ${
+            i === current
+              ? "w-6 bg-primary"
+              : i < current
+              ? "w-3 bg-primary/40"
+              : "w-1.5 bg-slate-700"
+          }`}
+        />
+      ))}
     </div>
   );
 }

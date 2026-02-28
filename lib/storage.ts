@@ -1,15 +1,35 @@
-import type { MeterReading, UserSettings } from "./types";
+import type { MeterReading, UserSettings, BookmarkedTip } from "./types";
 
 const READINGS_KEY = "chopmeter_readings";
 const SETTINGS_KEY = "chopmeter_settings";
+const BOOKMARKS_KEY = "chopmeter_bookmarks";
 
 const DEFAULT_SETTINGS: UserSettings = {
   onboardingComplete: false,
   meterNumber: "",
-  tariffRate: 0.75,
+  tariffRate: 2.0,
+  tariffOverridden: false,
+  countryCode: "GH",
   lastBalance: 0,
   lastBalanceDate: Date.now(),
 };
+
+// ---- Legacy migration ----
+
+function migrateSettings(raw: Record<string, unknown>): Record<string, unknown> {
+  // Migrate old 0.75 tariff to new 2.00 Ghana default
+  if (raw.tariffRate === 0.75 && !raw.tariffOverridden) {
+    raw.tariffRate = 2.0;
+  }
+  // Add countryCode if missing (old installs)
+  if (!raw.countryCode) {
+    raw.countryCode = "GH";
+  }
+  if (raw.tariffOverridden === undefined) {
+    raw.tariffOverridden = false;
+  }
+  return raw;
+}
 
 // ---- Readings ----
 
@@ -47,7 +67,8 @@ export function getSettings(): UserSettings {
   const raw = localStorage.getItem(SETTINGS_KEY);
   if (!raw) return DEFAULT_SETTINGS;
   try {
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    const parsed = migrateSettings(JSON.parse(raw));
+    return { ...DEFAULT_SETTINGS, ...parsed };
   } catch {
     return DEFAULT_SETTINGS;
   }
@@ -57,6 +78,49 @@ export function saveSettings(partial: Partial<UserSettings>): void {
   const current = getSettings();
   const updated = { ...current, ...partial };
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(updated));
+}
+
+// ---- Bookmarks ----
+
+function getBookmarks(): BookmarkedTip[] {
+  if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(BOOKMARKS_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as BookmarkedTip[];
+  } catch {
+    return [];
+  }
+}
+
+export function toggleBookmark(tipId: string): boolean {
+  const bookmarks = getBookmarks();
+  const idx = bookmarks.findIndex((b) => b.tipId === tipId);
+  if (idx >= 0) {
+    bookmarks.splice(idx, 1);
+    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
+    return false; // unbookmarked
+  } else {
+    bookmarks.push({ tipId, timestamp: Date.now() });
+    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
+    return true; // bookmarked
+  }
+}
+
+export function isBookmarked(tipId: string): boolean {
+  return getBookmarks().some((b) => b.tipId === tipId);
+}
+
+export function getBookmarkedTipIds(): string[] {
+  return getBookmarks().map((b) => b.tipId);
+}
+
+// ---- Data management ----
+
+export function clearAllData(): void {
+  localStorage.removeItem(READINGS_KEY);
+  localStorage.removeItem(SETTINGS_KEY);
+  localStorage.removeItem(BOOKMARKS_KEY);
 }
 
 // ---- ID generation ----
