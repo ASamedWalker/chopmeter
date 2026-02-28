@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { saveReading, saveSettings, getSettings, generateId } from "@/lib/storage";
 import { getCountry } from "@/lib/countries";
 import { recognizeMeterReading } from "@/lib/ocr";
-import { X, Zap, Keyboard, CircleStop, CirclePlay, Wallet } from "lucide-react";
+import { X, Zap, Keyboard, Wallet } from "lucide-react";
 
 type ScanState = "idle" | "scanning" | "success" | "manual";
 
@@ -14,7 +14,8 @@ export default function ScannerPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const autoScanRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const scanningRef = useRef(false);
 
   const [scanState, setScanState] = useState<ScanState>("idle");
   const [scannedValue, setScannedValue] = useState<string>("");
@@ -22,11 +23,53 @@ export default function ScannerPage() {
   const [balanceValue, setBalanceValue] = useState<string>("");
   const [flashOn, setFlashOn] = useState(false);
   const [error, setError] = useState<string>("");
-  const [autoScan, setAutoScan] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const settings = getSettings();
   const country = getCountry(settings.countryCode);
+
+  const stopScanning = useCallback(() => {
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
+  }, []);
+
+  const captureAndScan = useCallback(async () => {
+    if (!videoRef.current || !canvasRef.current || scanningRef.current) return;
+    scanningRef.current = true;
+    setScanState("scanning");
+    setError("");
+    setProgress(0);
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) { scanningRef.current = false; return; }
+    ctx.drawImage(video, 0, 0);
+
+    const dataUrl = canvas.toDataURL("image/png");
+    const result = await recognizeMeterReading(dataUrl, (p) => setProgress(p));
+
+    if (result.value !== null) {
+      setScannedValue(result.value.toString());
+      setScanState("success");
+      stopScanning();
+      navigator.vibrate?.(100);
+    } else {
+      setScanState("idle");
+    }
+    setProgress(0);
+    scanningRef.current = false;
+  }, [stopScanning]);
+
+  const startScanning = useCallback(() => {
+    stopScanning();
+    captureAndScan();
+    scanIntervalRef.current = setInterval(captureAndScan, 3000);
+  }, [stopScanning, captureAndScan]);
 
   const startCamera = useCallback(async () => {
     try {
@@ -39,11 +82,13 @@ export default function ScannerPage() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
+      // Auto-scan starts as soon as camera is ready
+      startScanning();
     } catch {
-      setError("Camera access denied. You can enter the reading manually.");
+      setError("Camera access denied.");
       setScanState("manual");
     }
-  }, []);
+  }, [startScanning]);
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -52,20 +97,13 @@ export default function ScannerPage() {
     }
   }, []);
 
-  const stopAutoScan = useCallback(() => {
-    if (autoScanRef.current) {
-      clearInterval(autoScanRef.current);
-      autoScanRef.current = null;
-    }
-  }, []);
-
   useEffect(() => {
     startCamera();
     return () => {
       stopCamera();
-      stopAutoScan();
+      stopScanning();
     };
-  }, [startCamera, stopCamera, stopAutoScan]);
+  }, [startCamera, stopCamera, stopScanning]);
 
   const toggleFlash = async () => {
     if (!streamRef.current) return;
@@ -82,50 +120,6 @@ export default function ScannerPage() {
     }
   };
 
-  const captureAndScan = useCallback(async () => {
-    if (!videoRef.current || !canvasRef.current) return;
-    setScanState("scanning");
-    setError("");
-    setProgress(0);
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.drawImage(video, 0, 0);
-
-    const dataUrl = canvas.toDataURL("image/png");
-    const result = await recognizeMeterReading(dataUrl, (p) => setProgress(p));
-
-    if (result.value !== null) {
-      setScannedValue(result.value.toString());
-      setScanState("success");
-      stopAutoScan();
-      navigator.vibrate?.(100);
-    } else {
-      if (!autoScan) {
-        setError("Could not read meter. Try again or enter manually.");
-      }
-      setScanState("idle");
-    }
-    setProgress(0);
-  }, [autoScan, stopAutoScan]);
-
-  const toggleAutoScan = useCallback(() => {
-    if (autoScan) {
-      stopAutoScan();
-      setAutoScan(false);
-    } else {
-      setAutoScan(true);
-      autoScanRef.current = setInterval(() => {
-        captureAndScan();
-      }, 3000);
-      captureAndScan();
-    }
-  }, [autoScan, stopAutoScan, captureAndScan]);
-
   const handleSave = (value: string, source: "ocr" | "manual") => {
     const numValue = parseFloat(value);
     if (isNaN(numValue) || numValue <= 0) {
@@ -140,7 +134,6 @@ export default function ScannerPage() {
       source,
     });
 
-    // Save balance if user entered one
     const balNum = parseFloat(balanceValue);
     if (!isNaN(balNum) && balNum > 0) {
       saveSettings({
@@ -150,7 +143,7 @@ export default function ScannerPage() {
     }
 
     stopCamera();
-    stopAutoScan();
+    stopScanning();
     router.push("/dashboard");
   };
 
@@ -175,7 +168,7 @@ export default function ScannerPage() {
         <button
           onClick={() => {
             stopCamera();
-            stopAutoScan();
+            stopScanning();
             router.push("/dashboard");
           }}
           className="flex items-center justify-center size-10 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-colors"
@@ -222,24 +215,19 @@ export default function ScannerPage() {
             <div className="absolute bottom-4 left-0 right-0 text-center z-20">
               <span className="inline-block px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full text-xs font-medium text-blue-400 uppercase tracking-wider">
                 {scanState === "scanning"
-                  ? `Scanning... ${progress}%`
+                  ? `Reading... ${progress}%`
                   : scanState === "success"
-                  ? "Reading Found!"
-                  : "Align Display"}
+                  ? "Found!"
+                  : "Point at meter"}
               </span>
             </div>
           </div>
 
-          <div className="mt-6 text-center max-w-[280px]">
-            <p className="text-white text-lg font-bold mb-2">
-              {autoScan ? "Auto-scanning..." : "Position meter, then tap capture"}
+          {scanState !== "success" && (
+            <p className="mt-6 text-gray-400 text-sm text-center">
+              Hold steady — scanning automatically
             </p>
-            <p className="text-gray-300 text-sm leading-relaxed">
-              {autoScan
-                ? "Scanning every 3 seconds. Hold your phone steady."
-                : "Align the meter display in the frame and tap the button below."}
-            </p>
-          </div>
+          )}
 
           {error && (
             <p className="mt-3 text-danger text-sm text-center">{error}</p>
@@ -273,9 +261,6 @@ export default function ScannerPage() {
                     className="w-full h-10 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-10 pr-3 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
-                <p className="text-gray-600 text-[10px] mt-1">
-                  Enter your current meter credit to track spending
-                </p>
               </div>
 
               <div className="flex gap-2 mt-4">
@@ -284,6 +269,7 @@ export default function ScannerPage() {
                     setScanState("idle");
                     setScannedValue("");
                     setBalanceValue("");
+                    startScanning();
                   }}
                   className="flex-1 py-2 rounded-lg border border-white/[0.06] text-white text-sm font-bold hover:bg-white/[0.05] transition-colors"
                 >
@@ -298,31 +284,6 @@ export default function ScannerPage() {
               </div>
             </div>
           )}
-
-          {scanState === "idle" && (
-            <div className="mt-6 flex flex-col items-center gap-4">
-              <button
-                onClick={toggleAutoScan}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                  autoScan
-                    ? "bg-gradient-to-r from-blue-500 to-violet-500 text-white"
-                    : "bg-white/10 text-white border border-white/20"
-                }`}
-              >
-                {autoScan ? <CircleStop size={18} /> : <CirclePlay size={18} />}
-                {autoScan ? "Stop Auto-Scan" : "Auto-Scan"}
-              </button>
-
-              {!autoScan && (
-                <button
-                  onClick={captureAndScan}
-                  className="size-16 rounded-full border-4 border-white/20 flex items-center justify-center group transition-all hover:scale-105 active:scale-95"
-                >
-                  <div className="size-12 rounded-full bg-white group-hover:bg-blue-400 transition-colors shadow-lg" />
-                </button>
-              )}
-            </div>
-          )}
         </main>
       )}
 
@@ -333,11 +294,8 @@ export default function ScannerPage() {
             <div className="text-center">
               <Keyboard size={48} className="text-blue-400 mx-auto mb-4" />
               <h3 className="text-white text-xl font-bold mb-2">
-                Enter Reading Manually
+                Manual Entry
               </h3>
-              <p className="text-gray-400 text-sm">
-                Type the number shown on your meter display.
-              </p>
             </div>
 
             <div>
@@ -372,9 +330,6 @@ export default function ScannerPage() {
                   className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-12 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </div>
-              <p className="text-gray-600 text-[10px] mt-1">
-                Enter your current meter credit to track spending
-              </p>
             </div>
 
             {error && (
@@ -396,7 +351,7 @@ export default function ScannerPage() {
               }}
               className="w-full text-center text-blue-400 text-sm font-bold hover:underline"
             >
-              Try Camera Again
+              Try Camera Instead
             </button>
           </div>
         </main>
@@ -405,25 +360,20 @@ export default function ScannerPage() {
       {/* Footer */}
       <footer className="relative z-10 w-full p-6 pb-8 bg-gradient-to-t from-black via-black/90 to-transparent">
         {scanState !== "manual" ? (
-          <>
-            <button
-              onClick={() => {
-                setScanState("manual");
-                stopCamera();
-                stopAutoScan();
-              }}
-              className="w-full flex items-center justify-center gap-3 h-14 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-white font-bold text-base hover:bg-white/20 active:bg-white/5 transition-all group"
-            >
-              <Keyboard size={20} className="text-blue-400 group-hover:text-white transition-colors" />
-              <span>Enter Code Manually</span>
-            </button>
-            <p className="text-center text-xs text-gray-500 mt-4">
-              Powered by ChopMeter Intelligence
-            </p>
-          </>
+          <button
+            onClick={() => {
+              setScanState("manual");
+              stopCamera();
+              stopScanning();
+            }}
+            className="w-full flex items-center justify-center gap-3 h-14 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-white font-bold text-base hover:bg-white/20 active:bg-white/5 transition-all group"
+          >
+            <Keyboard size={20} className="text-blue-400 group-hover:text-white transition-colors" />
+            <span>Enter Manually</span>
+          </button>
         ) : (
           <p className="text-center text-xs text-gray-500">
-            Powered by ChopMeter Intelligence
+            Powered by ChopMeter
           </p>
         )}
       </footer>
