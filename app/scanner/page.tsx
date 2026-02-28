@@ -2,9 +2,10 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { saveReading, generateId } from "@/lib/storage";
+import { saveReading, saveSettings, getSettings, generateId } from "@/lib/storage";
+import { getCountry } from "@/lib/countries";
 import { recognizeMeterReading } from "@/lib/ocr";
-import { X, Zap, Keyboard, CircleStop, CirclePlay } from "lucide-react";
+import { X, Zap, Keyboard, CircleStop, CirclePlay, Wallet } from "lucide-react";
 
 type ScanState = "idle" | "scanning" | "success" | "manual";
 
@@ -18,10 +19,14 @@ export default function ScannerPage() {
   const [scanState, setScanState] = useState<ScanState>("idle");
   const [scannedValue, setScannedValue] = useState<string>("");
   const [manualValue, setManualValue] = useState<string>("");
+  const [balanceValue, setBalanceValue] = useState<string>("");
   const [flashOn, setFlashOn] = useState(false);
   const [error, setError] = useState<string>("");
   const [autoScan, setAutoScan] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const settings = getSettings();
+  const country = getCountry(settings.countryCode);
 
   const startCamera = useCallback(async () => {
     try {
@@ -135,6 +140,15 @@ export default function ScannerPage() {
       source,
     });
 
+    // Save balance if user entered one
+    const balNum = parseFloat(balanceValue);
+    if (!isNaN(balNum) && balNum > 0) {
+      saveSettings({
+        lastBalance: balNum,
+        lastBalanceDate: Date.now(),
+      });
+    }
+
     stopCamera();
     stopAutoScan();
     router.push("/dashboard");
@@ -240,11 +254,36 @@ export default function ScannerPage() {
                 {scannedValue}{" "}
                 <span className="text-lg text-gray-400">kWh</span>
               </p>
+
+              <div className="mt-4 pt-3 border-t border-white/[0.08]">
+                <label className="flex items-center gap-1.5 text-gray-400 text-xs uppercase tracking-wider mb-1.5">
+                  <Wallet size={12} />
+                  Credit Balance (optional)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold">
+                    {country.currencySymbol}
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={balanceValue}
+                    onChange={(e) => setBalanceValue(e.target.value)}
+                    placeholder="e.g. 500.00"
+                    className="w-full h-10 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-10 pr-3 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <p className="text-gray-600 text-[10px] mt-1">
+                  Enter your current meter credit to track spending
+                </p>
+              </div>
+
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={() => {
                     setScanState("idle");
                     setScannedValue("");
+                    setBalanceValue("");
                   }}
                   className="flex-1 py-2 rounded-lg border border-white/[0.06] text-white text-sm font-bold hover:bg-white/[0.05] transition-colors"
                 >
@@ -301,14 +340,42 @@ export default function ScannerPage() {
               </p>
             </div>
 
-            <input
-              type="number"
-              inputMode="decimal"
-              value={manualValue}
-              onChange={(e) => setManualValue(e.target.value)}
-              placeholder="e.g. 2450.5"
-              className="w-full h-16 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-2xl font-bold text-center placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
+            <div>
+              <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5 text-left">
+                Meter Reading (kWh)
+              </label>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={manualValue}
+                onChange={(e) => setManualValue(e.target.value)}
+                placeholder="e.g. 2450.5"
+                className="w-full h-16 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-2xl font-bold text-center placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="flex items-center gap-1.5 text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5">
+                <Wallet size={12} />
+                Credit Balance (optional)
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold">
+                  {country.currencySymbol}
+                </span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={balanceValue}
+                  onChange={(e) => setBalanceValue(e.target.value)}
+                  placeholder="e.g. 500.00"
+                  className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-12 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <p className="text-gray-600 text-[10px] mt-1">
+                Enter your current meter credit to track spending
+              </p>
+            </div>
 
             {error && (
               <p className="text-danger text-sm text-center">{error}</p>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   getAllReadings,
   getSettings,
+  saveSettings,
   getRecentReadings,
   deleteReading,
 } from "@/lib/storage";
@@ -110,6 +111,8 @@ export default function DashboardPage() {
   const [expandedReading, setExpandedReading] = useState<string | null>(null);
   const [deletingReading, setDeletingReading] = useState<string | null>(null);
   const [displayBalance, setDisplayBalance] = useState(0);
+  const [balanceInput, setBalanceInput] = useState("");
+  const [balanceSaved, setBalanceSaved] = useState(false);
   const [weather, setWeather] = useState<WeatherCache | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animFrameRef = useRef<number | null>(null);
@@ -368,6 +371,49 @@ export default function DashboardPage() {
                     <span className="text-gray-200">
                       {country.currencySymbol} {settings.tariffRate}/kWh
                     </span>
+                  </div>
+
+                  {/* Quick balance update */}
+                  <div className="pt-2 border-t border-white/[0.06]">
+                    <label className="flex items-center gap-1.5 text-gray-400 text-xs uppercase tracking-wider mb-1.5">
+                      <Wallet size={12} />
+                      Update Balance
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold">
+                          {country.currencySymbol}
+                        </span>
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          value={balanceInput}
+                          onChange={(e) => {
+                            setBalanceInput(e.target.value);
+                            setBalanceSaved(false);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          placeholder="e.g. 500.00"
+                          className="w-full h-10 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-10 pr-3 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        />
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const val = parseFloat(balanceInput);
+                          if (isNaN(val) || val <= 0) return;
+                          saveSettings({
+                            lastBalance: val,
+                            lastBalanceDate: Date.now(),
+                          });
+                          setBalanceSaved(true);
+                          loadData();
+                        }}
+                        className="h-10 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-violet-500 text-white text-sm font-bold hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.95]"
+                      >
+                        {balanceSaved ? "Saved!" : "Save"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
