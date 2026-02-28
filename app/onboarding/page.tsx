@@ -4,6 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveSettings } from "@/lib/storage";
 import { COUNTRIES, type CountryConfig } from "@/lib/countries";
+import {
+  Zap,
+  ArrowRight,
+  ArrowLeft,
+  Gauge,
+  PiggyBank,
+  CheckCircle,
+  Rocket,
+  ScanLine,
+  TrendingUp,
+} from "lucide-react";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -11,6 +22,7 @@ export default function OnboardingPage() {
   const [selectedCountry, setSelectedCountry] = useState<CountryConfig>(
     COUNTRIES[0]
   );
+  const [displayName, setDisplayName] = useState("");
   const [meterNumber, setMeterNumber] = useState("");
   const [balance, setBalance] = useState("");
   const [tariff, setTariff] = useState(COUNTRIES[0].defaultTariff.toString());
@@ -23,6 +35,7 @@ export default function OnboardingPage() {
     saveSettings({
       onboardingComplete: true,
       countryCode: selectedCountry.code,
+      displayName: displayName.trim(),
       meterNumber,
       lastBalance: balanceNum,
       lastBalanceDate: Date.now(),
@@ -40,7 +53,7 @@ export default function OnboardingPage() {
   };
 
   const next = () => {
-    if (step === 2 && !balance) return; // balance required
+    if (step === 2 && !balance) return;
     if (step < 3) setStep(step + 1);
     else handleFinish();
   };
@@ -61,6 +74,8 @@ export default function OnboardingPage() {
       {step === 2 && (
         <MeterSetupScreen
           country={selectedCountry}
+          displayName={displayName}
+          setDisplayName={setDisplayName}
           meterNumber={meterNumber}
           setMeterNumber={setMeterNumber}
           balance={balance}
@@ -92,9 +107,7 @@ function WelcomeScreen({
       <header className="flex items-center justify-between px-6 py-5 z-20">
         <div className="flex items-center gap-2">
           <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
-            <span className="material-symbols-outlined text-xl">
-              electric_bolt
-            </span>
+            <Zap size={18} />
           </div>
           <h2 className="text-white text-lg font-bold tracking-tight">
             ChopMeter
@@ -117,16 +130,11 @@ function WelcomeScreen({
           <div className="relative w-full aspect-[4/5] max-h-[400px] rounded-2xl overflow-hidden bg-gradient-to-b from-blue-500/5 to-violet-500/10 border border-white/[0.06] shadow-lg">
             <div className="absolute inset-0 bg-gradient-to-t from-bg-dark/80 via-transparent to-transparent" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <span
-                className="material-symbols-outlined text-blue-500/20"
-                style={{ fontSize: 120, fontVariationSettings: "'FILL' 1" }}
-              >
-                electric_meter
-              </span>
+              <Gauge size={120} className="text-blue-500/20" strokeWidth={0.5} />
             </div>
             <div className="absolute bottom-4 left-4 right-4 bg-bg-dark/60 backdrop-blur-md border border-white/[0.08] rounded-xl p-3 flex items-center gap-3">
               <div className="size-10 rounded-full bg-gradient-to-r from-blue-500 to-violet-500 flex items-center justify-center text-white shrink-0">
-                <span className="material-symbols-outlined">savings</span>
+                <PiggyBank size={20} />
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-blue-400 font-bold uppercase tracking-wider">
@@ -156,15 +164,13 @@ function WelcomeScreen({
         <StepDots current={0} total={4} />
         <button
           onClick={onNext}
-          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]"
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
         >
           <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
           <span className="text-white text-lg font-bold tracking-wide mr-2 relative z-10">
             Get Started
           </span>
-          <span className="material-symbols-outlined text-white relative z-10 transition-transform group-hover:translate-x-1">
-            arrow_forward
-          </span>
+          <ArrowRight size={20} className="text-white relative z-10 transition-transform group-hover:translate-x-1" />
         </button>
       </footer>
     </div>
@@ -190,7 +196,7 @@ function CountryScreen({
           onClick={onBack}
           className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-300 hover:text-white transition-colors"
         >
-          <span className="material-symbols-outlined">arrow_back</span>
+          <ArrowLeft size={20} />
         </button>
         <h2 className="text-white text-lg font-bold tracking-tight">
           Your Country
@@ -229,9 +235,7 @@ function CountryScreen({
                   {country.currencySymbol}/kWh
                 </span>
                 {isSelected && (
-                  <span className="material-symbols-outlined text-blue-400 text-lg">
-                    check_circle
-                  </span>
+                  <CheckCircle size={18} className="text-blue-400" />
                 )}
               </button>
             );
@@ -243,14 +247,12 @@ function CountryScreen({
         <StepDots current={1} total={4} />
         <button
           onClick={onNext}
-          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98]"
         >
           <span className="text-white text-lg font-bold tracking-wide mr-2 relative z-10">
             Continue
           </span>
-          <span className="material-symbols-outlined text-white relative z-10">
-            arrow_forward
-          </span>
+          <ArrowRight size={20} className="text-white relative z-10" />
         </button>
       </footer>
     </div>
@@ -260,6 +262,8 @@ function CountryScreen({
 /* ======================== SCREEN 2: METER SETUP ======================== */
 function MeterSetupScreen({
   country,
+  displayName,
+  setDisplayName,
   meterNumber,
   setMeterNumber,
   balance,
@@ -270,6 +274,8 @@ function MeterSetupScreen({
   onBack,
 }: {
   country: CountryConfig;
+  displayName: string;
+  setDisplayName: (v: string) => void;
   meterNumber: string;
   setMeterNumber: (v: string) => void;
   balance: string;
@@ -288,7 +294,7 @@ function MeterSetupScreen({
           onClick={onBack}
           className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-300 hover:text-white transition-colors"
         >
-          <span className="material-symbols-outlined">arrow_back</span>
+          <ArrowLeft size={20} />
         </button>
         <h2 className="text-white text-lg font-bold tracking-tight">
           Meter Setup
@@ -311,6 +317,21 @@ function MeterSetupScreen({
         </div>
 
         <div className="space-y-5">
+          {/* Display Name (optional) */}
+          <div>
+            <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
+              Your Name{" "}
+              <span className="text-gray-600 normal-case">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="e.g. Kofi"
+              className="w-full h-14 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-lg font-bold px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
           {/* Meter Number (optional) */}
           <div>
             <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
@@ -383,14 +404,14 @@ function MeterSetupScreen({
         <button
           onClick={onNext}
           disabled={!balanceValid}
-          className={`w-full flex items-center justify-center rounded-xl h-14 font-bold text-lg transition-all ${
+          className={`w-full flex items-center justify-center rounded-xl h-14 font-bold text-lg transition-all active:scale-[0.98] ${
             balanceValid
               ? "bg-gradient-to-r from-blue-500 to-violet-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]"
               : "bg-white/[0.03] text-gray-600 cursor-not-allowed"
           }`}
         >
           Continue
-          <span className="material-symbols-outlined ml-2">arrow_forward</span>
+          <ArrowRight size={20} className="ml-2" />
         </button>
       </footer>
     </div>
@@ -412,7 +433,7 @@ function ReadyScreen({
           onClick={onBack}
           className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-300 hover:text-white transition-colors"
         >
-          <span className="material-symbols-outlined">arrow_back</span>
+          <ArrowLeft size={20} />
         </button>
         <h2 className="text-white text-lg font-bold tracking-tight">
           ChopMeter
@@ -424,15 +445,7 @@ function ReadyScreen({
         <div className="relative mb-8">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-violet-500/5 rounded-full opacity-40 blur-3xl scale-150" />
           <div className="relative z-10 flex flex-col items-center justify-center p-10 glass-card rounded-full shadow-2xl size-56">
-            <span
-              className="material-symbols-outlined text-blue-400"
-              style={{
-                fontSize: 80,
-                fontVariationSettings: "'FILL' 1, 'wght' 400",
-              }}
-            >
-              rocket_launch
-            </span>
+            <Rocket size={80} className="text-blue-400" fill="currentColor" strokeWidth={1} />
             <div className="absolute -z-10 w-full h-full border border-blue-500/20 rounded-full animate-pulse" />
           </div>
         </div>
@@ -448,17 +461,15 @@ function ReadyScreen({
 
           <div className="grid grid-cols-3 gap-3 w-full pt-4">
             {[
-              { icon: "qr_code_scanner", label: "Scan" },
-              { icon: "monitoring", label: "Track" },
-              { icon: "savings", label: "Save" },
+              { Icon: ScanLine, label: "Scan" },
+              { Icon: TrendingUp, label: "Track" },
+              { Icon: PiggyBank, label: "Save" },
             ].map((item) => (
               <div
                 key={item.label}
                 className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]"
               >
-                <span className="material-symbols-outlined text-blue-400 text-2xl">
-                  {item.icon}
-                </span>
+                <item.Icon size={24} className="text-blue-400" />
                 <span className="text-gray-300 text-xs font-bold">
                   {item.label}
                 </span>
@@ -472,15 +483,13 @@ function ReadyScreen({
         <StepDots current={3} total={4} />
         <button
           onClick={onFinish}
-          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]"
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
         >
           <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
           <span className="text-white text-lg font-bold tracking-wide mr-2 relative z-10">
             Launch Dashboard
           </span>
-          <span className="material-symbols-outlined text-white relative z-10 transition-transform group-hover:translate-x-1">
-            arrow_forward
-          </span>
+          <ArrowRight size={20} className="text-white relative z-10 transition-transform group-hover:translate-x-1" />
         </button>
       </footer>
     </div>

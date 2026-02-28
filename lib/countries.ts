@@ -7,6 +7,10 @@ export interface CountryConfig {
   /** Default residential tariff rate per kWh */
   defaultTariff: number;
   locale: string;
+  /** Fallback city for weather when geolocation is unavailable */
+  capitalName: string;
+  capitalLat: number;
+  capitalLon: number;
 }
 
 export const COUNTRIES: CountryConfig[] = [
@@ -18,6 +22,9 @@ export const COUNTRIES: CountryConfig[] = [
     currencySymbol: "GH\u20B5",
     defaultTariff: 2.0,
     locale: "en-GH",
+    capitalName: "Accra",
+    capitalLat: 5.6037,
+    capitalLon: -0.187,
   },
   {
     code: "NG",
@@ -27,6 +34,9 @@ export const COUNTRIES: CountryConfig[] = [
     currencySymbol: "\u20A6",
     defaultTariff: 209.5,
     locale: "en-NG",
+    capitalName: "Lagos",
+    capitalLat: 6.5244,
+    capitalLon: 3.3792,
   },
   {
     code: "ZA",
@@ -36,6 +46,9 @@ export const COUNTRIES: CountryConfig[] = [
     currencySymbol: "R",
     defaultTariff: 3.5,
     locale: "en-ZA",
+    capitalName: "Johannesburg",
+    capitalLat: -26.2041,
+    capitalLon: 28.0473,
   },
   {
     code: "KE",
@@ -45,6 +58,9 @@ export const COUNTRIES: CountryConfig[] = [
     currencySymbol: "KSh",
     defaultTariff: 12.23,
     locale: "en-KE",
+    capitalName: "Nairobi",
+    capitalLat: -1.2921,
+    capitalLon: 36.8219,
   },
   {
     code: "GB",
@@ -54,6 +70,9 @@ export const COUNTRIES: CountryConfig[] = [
     currencySymbol: "\u00A3",
     defaultTariff: 0.2684,
     locale: "en-GB",
+    capitalName: "London",
+    capitalLat: 51.5074,
+    capitalLon: -0.1278,
   },
   {
     code: "US",
@@ -63,6 +82,9 @@ export const COUNTRIES: CountryConfig[] = [
     currencySymbol: "$",
     defaultTariff: 0.1778,
     locale: "en-US",
+    capitalName: "New York",
+    capitalLat: 40.7128,
+    capitalLon: -74.006,
   },
 ];
 

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSettings } from "@/lib/storage";
+import { Zap } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -18,9 +19,7 @@ export default function Home() {
 
   return (
     <div className="flex-1 flex items-center justify-center min-h-screen bg-bg-dark">
-      <span className="material-symbols-outlined text-primary text-5xl animate-pulse">
-        electric_bolt
-      </span>
+      <Zap className="text-blue-400 animate-pulse" size={48} />
     </div>
   );
 }

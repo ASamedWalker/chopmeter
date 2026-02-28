@@ -10,6 +10,20 @@ import {
 } from "@/lib/storage";
 import { COUNTRIES, getCountry, type CountryConfig } from "@/lib/countries";
 import type { UserSettings } from "@/lib/types";
+import {
+  Zap,
+  Settings as SettingsIcon,
+  Globe,
+  ChevronDown,
+  Gauge,
+  RotateCcw,
+  Database,
+  Download,
+  Trash2,
+  ChevronRight,
+  Info,
+  User,
+} from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 
 export default function SettingsPage() {
@@ -20,6 +34,7 @@ export default function SettingsPage() {
   const [meterNumber, setMeterNumber] = useState("");
   const [balance, setBalance] = useState("");
   const [tariff, setTariff] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
 
@@ -34,6 +49,7 @@ export default function SettingsPage() {
     setMeterNumber(s.meterNumber);
     setBalance(s.lastBalance.toString());
     setTariff(s.tariffRate.toString());
+    setDisplayName(s.displayName || "");
   }, [router]);
 
   const flash = (msg: string) => {
@@ -55,6 +71,11 @@ export default function SettingsPage() {
         : c.defaultTariff,
     });
     flash("Country updated");
+  };
+
+  const handleSaveProfile = () => {
+    saveSettings({ displayName: displayName.trim() });
+    flash("Profile updated");
   };
 
   const handleSaveMeter = () => {
@@ -112,9 +133,7 @@ export default function SettingsPage() {
   if (!settings) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-screen bg-bg-dark">
-        <span className="material-symbols-outlined text-blue-400 text-5xl animate-pulse">
-          electric_bolt
-        </span>
+        <Zap size={48} className="text-blue-400 animate-pulse" />
       </div>
     );
   }
@@ -126,9 +145,7 @@ export default function SettingsPage() {
         <div className="px-4 sm:px-6 max-w-[600px] mx-auto flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <div className="size-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
-              <span className="material-symbols-outlined text-2xl">
-                settings
-              </span>
+              <SettingsIcon size={20} />
             </div>
             <h2 className="text-white text-xl font-extrabold tracking-tight">
               Settings
@@ -145,12 +162,43 @@ export default function SettingsPage() {
       )}
 
       <div className="flex-1 px-4 sm:px-6 py-6 max-w-[600px] mx-auto w-full pb-28 space-y-6">
+        {/* Profile */}
+        <section className="glass-card p-5">
+          <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+            <User size={18} className="text-blue-400" />
+            Profile
+          </h3>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5">
+                Display Name
+              </label>
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="e.g. Kofi"
+                className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              />
+              <p className="text-gray-500 text-xs mt-1">
+                Used for personalized greetings on the dashboard
+              </p>
+            </div>
+
+            <button
+              onClick={handleSaveProfile}
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
+            >
+              Save Profile
+            </button>
+          </div>
+        </section>
+
         {/* Country & Currency */}
         <section className="glass-card p-5">
           <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-blue-400 text-lg">
-              public
-            </span>
+            <Globe size={18} className="text-blue-400" />
             Country & Currency
           </h3>
 
@@ -167,13 +215,12 @@ export default function SettingsPage() {
                 </p>
               </div>
             </div>
-            <span
-              className={`material-symbols-outlined text-gray-400 transition-transform ${
+            <ChevronDown
+              size={20}
+              className={`text-gray-400 transition-transform ${
                 showCountryPicker ? "rotate-180" : ""
               }`}
-            >
-              expand_more
-            </span>
+            />
           </button>
 
           {showCountryPicker && (
@@ -204,9 +251,7 @@ export default function SettingsPage() {
         {/* Meter Details */}
         <section className="glass-card p-5">
           <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-blue-400 text-lg">
-              electric_meter
-            </span>
+            <Gauge size={18} className="text-blue-400" />
             Meter Details
           </h3>
 
@@ -266,12 +311,10 @@ export default function SettingsPage() {
                 </div>
                 <button
                   onClick={handleResetTariff}
-                  className="h-12 px-3 rounded-xl border border-white/[0.06] text-gray-400 text-xs font-bold hover:border-blue-500/50 hover:text-white transition-colors"
+                  className="h-12 px-3 rounded-xl border border-white/[0.06] text-gray-400 hover:border-blue-500/50 hover:text-white transition-colors"
                   title="Reset to default"
                 >
-                  <span className="material-symbols-outlined text-lg">
-                    restart_alt
-                  </span>
+                  <RotateCcw size={18} />
                 </button>
               </div>
               <p className="text-gray-500 text-xs mt-1">
@@ -292,9 +335,7 @@ export default function SettingsPage() {
         {/* Data Management */}
         <section className="glass-card p-5">
           <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-blue-400 text-lg">
-              database
-            </span>
+            <Database size={18} className="text-blue-400" />
             Data Management
           </h3>
 
@@ -304,9 +345,7 @@ export default function SettingsPage() {
               className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-blue-500/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-blue-400">
-                  download
-                </span>
+                <Download size={20} className="text-blue-400" />
                 <div className="text-left">
                   <p className="text-white text-sm font-bold">
                     Export Readings
@@ -316,9 +355,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
-              <span className="material-symbols-outlined text-gray-400">
-                chevron_right
-              </span>
+              <ChevronRight size={20} className="text-gray-400" />
             </button>
 
             <button
@@ -326,9 +363,7 @@ export default function SettingsPage() {
               className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-red-500/20 hover:border-red-500/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-danger">
-                  delete_forever
-                </span>
+                <Trash2 size={20} className="text-danger" />
                 <div className="text-left">
                   <p className="text-danger text-sm font-bold">
                     Clear All Data
@@ -338,9 +373,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
-              <span className="material-symbols-outlined text-gray-400">
-                chevron_right
-              </span>
+              <ChevronRight size={20} className="text-gray-400" />
             </button>
 
             {showClearConfirm && (
@@ -370,9 +403,7 @@ export default function SettingsPage() {
         {/* About */}
         <section className="glass-card p-5">
           <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-blue-400 text-lg">
-              info
-            </span>
+            <Info size={18} className="text-blue-400" />
             About
           </h3>
           <div className="space-y-2 text-sm">

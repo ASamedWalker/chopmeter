@@ -23,6 +23,19 @@ export interface UserSettings {
   lastBalance: number;
   /** When lastBalance was recorded (Unix ms) */
   lastBalanceDate: number;
+  /** User's display name for personalized greeting */
+  displayName: string;
+}
+
+/** Cached weather data from Open-Meteo */
+export interface WeatherCache {
+  temperature: number;
+  weatherCode: number;
+  condition: string;
+  cityName: string;
+  cachedAt: number;
+  latitude: number;
+  longitude: number;
 }
 
 /** Computed dashboard metrics */

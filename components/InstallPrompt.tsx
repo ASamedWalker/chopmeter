@@ -1,16 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Download } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-/**
- * PWA Install prompt banner.
- * Shows when the browser fires the `beforeinstallprompt` event.
- */
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
@@ -39,9 +36,7 @@ export default function InstallPrompt() {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-500 to-violet-500 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-4">
       <div className="flex items-center gap-3 min-w-0">
-        <span className="material-symbols-outlined text-white text-2xl shrink-0">
-          install_mobile
-        </span>
+        <Download className="text-white shrink-0" size={24} />
         <p className="text-white font-bold text-sm truncate">
           Install ChopMeter for offline use!
         </p>

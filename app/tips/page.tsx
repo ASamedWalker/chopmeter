@@ -2,8 +2,38 @@
 
 import { useState, useEffect } from "react";
 import type { EnergyTip } from "@/lib/types";
+import type { LucideIcon } from "lucide-react";
+import {
+  Zap,
+  Snowflake,
+  CookingPot,
+  Shirt,
+  Lightbulb,
+  PowerOff,
+  Fan,
+  UtensilsCrossed,
+  WashingMachine,
+  Laptop,
+  Bookmark,
+  BookmarkCheck,
+  Search,
+  SearchX,
+} from "lucide-react";
 import { toggleBookmark, getBookmarkedTipIds } from "@/lib/storage";
 import BottomNav from "@/components/BottomNav";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  ac_unit: Snowflake,
+  kitchen: CookingPot,
+  iron: Shirt,
+  lightbulb: Lightbulb,
+  power_off: PowerOff,
+  mode_fan: Fan,
+  soup_kitchen: UtensilsCrossed,
+  local_laundry_service: WashingMachine,
+  devices: Laptop,
+  bolt: Zap,
+};
 
 const TIPS: (EnergyTip & { extended: string })[] = [
   {
@@ -96,13 +126,13 @@ const TIPS: (EnergyTip & { extended: string })[] = [
   },
 ];
 
-const CATEGORIES = [
-  { key: "all", label: "All Tips", icon: "" },
-  { key: "saved", label: "Saved", icon: "bookmark" },
-  { key: "kitchen", label: "Kitchen", icon: "kitchen" },
-  { key: "cooling", label: "Cooling", icon: "ac_unit" },
-  { key: "lighting", label: "Lighting", icon: "lightbulb" },
-  { key: "appliances", label: "Appliances", icon: "devices" },
+const CATEGORIES: { key: string; label: string; Icon: LucideIcon | null }[] = [
+  { key: "all", label: "All Tips", Icon: null },
+  { key: "saved", label: "Saved", Icon: Bookmark },
+  { key: "kitchen", label: "Kitchen", Icon: CookingPot },
+  { key: "cooling", label: "Cooling", Icon: Snowflake },
+  { key: "lighting", label: "Lighting", Icon: Lightbulb },
+  { key: "appliances", label: "Appliances", Icon: Laptop },
 ];
 
 const ICON_STYLES: Record<
@@ -196,7 +226,7 @@ export default function TipsPage() {
         <div className="px-4 sm:px-6 max-w-[1200px] mx-auto flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <div className="size-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
-              <span className="material-symbols-outlined text-2xl">bolt</span>
+              <Zap size={20} />
             </div>
             <h2 className="text-white text-xl font-extrabold tracking-tight">
               ChopMeter
@@ -212,9 +242,7 @@ export default function TipsPage() {
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
           <div className="relative z-10 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-wider mb-4 border border-blue-500/20">
-              <span className="material-symbols-outlined text-sm">
-                tips_and_updates
-              </span>
+              <Lightbulb size={14} />
               Chop Smart
             </div>
             <h1 className="text-white text-3xl md:text-4xl font-black leading-tight mb-3">
@@ -227,7 +255,7 @@ export default function TipsPage() {
             </p>
             <div className="relative w-full max-w-lg">
               <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
-                <span className="material-symbols-outlined">search</span>
+                <Search size={20} />
               </div>
               <input
                 type="text"
@@ -252,11 +280,7 @@ export default function TipsPage() {
                   : "bg-white/[0.03] border border-white/[0.06] text-gray-300 hover:border-blue-500/50 hover:text-white"
               }`}
             >
-              {cat.icon && (
-                <span className="material-symbols-outlined text-lg">
-                  {cat.icon}
-                </span>
-              )}
+              {cat.Icon && <cat.Icon size={18} />}
               {cat.label}
               {cat.key === "saved" && bookmarks.size > 0 && (
                 <span className="text-xs bg-blue-500/20 text-blue-400 rounded-full size-5 flex items-center justify-center">
@@ -277,6 +301,7 @@ export default function TipsPage() {
             };
             const isExpanded = expandedTip === tip.id;
             const isSaved = bookmarks.has(tip.id);
+            const TipIcon = ICON_MAP[tip.icon];
 
             return (
               <div
@@ -293,9 +318,7 @@ export default function TipsPage() {
                 <div
                   className={`size-12 rounded-lg flex items-center justify-center ${iconStyle.bg} ${iconStyle.text} ${iconStyle.hoverBg} group-hover:text-white transition-colors`}
                 >
-                  <span className="material-symbols-outlined text-3xl">
-                    {tip.icon}
-                  </span>
+                  {TipIcon ? <TipIcon size={28} /> : <Zap size={28} />}
                 </div>
                 <div className="flex flex-col gap-2">
                   <h3 className="text-white text-lg font-bold leading-tight group-hover:text-blue-400 transition-colors">
@@ -329,13 +352,11 @@ export default function TipsPage() {
                         : "text-gray-500 hover:text-white"
                     }`}
                   >
-                    <span
-                      className={`material-symbols-outlined ${
-                        isSaved ? "filled" : ""
-                      }`}
-                    >
-                      bookmark
-                    </span>
+                    {isSaved ? (
+                      <BookmarkCheck size={20} fill="currentColor" />
+                    ) : (
+                      <Bookmark size={20} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -346,9 +367,11 @@ export default function TipsPage() {
         {/* Empty State */}
         {filtered.length === 0 && (
           <div className="text-center py-12">
-            <span className="material-symbols-outlined text-gray-600 text-5xl mb-4 block">
-              {activeCategory === "saved" ? "bookmark_border" : "search_off"}
-            </span>
+            {activeCategory === "saved" ? (
+              <Bookmark size={48} className="text-gray-600 mx-auto mb-4" />
+            ) : (
+              <SearchX size={48} className="text-gray-600 mx-auto mb-4" />
+            )}
             <p className="text-gray-400">
               {activeCategory === "saved"
                 ? "No saved tips yet. Tap the bookmark icon on any tip to save it."

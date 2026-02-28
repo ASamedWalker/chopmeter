@@ -1,17 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Home, ScanLine, Lightbulb, Settings } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface BottomNavProps {
   active: "dashboard" | "scanner" | "tips" | "settings";
 }
 
-const NAV_ITEMS = [
-  { key: "dashboard", label: "Home", icon: "home", href: "/dashboard" },
-  { key: "scanner", label: "Scan", icon: "qr_code_scanner", href: "/scanner" },
-  { key: "tips", label: "Tips", icon: "tips_and_updates", href: "/tips" },
-  { key: "settings", label: "Settings", icon: "settings", href: "/settings" },
-] as const;
+const NAV_ITEMS: {
+  key: string;
+  label: string;
+  Icon: LucideIcon;
+  href: string;
+}[] = [
+  { key: "dashboard", label: "Home", Icon: Home, href: "/dashboard" },
+  { key: "scanner", label: "Scan", Icon: ScanLine, href: "/scanner" },
+  { key: "tips", label: "Tips", Icon: Lightbulb, href: "/tips" },
+  { key: "settings", label: "Settings", Icon: Settings, href: "/settings" },
+];
 
 export default function BottomNav({ active }: BottomNavProps) {
   const router = useRouter();
@@ -24,20 +31,21 @@ export default function BottomNav({ active }: BottomNavProps) {
           return (
             <button
               key={item.key}
-              onClick={() => router.push(item.href)}
-              className={`flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 ${
+              onClick={() => {
+                navigator.vibrate?.(10);
+                router.push(item.href);
+              }}
+              className={`flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 active:scale-[0.95] ${
                 isActive
                   ? "bg-gradient-to-r from-blue-500/20 to-violet-500/20 text-white"
                   : "text-gray-500 hover:text-gray-300"
               }`}
             >
-              <span
-                className={`material-symbols-outlined text-2xl ${
-                  isActive ? "filled" : ""
-                }`}
-              >
-                {item.icon}
-              </span>
+              <item.Icon
+                size={22}
+                strokeWidth={isActive ? 2.5 : 1.5}
+                fill={isActive ? "currentColor" : "none"}
+              />
               <span
                 className={`text-[10px] font-semibold ${
                   isActive ? "text-white" : ""

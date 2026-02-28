@@ -8,10 +8,37 @@ import {
   getRecentReadings,
   deleteReading,
 } from "@/lib/storage";
-import type { MeterReading, UserSettings, DashboardMetrics } from "@/lib/types";
+import type { MeterReading, UserSettings, DashboardMetrics, WeatherCache } from "@/lib/types";
 import { getCountry } from "@/lib/countries";
+import { getGreeting } from "@/lib/greeting";
+import { fetchWeather, decodeWeatherCode } from "@/lib/weather";
 import BottomNav from "@/components/BottomNav";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import {
+  Zap,
+  Settings,
+  ScanLine,
+  Wallet,
+  ChevronDown,
+  Timer,
+  TrendingUp,
+  Camera,
+  Keyboard,
+  Gauge,
+  Sun,
+  CloudSun,
+  Cloud,
+  CloudFog,
+  CloudDrizzle,
+  CloudRain,
+  Snowflake,
+  CloudLightning,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+const WEATHER_ICON_MAP: Record<string, LucideIcon> = {
+  Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, Snowflake, CloudLightning,
+};
 
 function computeMetrics(
   readings: MeterReading[],
@@ -70,7 +97,6 @@ function computeMetrics(
   };
 }
 
-/** Easing: easeOutCubic */
 function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
 }
@@ -84,6 +110,7 @@ export default function DashboardPage() {
   const [expandedReading, setExpandedReading] = useState<string | null>(null);
   const [deletingReading, setDeletingReading] = useState<string | null>(null);
   const [displayBalance, setDisplayBalance] = useState(0);
+  const [weather, setWeather] = useState<WeatherCache | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
@@ -102,6 +129,13 @@ export default function DashboardPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Fetch weather
+  useEffect(() => {
+    if (settings?.countryCode) {
+      fetchWeather(settings.countryCode).then(setWeather);
+    }
+  }, [settings?.countryCode]);
 
   // Animated balance counter
   useEffect(() => {
@@ -154,7 +188,6 @@ export default function DashboardPage() {
   if (!metrics || !settings) {
     return (
       <div className="flex flex-col min-h-screen bg-bg-dark">
-        {/* Skeleton header */}
         <header className="sticky top-0 z-10 bg-bg-dark/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
           <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -168,7 +201,8 @@ export default function DashboardPage() {
           </div>
         </header>
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 pb-24">
-          {/* Skeleton hero */}
+          <div className="h-7 w-48 rounded skeleton-shimmer mb-1" />
+          <div className="h-4 w-32 rounded skeleton-shimmer mb-6" />
           <div className="glass-card gradient-hero p-6 mb-4">
             <div className="h-4 w-32 rounded skeleton-shimmer mb-4" />
             <div className="h-10 w-48 rounded-lg skeleton-shimmer mb-6" />
@@ -182,7 +216,6 @@ export default function DashboardPage() {
           <div className="space-y-2">
             <div className="glass-card p-4 h-16 skeleton-shimmer" />
             <div className="glass-card p-4 h-16 skeleton-shimmer" />
-            <div className="glass-card p-4 h-16 skeleton-shimmer" />
           </div>
         </main>
         <BottomNav active="dashboard" />
@@ -193,7 +226,6 @@ export default function DashboardPage() {
   const country = getCountry(settings.countryCode);
   const hasData = recentReadings.length > 0;
 
-  // Runway color
   const runwayColor =
     metrics.daysLeft === null
       ? "text-gray-500"
@@ -219,9 +251,9 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center size-10 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
-              <span className="material-symbols-outlined">electric_bolt</span>
+              <Zap size={22} />
             </div>
-            <h2 className="text-white text-xl font-extrabold tracking-tight">
+            <h2 className="text-white text-lg font-bold tracking-tight">
               ChopMeter
             </h2>
           </div>
@@ -230,21 +262,50 @@ export default function DashboardPage() {
               onClick={() => router.push("/settings")}
               className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-400 hover:text-white transition-colors"
             >
-              <span className="material-symbols-outlined">settings</span>
+              <Settings size={20} />
             </button>
             <button
               onClick={() => router.push("/scanner")}
               className="flex items-center justify-center size-10 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400 hover:from-blue-500/30 hover:to-violet-500/30 transition-colors"
             >
-              <span className="material-symbols-outlined">
-                qr_code_scanner
-              </span>
+              <ScanLine size={20} />
             </button>
           </div>
         </div>
       </header>
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 pb-24">
+        {/* Greeting + Weather Row */}
+        <div className="flex items-start justify-between mb-6 animate-fade-in-up">
+          <div>
+            <h1 className="text-2xl font-extrabold text-white tracking-tight">
+              {getGreeting()}
+              {settings.displayName ? `, ${settings.displayName}` : ""}
+            </h1>
+            <p className="text-gray-400 text-sm mt-1">
+              Here&apos;s your energy overview
+            </p>
+          </div>
+
+          {weather && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] shrink-0">
+              {(() => {
+                const { icon } = decodeWeatherCode(weather.weatherCode);
+                const WeatherIcon = WEATHER_ICON_MAP[icon] ?? Cloud;
+                return <WeatherIcon size={20} className="text-blue-400" />;
+              })()}
+              <div className="flex flex-col">
+                <span className="text-white text-sm font-bold leading-tight">
+                  {weather.temperature}&deg;C
+                </span>
+                <span className="text-gray-500 text-[10px] leading-tight">
+                  {weather.cityName}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Hero Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Main Balance Card */}
@@ -253,9 +314,7 @@ export default function DashboardPage() {
             className="md:col-span-2 relative overflow-hidden glass-card gradient-hero p-6 shadow-xl cursor-pointer active:scale-[0.98] transition-transform"
           >
             <div className="absolute top-0 right-0 p-4 opacity-[0.07]">
-              <span className="material-symbols-outlined text-8xl text-blue-400">
-                account_balance_wallet
-              </span>
+              <Wallet size={96} className="text-blue-400" />
             </div>
             <div className="relative z-10 flex flex-col h-full justify-between">
               <div>
@@ -263,13 +322,12 @@ export default function DashboardPage() {
                   <p className="text-gray-400 text-sm font-medium uppercase tracking-wider">
                     Estimated Balance
                   </p>
-                  <span
-                    className={`material-symbols-outlined text-gray-500 text-lg transition-transform ${
+                  <ChevronDown
+                    size={18}
+                    className={`text-gray-500 transition-transform ${
                       expandedCard === "balance" ? "rotate-180" : ""
                     }`}
-                  >
-                    expand_more
-                  </span>
+                  />
                 </div>
                 <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-2 animate-number-pop">
                   <span className="text-xl font-bold text-gray-500 align-top mt-1 inline-block">
@@ -281,7 +339,6 @@ export default function DashboardPage() {
                 </h1>
               </div>
 
-              {/* Expanded details */}
               {expandedCard === "balance" && (
                 <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2 animate-fade-in-up">
                   <div className="flex justify-between text-sm">
@@ -323,9 +380,7 @@ export default function DashboardPage() {
                   }}
                   className="flex-1 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 active:scale-[0.98]"
                 >
-                  <span className="material-symbols-outlined">
-                    qr_code_scanner
-                  </span>
+                  <ScanLine size={20} />
                   Scan Meter
                 </button>
               </div>
@@ -344,9 +399,7 @@ export default function DashboardPage() {
                 <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">
                   Est. Runway
                 </p>
-                <span className="material-symbols-outlined text-blue-400 text-xl">
-                  timelapse
-                </span>
+                <Timer size={20} className="text-blue-400" />
               </div>
               <div className="flex items-baseline gap-2">
                 <h3 className={`text-3xl font-bold ${runwayColor}`}>
@@ -399,9 +452,7 @@ export default function DashboardPage() {
                 <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">
                   Daily Avg
                 </p>
-                <span className="material-symbols-outlined text-blue-400 text-xl">
-                  monitoring
-                </span>
+                <TrendingUp size={20} className="text-blue-400" />
               </div>
               {hasData ? (
                 <h3 className="text-2xl font-bold text-white">
@@ -460,7 +511,6 @@ export default function DashboardPage() {
                       animation: "fade-in-up 0.4s ease-out both",
                     }}
                   >
-                    {/* Delete Confirmation Overlay */}
                     {isDeleting && (
                       <div className="absolute inset-0 z-20 bg-bg-dark/95 backdrop-blur-sm rounded-2xl flex items-center justify-center gap-3 animate-fade-in-up">
                         <span className="text-gray-400 text-sm">Delete?</span>
@@ -494,11 +544,11 @@ export default function DashboardPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="size-10 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center text-gray-300">
-                            <span className="material-symbols-outlined">
-                              {r.source === "ocr"
-                                ? "photo_camera"
-                                : "keyboard"}
-                            </span>
+                            {r.source === "ocr" ? (
+                              <Camera size={20} />
+                            ) : (
+                              <Keyboard size={20} />
+                            )}
                           </div>
                           <div>
                             <p className="text-white font-bold text-sm">
@@ -536,7 +586,6 @@ export default function DashboardPage() {
                         </div>
                       </div>
 
-                      {/* Expanded reading details */}
                       {isExpanded && (
                         <div className="mt-3 pt-3 border-t border-white/[0.06] text-xs text-gray-400 space-y-1 animate-fade-in-up">
                           <div className="flex justify-between">
@@ -576,9 +625,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="glass-card p-8 text-center">
-              <span className="material-symbols-outlined text-gray-600 text-4xl mb-3 block">
-                electric_meter
-              </span>
+              <Gauge size={40} className="text-gray-600 mx-auto mb-3" />
               <p className="text-gray-400 text-sm mb-4">
                 No readings yet. Scan your meter to get started!
               </p>

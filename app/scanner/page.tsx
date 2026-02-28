@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { saveReading, generateId } from "@/lib/storage";
 import { recognizeMeterReading } from "@/lib/ocr";
+import { X, Zap, Keyboard, CircleStop, CirclePlay } from "lucide-react";
 
 type ScanState = "idle" | "scanning" | "success" | "manual";
 
@@ -107,7 +108,6 @@ export default function ScannerPage() {
     setProgress(0);
   }, [autoScan, stopAutoScan]);
 
-  // Auto-scan toggle
   const toggleAutoScan = useCallback(() => {
     if (autoScan) {
       stopAutoScan();
@@ -166,7 +166,7 @@ export default function ScannerPage() {
           }}
           className="flex items-center justify-center size-10 rounded-full bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-colors"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <X size={20} />
         </button>
         <h2 className="text-white text-lg font-bold tracking-tight drop-shadow-md">
           Scan Meter
@@ -180,7 +180,7 @@ export default function ScannerPage() {
           }`}
           title="Toggle Flash"
         >
-          <span className="material-symbols-outlined text-xl">flash_on</span>
+          <Zap size={20} />
         </button>
       </header>
 
@@ -196,7 +196,6 @@ export default function ScannerPage() {
             <div className="absolute inset-x-0 top-0 h-0.5 bg-blue-500/80 shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-scan z-10 w-full" />
             <div className="absolute inset-0 bg-transparent ring-[1000px] ring-black/50 pointer-events-none" />
 
-            {/* Progress bar */}
             {scanState === "scanning" && (
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/50 z-30">
                 <div
@@ -263,7 +262,6 @@ export default function ScannerPage() {
 
           {scanState === "idle" && (
             <div className="mt-6 flex flex-col items-center gap-4">
-              {/* Auto-scan toggle */}
               <button
                 onClick={toggleAutoScan}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${
@@ -272,13 +270,10 @@ export default function ScannerPage() {
                     : "bg-white/10 text-white border border-white/20"
                 }`}
               >
-                <span className="material-symbols-outlined text-lg">
-                  {autoScan ? "stop_circle" : "play_circle"}
-                </span>
+                {autoScan ? <CircleStop size={18} /> : <CirclePlay size={18} />}
                 {autoScan ? "Stop Auto-Scan" : "Auto-Scan"}
               </button>
 
-              {/* Manual capture button */}
               {!autoScan && (
                 <button
                   onClick={captureAndScan}
@@ -297,9 +292,7 @@ export default function ScannerPage() {
         <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6">
           <div className="w-full max-w-xs space-y-6">
             <div className="text-center">
-              <span className="material-symbols-outlined text-blue-400 text-5xl mb-4 block">
-                keyboard
-              </span>
+              <Keyboard size={48} className="text-blue-400 mx-auto mb-4" />
               <h3 className="text-white text-xl font-bold mb-2">
                 Enter Reading Manually
               </h3>
@@ -354,9 +347,7 @@ export default function ScannerPage() {
               }}
               className="w-full flex items-center justify-center gap-3 h-14 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-white font-bold text-base hover:bg-white/20 active:bg-white/5 transition-all group"
             >
-              <span className="material-symbols-outlined text-blue-400 group-hover:text-white transition-colors">
-                keyboard
-              </span>
+              <Keyboard size={20} className="text-blue-400 group-hover:text-white transition-colors" />
               <span>Enter Code Manually</span>
             </button>
             <p className="text-center text-xs text-gray-500 mt-4">

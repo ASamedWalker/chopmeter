@@ -1,8 +1,10 @@
-import type { MeterReading, UserSettings, BookmarkedTip } from "./types";
+import type { MeterReading, UserSettings, BookmarkedTip, WeatherCache } from "./types";
 
 const READINGS_KEY = "chopmeter_readings";
 const SETTINGS_KEY = "chopmeter_settings";
 const BOOKMARKS_KEY = "chopmeter_bookmarks";
+const WEATHER_CACHE_KEY = "chopmeter_weather";
+const WEATHER_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 const DEFAULT_SETTINGS: UserSettings = {
   onboardingComplete: false,
@@ -12,6 +14,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   countryCode: "GH",
   lastBalance: 0,
   lastBalanceDate: Date.now(),
+  displayName: "",
 };
 
 // ---- Legacy migration ----
@@ -27,6 +30,9 @@ function migrateSettings(raw: Record<string, unknown>): Record<string, unknown> 
   }
   if (raw.tariffOverridden === undefined) {
     raw.tariffOverridden = false;
+  }
+  if (raw.displayName === undefined) {
+    raw.displayName = "";
   }
   return raw;
 }
@@ -121,6 +127,26 @@ export function clearAllData(): void {
   localStorage.removeItem(READINGS_KEY);
   localStorage.removeItem(SETTINGS_KEY);
   localStorage.removeItem(BOOKMARKS_KEY);
+  localStorage.removeItem(WEATHER_CACHE_KEY);
+}
+
+// ---- Weather cache ----
+
+export function getWeatherCache(): WeatherCache | null {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(WEATHER_CACHE_KEY);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as WeatherCache;
+    if (Date.now() - parsed.cachedAt > WEATHER_CACHE_TTL) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+export function setWeatherCache(data: WeatherCache): void {
+  localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(data));
 }
 
 // ---- ID generation ----
