@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import InstallPrompt from "@/components/InstallPrompt";
+import UpdatePrompt from "@/components/UpdatePrompt";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -49,6 +50,7 @@ export default function RootLayout({
           })(window,document,"clarity","script","vvsu7kn5nz");`}
         </Script>
         <InstallPrompt />
+        <UpdatePrompt />
         {children}
       </body>
     </html>

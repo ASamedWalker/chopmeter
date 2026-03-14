@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import PullToRefresh from "@/components/PullToRefresh";
 import { useRouter } from "next/navigation";
 import {
   getSettings,
@@ -145,6 +146,7 @@ export default function SettingsPage() {
         </div>
       )}
 
+      <PullToRefresh onRefresh={() => window.location.reload()}>
       <div className="flex-1 px-4 sm:px-6 py-6 max-w-[600px] mx-auto w-full pb-28 space-y-6">
         {/* Profile */}
         <section className="glass-card p-5">
@@ -398,6 +400,7 @@ export default function SettingsPage() {
           </div>
         </section>
       </div>
+      </PullToRefresh>
 
       <BottomNav active="settings" />
     </div>

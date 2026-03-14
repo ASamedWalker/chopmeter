@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import PullToRefresh from "@/components/PullToRefresh";
 import type { EnergyTip } from "@/lib/types";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -221,6 +222,7 @@ export default function TipsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg-dark font-display text-gray-50">
+      <PullToRefresh onRefresh={() => window.location.reload()}>
       <div className="flex-1 px-4 sm:px-6 pt-6 max-w-[1200px] mx-auto w-full pb-24">
         {/* Hero Banner */}
         <div className="glass-card gradient-hero p-6 md:p-10 relative overflow-hidden mb-6">
@@ -365,6 +367,7 @@ export default function TipsPage() {
           </div>
         )}
       </div>
+      </PullToRefresh>
 
       <BottomNav active="tips" />
     </div>
