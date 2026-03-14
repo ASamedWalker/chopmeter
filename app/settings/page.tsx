@@ -20,7 +20,6 @@ import {
   Download,
   Trash2,
   ChevronRight,
-  Info,
   User,
 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
@@ -387,23 +386,15 @@ export default function SettingsPage() {
 
         {/* About */}
         <section className="glass-card p-5">
-          <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Info size={18} className="text-blue-400" />
-            About
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-400">App</span>
-              <span className="text-white font-bold">ChopMeter</span>
+          <div className="flex flex-col items-center text-center py-4">
+            <div className="size-16 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-lg shadow-blue-500/20 mb-4">
+              <Zap size={32} className="text-white" fill="white" />
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Version</span>
-              <span className="text-white font-bold">2.0.0</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Type</span>
-              <span className="text-white font-bold">PWA</span>
-            </div>
+            <h3 className="text-white text-lg font-bold">ChopMeter</h3>
+            <p className="text-gray-500 text-xs mt-1">Version 1.0.0</p>
+            <p className="text-gray-400 text-sm mt-3 max-w-[260px] leading-relaxed">
+              Track your prepaid electricity usage and spending with ease.
+            </p>
           </div>
         </section>
       </div>
