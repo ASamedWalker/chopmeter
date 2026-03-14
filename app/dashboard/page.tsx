@@ -15,6 +15,8 @@ import { getGreeting } from "@/lib/greeting";
 import { fetchWeather, decodeWeatherCode } from "@/lib/weather";
 import BottomNav from "@/components/BottomNav";
 import PullToRefresh from "@/components/PullToRefresh";
+import UsageChart from "@/components/UsageChart";
+import LowBalanceAlert from "@/components/LowBalanceAlert";
 
 import {
   ScanLine,
@@ -104,6 +106,7 @@ function easeOutCubic(t: number) {
 export default function DashboardPage() {
   const router = useRouter();
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [allReadings, setAllReadings] = useState<MeterReading[]>([]);
   const [recentReadings, setRecentReadings] = useState<MeterReading[]>([]);
   const [settings, setSettingsState] = useState<UserSettings | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
@@ -124,6 +127,7 @@ export default function DashboardPage() {
     }
     setSettingsState(s);
     const readings = getAllReadings();
+    setAllReadings(readings);
     setMetrics(computeMetrics(readings, s));
     setRecentReadings(getRecentReadings(7).slice(0, 10));
   }, [router]);
@@ -443,20 +447,27 @@ export default function DashboardPage() {
 
               {expandedCard === "runway" && metrics.daysLeft !== null && (
                 <div className="mt-3 pt-3 border-t border-white/[0.06] text-xs text-gray-400 space-y-1 animate-fade-in-up">
-                  <p>
-                    Based on {country.currencySymbol}{" "}
-                    {metrics.dailyBurnRate.toFixed(2)}/day burn rate
-                  </p>
-                  {metrics.daysLeft <= 3 && (
-                    <p className="text-danger font-bold">
-                      Top up soon to avoid blackout!
-                    </p>
-                  )}
-                  {metrics.daysLeft > 3 && metrics.daysLeft <= 7 && (
-                    <p className="text-yellow-400 font-bold">
-                      Consider topping up this week
-                    </p>
-                  )}
+                  <div className="flex justify-between">
+                    <span>Burn rate</span>
+                    <span className="text-gray-200">
+                      {country.currencySymbol}
+                      {metrics.dailyBurnRate.toFixed(2)}/day
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Projected empty</span>
+                    <span className="text-gray-200">
+                      {(() => {
+                        const d = new Date();
+                        d.setDate(d.getDate() + metrics.daysLeft!);
+                        return d.toLocaleDateString(country.locale, {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                        });
+                      })()}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
@@ -504,6 +515,26 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Low Balance Alert */}
+        {metrics && (
+          <LowBalanceAlert
+            daysLeft={metrics.daysLeft}
+            currentBalance={metrics.currentBalance}
+            dailyBurnRate={metrics.dailyBurnRate}
+            currencySymbol={country.currencySymbol}
+            onScanNow={() => router.push("/scanner")}
+          />
+        )}
+
+        {/* Usage Chart */}
+        {allReadings.length > 1 && (
+          <UsageChart
+            readings={allReadings}
+            tariffRate={settings.tariffRate}
+            currencySymbol={country.currencySymbol}
+          />
+        )}
 
         {/* Recent Readings */}
         <div>
