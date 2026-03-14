@@ -191,7 +191,7 @@ export default function DashboardPage() {
   if (!metrics || !settings) {
     return (
       <div className="flex flex-col min-h-screen bg-bg-dark">
-        <header className="sticky top-0 z-10 bg-bg-dark/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
+        <header className="sticky top-0 z-10 bg-bg-dark backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
           <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-full skeleton-shimmer" />
@@ -250,7 +250,7 @@ export default function DashboardPage() {
   return (
     <div className="flex h-full grow flex-col bg-bg-dark font-display min-h-screen text-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-bg-dark/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
+      <header className="sticky top-0 z-10 bg-bg-dark backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">

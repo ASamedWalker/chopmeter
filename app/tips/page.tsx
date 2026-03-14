@@ -222,7 +222,7 @@ export default function TipsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-bg-dark font-display text-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full backdrop-blur-xl border-b border-white/[0.06] bg-bg-dark/80">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-xl border-b border-white/[0.06] bg-bg-dark">
         <div className="px-4 sm:px-6 max-w-[1200px] mx-auto flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">

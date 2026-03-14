@@ -141,7 +141,7 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-bg-dark font-display text-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full backdrop-blur-xl border-b border-white/[0.06] bg-bg-dark/80">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-xl border-b border-white/[0.06] bg-bg-dark">
         <div className="px-4 sm:px-6 max-w-[600px] mx-auto flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <div className="size-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
