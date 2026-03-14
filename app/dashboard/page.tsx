@@ -253,8 +253,8 @@ export default function DashboardPage() {
       <header className="sticky top-0 z-10 bg-bg-dark/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center size-10 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
-              <Zap size={22} />
+            <div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">
+              <Zap size={22} className="text-white" fill="white" />
             </div>
             <h2 className="text-white text-lg font-bold tracking-tight">
               ChopMeter

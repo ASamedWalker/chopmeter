@@ -225,8 +225,8 @@ export default function TipsPage() {
       <header className="sticky top-0 z-50 w-full backdrop-blur-xl border-b border-white/[0.06] bg-bg-dark/80">
         <div className="px-4 sm:px-6 max-w-[1200px] mx-auto flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
-            <div className="size-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
-              <Zap size={20} />
+            <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">
+              <Zap size={18} className="text-white" fill="white" />
             </div>
             <h2 className="text-white text-xl font-extrabold tracking-tight">
               ChopMeter

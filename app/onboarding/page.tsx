@@ -106,8 +106,8 @@ function WelcomeScreen({
     <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-white/[0.06]">
       <header className="flex items-center justify-between px-6 py-5 z-20">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
-            <Zap size={18} />
+          <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">
+            <Zap size={18} className="text-white" fill="white" />
           </div>
           <h2 className="text-white text-lg font-bold tracking-tight">
             ChopMeter
