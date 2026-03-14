@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import InstallPrompt from "@/components/InstallPrompt";
 import UpdatePrompt from "@/components/UpdatePrompt";
+import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
 
 const siteUrl = "https://chopmeter.me";
@@ -143,6 +144,7 @@ export default function RootLayout({
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
           })(window,document,"clarity","script","vvsu7kn5nz");`}
         </Script>
+        <SmoothScroll />
         <InstallPrompt />
         <UpdatePrompt />
         {children}
