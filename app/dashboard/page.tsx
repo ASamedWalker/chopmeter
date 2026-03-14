@@ -14,10 +14,9 @@ import { getCountry } from "@/lib/countries";
 import { getGreeting } from "@/lib/greeting";
 import { fetchWeather, decodeWeatherCode } from "@/lib/weather";
 import BottomNav from "@/components/BottomNav";
+import PullToRefresh from "@/components/PullToRefresh";
 
 import {
-  Zap,
-  Settings,
   ScanLine,
   Wallet,
   ChevronDown,
@@ -249,35 +248,8 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-full grow flex-col bg-bg-dark font-display min-h-screen text-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0A0E1A] border-b border-white/[0.06] px-4 py-3">
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">
-              <Zap size={22} className="text-white" fill="white" />
-            </div>
-            <h2 className="text-white text-lg font-bold tracking-tight">
-              ChopMeter
-            </h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => router.push("/settings")}
-              className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-400 hover:text-white transition-colors"
-            >
-              <Settings size={20} />
-            </button>
-            <button
-              onClick={() => router.push("/scanner")}
-              className="flex items-center justify-center size-10 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400 hover:from-blue-500/30 hover:to-violet-500/30 transition-colors"
-            >
-              <ScanLine size={20} />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 pb-24">
+      <PullToRefresh onRefresh={loadData}>
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 pt-6 pb-24">
         {/* Greeting + Weather Row */}
         <div className="flex items-start justify-between mb-6 animate-fade-in-up">
           <div>
@@ -685,6 +657,7 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+      </PullToRefresh>
 
       <BottomNav active="dashboard" />
     </div>

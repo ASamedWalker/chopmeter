@@ -6,10 +6,21 @@
   html {
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
+    overscroll-behavior-y: none;
   }
 
   body {
     @apply bg-bg-dark text-gray-50 font-display antialiased;
+    overscroll-behavior-y: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: pan-y;
+  }
+
+  /* Allow text selection in inputs and textareas */
+  input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   ::selection {

@@ -12,7 +12,6 @@ import { COUNTRIES, getCountry, type CountryConfig } from "@/lib/countries";
 import type { UserSettings } from "@/lib/types";
 import {
   Zap,
-  Settings as SettingsIcon,
   Globe,
   ChevronDown,
   Gauge,
@@ -140,20 +139,6 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg-dark font-display text-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/[0.06] bg-[#0A0E1A]">
-        <div className="px-4 sm:px-6 max-w-[600px] mx-auto flex items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <div className="size-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400">
-              <SettingsIcon size={20} />
-            </div>
-            <h2 className="text-white text-xl font-extrabold tracking-tight">
-              Settings
-            </h2>
-          </div>
-        </div>
-      </header>
-
       {/* Flash message */}
       {saved && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm rounded-full shadow-lg animate-fade-in-up">

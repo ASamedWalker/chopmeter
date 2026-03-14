@@ -221,22 +221,7 @@ export default function TipsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bg-dark font-display text-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/[0.06] bg-[#0A0E1A]">
-        <div className="px-4 sm:px-6 max-w-[1200px] mx-auto flex items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">
-              <Zap size={18} className="text-white" fill="white" />
-            </div>
-            <h2 className="text-white text-xl font-extrabold tracking-tight">
-              ChopMeter
-            </h2>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="flex-1 px-4 sm:px-6 py-6 max-w-[1200px] mx-auto w-full pb-24">
+      <div className="flex-1 px-4 sm:px-6 pt-6 max-w-[1200px] mx-auto w-full pb-24">
         {/* Hero Banner */}
         <div className="glass-card gradient-hero p-6 md:p-10 relative overflow-hidden mb-6">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
