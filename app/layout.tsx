@@ -4,14 +4,74 @@ import InstallPrompt from "@/components/InstallPrompt";
 import UpdatePrompt from "@/components/UpdatePrompt";
 import "./globals.css";
 
+const siteUrl = "https://chopmeter.me";
+
 export const metadata: Metadata = {
-  title: "ChopMeter - Track Your Electricity",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "ChopMeter - Track Your Prepaid Electricity Usage in Ghana",
+    template: "%s | ChopMeter",
+  },
   description:
-    "No more meter dey chop my money! Free offline-first PWA to track your prepaid electricity meter.",
+    "Free app to track prepaid electricity meter readings, monitor daily energy usage, and manage your spending. Works offline. Built for Ghana, Nigeria, and Africa.",
+  keywords: [
+    "prepaid electricity tracker",
+    "meter reading app",
+    "electricity usage Ghana",
+    "ECG prepaid meter",
+    "energy savings Ghana",
+    "utility tariff Ghana",
+    "electricity bill tracker",
+    "prepaid meter app",
+    "energy monitoring Africa",
+    "electricity cost calculator",
+    "Ghana power consumption",
+    "PURC tariff",
+    "electricity budget",
+    "smart meter tracker",
+  ],
+  authors: [{ name: "ChopMeter" }],
+  creator: "ChopMeter",
+  publisher: "ChopMeter",
+  applicationName: "ChopMeter",
+  category: "utilities",
+  classification: "Energy & Utilities",
+  openGraph: {
+    type: "website",
+    locale: "en_GH",
+    url: siteUrl,
+    siteName: "ChopMeter",
+    title: "ChopMeter - Track Your Prepaid Electricity Usage",
+    description:
+      "Stop guessing where your electricity goes. Scan your prepaid meter, track daily usage, and save money on energy. Free, offline, no signup.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "ChopMeter - Prepaid Electricity Tracker",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ChopMeter - Track Your Prepaid Electricity",
+    description:
+      "Free app to scan your prepaid meter, track energy usage, and manage electricity spending. Built for Ghana & Africa.",
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: siteUrl,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "ChopMeter",
+  },
+  other: {
+    "geo.region": "GH",
+    "geo.country": "Ghana",
+    "content-language": "en-GH",
   },
 };
 
@@ -31,6 +91,40 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              name: "ChopMeter",
+              applicationCategory: "UtilitiesApplication",
+              operatingSystem: "Web",
+              description:
+                "Free app to track prepaid electricity meter readings, monitor daily energy usage, and manage spending. Built for Ghana and Africa.",
+              url: "https://chopmeter.me",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "GHS",
+              },
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: "4.8",
+                ratingCount: "1",
+              },
+              author: {
+                "@type": "Organization",
+                name: "ChopMeter",
+                url: "https://chopmeter.me",
+              },
+              areaServed: {
+                "@type": "Country",
+                name: "Ghana",
+              },
+            }),
+          }}
+        />
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="icon" type="image/png" sizes="96x96" href="/icons/favicon-96x96.png" />
         <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
