@@ -22,24 +22,14 @@ import {
 
 export default function LandingPage() {
   const router = useRouter();
-  const [ready, setReady] = useState(false);
+  const [isReturningUser, setIsReturningUser] = useState(false);
 
   useEffect(() => {
     const settings = getSettings();
     if (settings.onboardingComplete) {
-      router.replace("/dashboard");
-    } else {
-      setReady(true);
+      setIsReturningUser(true);
     }
-  }, [router]);
-
-  if (!ready) {
-    return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-bg-dark">
-        <Zap className="text-blue-400 animate-pulse" size={48} />
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <div className="min-h-screen bg-bg-dark font-display text-gray-50 overflow-x-hidden">
@@ -55,10 +45,10 @@ export default function LandingPage() {
             </span>
           </div>
           <button
-            onClick={() => router.push("/onboarding")}
+            onClick={() => router.push(isReturningUser ? "/dashboard" : "/onboarding")}
             className="bg-gradient-to-r from-blue-500 to-violet-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.97]"
           >
-            Get Started
+            {isReturningUser ? "Open Dashboard" : "Get Started"}
           </button>
         </div>
       </nav>
@@ -96,11 +86,11 @@ export default function LandingPage() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 animate-fade-in-up">
             <button
-              onClick={() => router.push("/onboarding")}
+              onClick={() => router.push(isReturningUser ? "/dashboard" : "/onboarding")}
               className="w-full sm:w-auto group relative flex items-center justify-center overflow-hidden rounded-2xl h-14 px-8 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
             >
               <span className="text-white text-[17px] font-bold mr-2 relative z-10">
-                Start Tracking Free
+                {isReturningUser ? "Open Dashboard" : "Start Tracking Free"}
               </span>
               <ArrowRight
                 size={20}
@@ -534,11 +524,11 @@ export default function LandingPage() {
             Stop guessing. Start tracking. Know if your meter is cheating you.
           </p>
           <button
-            onClick={() => router.push("/onboarding")}
+            onClick={() => router.push(isReturningUser ? "/dashboard" : "/onboarding")}
             className="w-full sm:w-auto group relative inline-flex items-center justify-center overflow-hidden rounded-2xl h-14 px-10 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
           >
             <span className="text-white text-[17px] font-bold mr-2 relative z-10">
-              Get Started — It&apos;s Free
+              {isReturningUser ? "Open Dashboard" : "Get Started — It\u0027s Free"}
             </span>
             <ArrowRight
               size={20}
