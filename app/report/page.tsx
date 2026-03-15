@@ -155,11 +155,11 @@ export default function ReportPage() {
   return (
     <div className="flex h-full grow flex-col bg-bg-dark font-display min-h-screen text-gray-50">
       {/* Screen-only toolbar */}
-      <header className="no-print sticky top-0 z-10 bg-[#0A0E1A]/95 backdrop-blur-md border-b border-white/[0.06] px-4 py-3 [&>*]:relative [&>*]:z-10">
-        <div className="max-w-2xl mx-auto flex items-center justify-between relative z-10">
+      <header className="no-print sticky top-0 z-20 bg-[#0A0E1A]/95 backdrop-blur-md border-b border-white/[0.06] px-4 py-3 isolate">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             onClick={() => router.back()}
-            className="relative z-20 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
           >
             <ArrowLeft size={20} />
             <span className="text-sm font-bold">Back</span>
@@ -167,7 +167,7 @@ export default function ReportPage() {
           <h1 className="text-white font-bold text-sm">Monthly Report</h1>
           <button
             onClick={handlePrint}
-            className="relative z-20 flex items-center gap-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm py-2 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm py-2 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
           >
             <Download size={16} />
             PDF

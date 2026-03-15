@@ -355,7 +355,8 @@ export default function SettingsPage() {
 
             <button
               onClick={() => guardSave(handleSaveProfile)}
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
+              disabled={!displayName.trim()}
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Save Profile
             </button>

@@ -71,14 +71,14 @@ function computeMetrics(
   for (let i = 0; i < weekReadings.length - 1; i++) {
     weeklyUsage += Math.abs(weekReadings[i].value - weekReadings[i + 1].value);
   }
-  const daysWithData = Math.max(
-    1,
+  const dataSpanDays =
     weekReadings.length > 1
       ? (weekReadings[0].timestamp -
           weekReadings[weekReadings.length - 1].timestamp) /
           (24 * 60 * 60 * 1000)
-      : 1
-  );
+      : 0;
+  const daysWithData = Math.max(1, dataSpanDays);
+  const dataAdequate = weekReadings.length >= 2 && dataSpanDays >= 1;
   const dailyKwh = weekReadings.length > 1 ? weeklyUsage / daysWithData : 0;
   const dailyBurnRate = dailyKwh * settings.tariffRate;
 
@@ -102,7 +102,9 @@ function computeMetrics(
   );
 
   const daysLeft =
-    dailyBurnRate > 0 ? Math.round(currentBalance / dailyBurnRate) : null;
+    dailyBurnRate > 0 && dataAdequate
+      ? Math.round(currentBalance / dailyBurnRate)
+      : null;
 
   return {
     currentBalance,
@@ -111,6 +113,8 @@ function computeMetrics(
     lastReading,
     todayUsage,
     weeklyUsage,
+    dataAdequate,
+    dataSpanDays: Math.round(dataSpanDays * 10) / 10,
   };
 }
 
@@ -388,9 +392,11 @@ export default function DashboardPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Daily burn rate</span>
                     <span className="text-gray-200">
-                      {hasData
-                        ? `${currencySymbol} ${metrics.dailyBurnRate.toFixed(2)}/day`
-                        : "No data yet"}
+                      {!hasData
+                        ? "No data yet"
+                        : !metrics.dataAdequate
+                        ? "Need more readings"
+                        : `${currencySymbol} ${metrics.dailyBurnRate.toFixed(2)}/day`}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -495,7 +501,9 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <p className="text-gray-500 text-xs mt-2">
-                  Scan meter to start tracking
+                  {hasData && !metrics.dataAdequate
+                    ? `Based on ${metrics.dataSpanDays < 1 ? "less than 1 day" : `${metrics.dataSpanDays} days`} of data — need 1+ day for estimates`
+                    : "Scan meter to start tracking"}
                 </p>
               )}
 

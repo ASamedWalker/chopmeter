@@ -152,7 +152,7 @@ export default function ScannerPage() {
   };
 
   return (
-    <div className="fixed inset-0 bg-black flex flex-col z-50">
+    <div className="fixed inset-0 bg-black flex flex-col z-40">
       <canvas ref={canvasRef} className="hidden" />
 
       <div className="absolute inset-0 z-0">

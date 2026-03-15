@@ -49,6 +49,10 @@ export interface DashboardMetrics {
   lastReading: MeterReading | null;
   todayUsage: number;
   weeklyUsage: number;
+  /** true when 2+ readings span at least 1 day */
+  dataAdequate: boolean;
+  /** days of reading data available */
+  dataSpanDays: number;
 }
 
 /** A bookmarked energy tip ID */
