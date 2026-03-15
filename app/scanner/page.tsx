@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { saveReading, saveSettings, getSettings, generateId } from "@/lib/storage";
+import { saveReading, saveSettings, getSettings, generateId, getDefaultMeter } from "@/lib/storage";
 import { getCountry } from "@/lib/countries";
 import { recognizeMeterReading } from "@/lib/ocr";
 import { X, Zap, Keyboard, Wallet } from "lucide-react";
@@ -27,6 +27,10 @@ export default function ScannerPage() {
 
   const settings = getSettings();
   const country = getCountry(settings.countryCode);
+
+  // Get active meter ID for saving readings
+  const activeMeter = typeof window !== "undefined" ? getDefaultMeter() : null;
+  const activeMeterId = activeMeter?.id;
 
   const stopScanning = useCallback(() => {
     if (scanIntervalRef.current) {
@@ -132,7 +136,7 @@ export default function ScannerPage() {
       value: numValue,
       timestamp: Date.now(),
       source,
-    });
+    }, activeMeterId);
 
     const balNum = parseFloat(balanceValue);
     if (!isNaN(balNum) && balNum > 0) {

@@ -1,4 +1,4 @@
-import type { MeterReading, UserSettings, BookmarkedTip, WeatherCache, TopUp } from "./types";
+import type { MeterReading, UserSettings, BookmarkedTip, WeatherCache, TopUp, Meter } from "./types";
 import type { ReminderSettings } from "./notifications";
 import { DEFAULT_REMINDER_SETTINGS } from "./notifications";
 
@@ -8,7 +8,11 @@ const BOOKMARKS_KEY = "chopmeter_bookmarks";
 const WEATHER_CACHE_KEY = "chopmeter_weather";
 const REMINDERS_KEY = "chopmeter_reminders";
 const TOPUPS_KEY = "chopmeter_topups";
+const METERS_KEY = "chopmeter_meters";
 const WEATHER_CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+/** The fixed ID used for the auto-created default meter (legacy migration). */
+const DEFAULT_METER_ID = "default";
 
 const DEFAULT_SETTINGS: UserSettings = {
   onboardingComplete: false,
@@ -45,17 +49,116 @@ function migrateSettings(raw: Record<string, unknown>): Record<string, unknown> 
   return raw;
 }
 
-// ---- Readings ----
+// ---- Meters ----
 
-export function saveReading(reading: MeterReading): void {
-  const readings = getAllReadings();
-  readings.unshift(reading);
-  localStorage.setItem(READINGS_KEY, JSON.stringify(readings));
+/**
+ * Returns the storage key for a meter's readings.
+ * The default meter uses the legacy key for backwards compatibility.
+ */
+function readingsKeyFor(meterId?: string): string {
+  if (!meterId || meterId === DEFAULT_METER_ID) return READINGS_KEY;
+  return `chopmeter_readings_${meterId}`;
 }
 
-export function getAllReadings(): MeterReading[] {
+/**
+ * Returns the storage key for a meter's top-ups.
+ * The default meter uses the legacy key for backwards compatibility.
+ */
+function topupsKeyFor(meterId?: string): string {
+  if (!meterId || meterId === DEFAULT_METER_ID) return TOPUPS_KEY;
+  return `chopmeter_topups_${meterId}`;
+}
+
+/**
+ * Ensures at least one meter exists. On first load with no meters,
+ * creates a default "Home" meter using settings.meterNumber.
+ */
+function ensureDefaultMeter(): void {
+  if (typeof window === "undefined") return;
+  const raw = localStorage.getItem(METERS_KEY);
+  if (raw) {
+    try {
+      const meters = JSON.parse(raw) as Meter[];
+      if (meters.length > 0) return;
+    } catch {
+      // corrupt data — recreate
+    }
+  }
+  // Create the default meter from existing settings
+  const settings = getSettings();
+  const defaultMeter: Meter = {
+    id: DEFAULT_METER_ID,
+    name: "Home",
+    meterNumber: settings.meterNumber || "",
+    icon: "home",
+    color: "#3B82F6",
+    isDefault: true,
+    createdAt: Date.now(),
+  };
+  localStorage.setItem(METERS_KEY, JSON.stringify([defaultMeter]));
+}
+
+export function getMeters(): Meter[] {
   if (typeof window === "undefined") return [];
-  const raw = localStorage.getItem(READINGS_KEY);
+  ensureDefaultMeter();
+  const raw = localStorage.getItem(METERS_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as Meter[];
+  } catch {
+    return [];
+  }
+}
+
+export function saveMeter(meter: Meter): void {
+  const meters = getMeters();
+  const idx = meters.findIndex((m) => m.id === meter.id);
+  if (idx >= 0) {
+    meters[idx] = meter;
+  } else {
+    meters.push(meter);
+  }
+  localStorage.setItem(METERS_KEY, JSON.stringify(meters));
+}
+
+export function deleteMeter(id: string): void {
+  let meters = getMeters().filter((m) => m.id !== id);
+  // If we deleted the default, promote the first remaining meter
+  if (meters.length > 0 && !meters.some((m) => m.isDefault)) {
+    meters[0].isDefault = true;
+  }
+  localStorage.setItem(METERS_KEY, JSON.stringify(meters));
+  // Clean up meter-specific storage
+  localStorage.removeItem(readingsKeyFor(id));
+  localStorage.removeItem(topupsKeyFor(id));
+}
+
+export function setDefaultMeter(id: string): void {
+  const meters = getMeters().map((m) => ({
+    ...m,
+    isDefault: m.id === id,
+  }));
+  localStorage.setItem(METERS_KEY, JSON.stringify(meters));
+}
+
+export function getDefaultMeter(): Meter | null {
+  const meters = getMeters();
+  return meters.find((m) => m.isDefault) ?? meters[0] ?? null;
+}
+
+// ---- Readings ----
+
+export function saveReading(reading: MeterReading, meterId?: string): void {
+  const key = readingsKeyFor(meterId);
+  const readings = getAllReadings(meterId);
+  readings.unshift(reading);
+  localStorage.setItem(key, JSON.stringify(readings));
+}
+
+export function getAllReadings(meterId?: string): MeterReading[] {
+  if (typeof window === "undefined") return [];
+  const key = readingsKeyFor(meterId);
+  const raw = localStorage.getItem(key);
   if (!raw) return [];
   try {
     return JSON.parse(raw) as MeterReading[];
@@ -64,14 +167,15 @@ export function getAllReadings(): MeterReading[] {
   }
 }
 
-export function getRecentReadings(days: number): MeterReading[] {
+export function getRecentReadings(days: number, meterId?: string): MeterReading[] {
   const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-  return getAllReadings().filter((r) => r.timestamp >= cutoff);
+  return getAllReadings(meterId).filter((r) => r.timestamp >= cutoff);
 }
 
-export function deleteReading(id: string): void {
-  const readings = getAllReadings().filter((r) => r.id !== id);
-  localStorage.setItem(READINGS_KEY, JSON.stringify(readings));
+export function deleteReading(id: string, meterId?: string): void {
+  const key = readingsKeyFor(meterId);
+  const readings = getAllReadings(meterId).filter((r) => r.id !== id);
+  localStorage.setItem(key, JSON.stringify(readings));
 }
 
 // ---- Settings ----
@@ -150,15 +254,17 @@ export function saveReminderSettings(partial: Partial<ReminderSettings>): void {
 
 // ---- Top-ups ----
 
-export function saveTopUp(topup: TopUp): void {
-  const topups = getAllTopUps();
+export function saveTopUp(topup: TopUp, meterId?: string): void {
+  const key = topupsKeyFor(meterId);
+  const topups = getAllTopUps(meterId);
   topups.unshift(topup);
-  localStorage.setItem(TOPUPS_KEY, JSON.stringify(topups));
+  localStorage.setItem(key, JSON.stringify(topups));
 }
 
-export function getAllTopUps(): TopUp[] {
+export function getAllTopUps(meterId?: string): TopUp[] {
   if (typeof window === "undefined") return [];
-  const raw = localStorage.getItem(TOPUPS_KEY);
+  const key = topupsKeyFor(meterId);
+  const raw = localStorage.getItem(key);
   if (!raw) return [];
   try {
     return JSON.parse(raw) as TopUp[];
@@ -167,20 +273,30 @@ export function getAllTopUps(): TopUp[] {
   }
 }
 
-export function deleteTopUp(id: string): void {
-  const topups = getAllTopUps().filter((t) => t.id !== id);
-  localStorage.setItem(TOPUPS_KEY, JSON.stringify(topups));
+export function deleteTopUp(id: string, meterId?: string): void {
+  const key = topupsKeyFor(meterId);
+  const topups = getAllTopUps(meterId).filter((t) => t.id !== id);
+  localStorage.setItem(key, JSON.stringify(topups));
 }
 
 // ---- Data management ----
 
 export function clearAllData(): void {
+  // Clear legacy keys
   localStorage.removeItem(READINGS_KEY);
   localStorage.removeItem(SETTINGS_KEY);
   localStorage.removeItem(BOOKMARKS_KEY);
   localStorage.removeItem(WEATHER_CACHE_KEY);
   localStorage.removeItem(REMINDERS_KEY);
   localStorage.removeItem(TOPUPS_KEY);
+
+  // Clear meter-specific keys
+  const meters = getMeters();
+  for (const meter of meters) {
+    localStorage.removeItem(readingsKeyFor(meter.id));
+    localStorage.removeItem(topupsKeyFor(meter.id));
+  }
+  localStorage.removeItem(METERS_KEY);
 }
 
 // ---- Weather cache ----

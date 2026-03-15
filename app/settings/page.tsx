@@ -10,14 +10,20 @@ import {
   clearAllData,
   getReminderSettings,
   saveReminderSettings,
+  getMeters,
+  saveMeter,
+  deleteMeter as deleteStorageMeter,
+  setDefaultMeter,
+  generateId,
 } from "@/lib/storage";
 import { COUNTRIES, getCountry, type CountryConfig } from "@/lib/countries";
-import type { UserSettings } from "@/lib/types";
+import type { UserSettings, Meter } from "@/lib/types";
 import type { ReminderSettings } from "@/lib/notifications";
 import {
   requestNotificationPermission,
   getNotificationStatus,
 } from "@/lib/notifications";
+import { getMeterIcon } from "@/components/MeterSwitcher";
 import {
   Zap,
   Globe,
@@ -35,8 +41,35 @@ import {
   AlertTriangle,
   Clock,
   Calendar,
+  Plus,
+  Pencil,
+  X,
+  Check,
+  Home,
+  Store,
+  Building,
+  Warehouse,
+  Factory,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
+
+const METER_ICONS: { name: string; icon: LucideIcon; label: string }[] = [
+  { name: "home", icon: Home, label: "Home" },
+  { name: "store", icon: Store, label: "Shop" },
+  { name: "building", icon: Building, label: "Office" },
+  { name: "warehouse", icon: Warehouse, label: "Warehouse" },
+  { name: "factory", icon: Factory, label: "Factory" },
+];
+
+const METER_COLORS = [
+  "#3B82F6",
+  "#8B5CF6",
+  "#10B981",
+  "#F59E0B",
+  "#EF4444",
+  "#EC4899",
+];
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -53,6 +86,16 @@ export default function SettingsPage() {
   const [reminders, setReminders] = useState<ReminderSettings | null>(null);
   const [notifStatus, setNotifStatus] = useState<"granted" | "denied" | "default" | "unsupported">("default");
 
+  // Multi-meter state
+  const [meters, setMetersLocal] = useState<Meter[]>([]);
+  const [editingMeter, setEditingMeter] = useState<Meter | null>(null);
+  const [showMeterForm, setShowMeterForm] = useState(false);
+  const [meterFormName, setMeterFormName] = useState("");
+  const [meterFormNumber, setMeterFormNumber] = useState("");
+  const [meterFormIcon, setMeterFormIcon] = useState("home");
+  const [meterFormColor, setMeterFormColor] = useState(METER_COLORS[0]);
+  const [deletingMeterId, setDeletingMeterId] = useState<string | null>(null);
+
   useEffect(() => {
     const s = getSettings();
     if (!s.onboardingComplete) {
@@ -68,6 +111,17 @@ export default function SettingsPage() {
     setBudgetAmount(s.monthlyBudget > 0 ? s.monthlyBudget.toString() : "");
     setReminders(getReminderSettings());
     setNotifStatus(getNotificationStatus());
+    setMetersLocal(getMeters());
+
+    // Auto-open add meter form if navigated with ?addMeter=1
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("addMeter") === "1") {
+        setShowMeterForm(true);
+        setEditingMeter(null);
+        resetMeterForm();
+      }
+    }
   }, [router]);
 
   const flash = (msg: string) => {
@@ -165,6 +219,72 @@ export default function SettingsPage() {
     flash("CSV exported");
   };
 
+  // --- Meter management ---
+
+  const resetMeterForm = () => {
+    setMeterFormName("");
+    setMeterFormNumber("");
+    setMeterFormIcon("home");
+    setMeterFormColor(METER_COLORS[0]);
+  };
+
+  const openEditMeter = (meter: Meter) => {
+    setEditingMeter(meter);
+    setMeterFormName(meter.name);
+    setMeterFormNumber(meter.meterNumber);
+    setMeterFormIcon(meter.icon);
+    setMeterFormColor(meter.color);
+    setShowMeterForm(true);
+  };
+
+  const handleSaveMeterForm = () => {
+    if (!meterFormName.trim()) return;
+
+    if (editingMeter) {
+      // Editing existing meter
+      const updated: Meter = {
+        ...editingMeter,
+        name: meterFormName.trim(),
+        meterNumber: meterFormNumber.trim(),
+        icon: meterFormIcon,
+        color: meterFormColor,
+      };
+      saveMeter(updated);
+      flash("Meter updated");
+    } else {
+      // Adding new meter
+      const newMeter: Meter = {
+        id: generateId(),
+        name: meterFormName.trim(),
+        meterNumber: meterFormNumber.trim(),
+        icon: meterFormIcon,
+        color: meterFormColor,
+        isDefault: meters.length === 0,
+        createdAt: Date.now(),
+      };
+      saveMeter(newMeter);
+      flash("Meter added");
+    }
+
+    setShowMeterForm(false);
+    setEditingMeter(null);
+    resetMeterForm();
+    setMetersLocal(getMeters());
+  };
+
+  const handleDeleteMeter = (id: string) => {
+    deleteStorageMeter(id);
+    setDeletingMeterId(null);
+    setMetersLocal(getMeters());
+    flash("Meter deleted");
+  };
+
+  const handleSetDefault = (id: string) => {
+    setDefaultMeter(id);
+    setMetersLocal(getMeters());
+    flash("Default meter updated");
+  };
+
   if (!settings) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-screen bg-bg-dark">
@@ -214,6 +334,210 @@ export default function SettingsPage() {
             >
               Save Profile
             </button>
+          </div>
+        </section>
+
+        {/* Meters */}
+        <section className="glass-card p-5">
+          <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Gauge size={18} className="text-blue-400" />
+            Meters
+          </h3>
+
+          <div className="space-y-3">
+            {meters.map((meter) => {
+              const Icon = getMeterIcon(meter.icon);
+              const isDeleting = deletingMeterId === meter.id;
+              return (
+                <div key={meter.id} className="relative">
+                  {isDeleting && (
+                    <div className="absolute inset-0 z-20 bg-bg-dark/95 backdrop-blur-sm rounded-xl flex items-center justify-center gap-3 animate-fade-in-up">
+                      <span className="text-gray-400 text-sm">Delete this meter?</span>
+                      <button
+                        onClick={() => setDeletingMeterId(null)}
+                        className="px-3 py-1.5 rounded-lg border border-white/[0.06] text-gray-300 text-sm font-bold hover:bg-white/[0.05] transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMeter(meter.id)}
+                        className="px-3 py-1.5 rounded-lg bg-danger text-white text-sm font-bold hover:brightness-110 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                    <div
+                      className="size-10 rounded-xl flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: `${meter.color}20` }}
+                    >
+                      <Icon size={20} style={{ color: meter.color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-white font-bold text-sm truncate">{meter.name}</p>
+                        {meter.isDefault && (
+                          <span className="text-[10px] text-blue-400 font-semibold uppercase tracking-wider bg-blue-500/10 px-1.5 py-0.5 rounded">
+                            Default
+                          </span>
+                        )}
+                      </div>
+                      {meter.meterNumber && (
+                        <p className="text-gray-500 text-xs truncate">#{meter.meterNumber}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {!meter.isDefault && (
+                        <button
+                          onClick={() => handleSetDefault(meter.id)}
+                          className="size-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-gray-500 hover:text-blue-400 hover:border-blue-500/30 transition-colors"
+                          title="Set as default"
+                        >
+                          <Check size={14} />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => openEditMeter(meter)}
+                        className="size-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-gray-500 hover:text-blue-400 hover:border-blue-500/30 transition-colors"
+                        title="Edit meter"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      {meters.length > 1 && (
+                        <button
+                          onClick={() => setDeletingMeterId(meter.id)}
+                          className="size-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-gray-500 hover:text-red-400 hover:border-red-500/30 transition-colors"
+                          title="Delete meter"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Add / Edit Meter Form */}
+            {showMeterForm ? (
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-blue-500/20 space-y-4 animate-fade-in-up">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-white font-bold text-sm">
+                    {editingMeter ? "Edit Meter" : "Add New Meter"}
+                  </h4>
+                  <button
+                    onClick={() => {
+                      setShowMeterForm(false);
+                      setEditingMeter(null);
+                      resetMeterForm();
+                    }}
+                    className="size-8 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+
+                {/* Name */}
+                <div>
+                  <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5">
+                    Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={meterFormName}
+                    onChange={(e) => setMeterFormName(e.target.value)}
+                    placeholder="e.g. Home, Shop, Rental"
+                    className="w-full h-11 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold px-3 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Meter Number */}
+                <div>
+                  <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5">
+                    Meter Number
+                  </label>
+                  <input
+                    type="text"
+                    value={meterFormNumber}
+                    onChange={(e) => setMeterFormNumber(e.target.value)}
+                    placeholder="e.g. 01234567890"
+                    className="w-full h-11 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold px-3 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Icon Picker */}
+                <div>
+                  <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5">
+                    Icon
+                  </label>
+                  <div className="flex gap-2">
+                    {METER_ICONS.map((item) => {
+                      const MIcon = item.icon;
+                      const isSelected = meterFormIcon === item.name;
+                      return (
+                        <button
+                          key={item.name}
+                          onClick={() => setMeterFormIcon(item.name)}
+                          className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all flex-1 ${
+                            isSelected
+                              ? "border-blue-500 bg-blue-500/10"
+                              : "border-white/[0.06] hover:border-blue-500/30"
+                          }`}
+                        >
+                          <MIcon size={20} className={isSelected ? "text-blue-400" : "text-gray-400"} />
+                          <span className={`text-[10px] font-medium ${isSelected ? "text-blue-400" : "text-gray-500"}`}>
+                            {item.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Color Picker */}
+                <div>
+                  <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5">
+                    Color
+                  </label>
+                  <div className="flex gap-2">
+                    {METER_COLORS.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setMeterFormColor(color)}
+                        className={`size-9 rounded-full border-2 transition-all ${
+                          meterFormColor === color
+                            ? "border-white scale-110"
+                            : "border-transparent hover:border-white/30"
+                        }`}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Save */}
+                <button
+                  onClick={handleSaveMeterForm}
+                  disabled={!meterFormName.trim()}
+                  className="w-full h-11 rounded-lg bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {editingMeter ? "Update Meter" : "Add Meter"}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setShowMeterForm(true);
+                  setEditingMeter(null);
+                  resetMeterForm();
+                }}
+                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-white/[0.1] text-gray-400 hover:text-white hover:border-blue-500/30 transition-colors"
+              >
+                <Plus size={18} />
+                <span className="font-bold text-sm">Add Meter</span>
+              </button>
+            )}
           </div>
         </section>
 

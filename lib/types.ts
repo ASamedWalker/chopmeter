@@ -70,6 +70,17 @@ export interface TopUp {
   note: string;
 }
 
+/** A meter/property that the user tracks */
+export interface Meter {
+  id: string;
+  name: string;           // e.g. "Home", "Shop", "Rental"
+  meterNumber: string;    // meter ID number
+  icon: string;           // lucide icon name: "home", "store", "building", "warehouse", "factory"
+  color: string;          // hex color for identification
+  isDefault: boolean;     // is this the active/selected meter
+  createdAt: number;
+}
+
 /** Energy saving tip */
 export interface EnergyTip {
   id: string;

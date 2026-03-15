@@ -8,6 +8,7 @@ import {
   deleteTopUp,
   getSettings,
   generateId,
+  getDefaultMeter,
 } from "@/lib/storage";
 import { getTopUpStats } from "@/lib/topups";
 import type { TopUpStats } from "@/lib/topups";
@@ -39,11 +40,15 @@ export default function TopUpsPage() {
   const settings = typeof window !== "undefined" ? getSettings() : null;
   const country = settings ? getCountry(settings.countryCode) : null;
 
+  // Get the active meter ID for scoping topups
+  const activeMeter = typeof window !== "undefined" ? getDefaultMeter() : null;
+  const activeMeterId = activeMeter?.id;
+
   const loadData = useCallback(() => {
-    const all = getAllTopUps();
+    const all = getAllTopUps(activeMeterId);
     setTopups(all);
     setStats(getTopUpStats(all));
-  }, []);
+  }, [activeMeterId]);
 
   useEffect(() => {
     loadData();
@@ -62,7 +67,7 @@ export default function TopUpsPage() {
       note: note.trim(),
     };
 
-    saveTopUp(topup);
+    saveTopUp(topup, activeMeterId);
     setAmount("");
     setUnits("");
     setNote("");
@@ -71,7 +76,7 @@ export default function TopUpsPage() {
   };
 
   const handleDelete = (id: string) => {
-    deleteTopUp(id);
+    deleteTopUp(id, activeMeterId);
     setDeletingId(null);
     loadData();
   };

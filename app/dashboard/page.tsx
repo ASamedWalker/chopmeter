@@ -9,13 +9,16 @@ import {
   getRecentReadings,
   deleteReading,
   getReminderSettings,
+  getMeters,
+  getDefaultMeter,
+  setDefaultMeter,
 } from "@/lib/storage";
 import {
   checkLowBalanceNotification,
   checkDailyReminder,
   checkWeeklyReport,
 } from "@/lib/notifications";
-import type { MeterReading, UserSettings, DashboardMetrics, WeatherCache } from "@/lib/types";
+import type { MeterReading, UserSettings, DashboardMetrics, WeatherCache, Meter } from "@/lib/types";
 import { getCountry } from "@/lib/countries";
 import { getGreeting } from "@/lib/greeting";
 import { getWeeklyComparison, getMonthlyComparison } from "@/lib/comparison";
@@ -27,6 +30,7 @@ import BottomNav from "@/components/BottomNav";
 import PullToRefresh from "@/components/PullToRefresh";
 import UsageChart from "@/components/UsageChart";
 import LowBalanceAlert from "@/components/LowBalanceAlert";
+import MeterSwitcher from "@/components/MeterSwitcher";
 
 import Link from "next/link";
 import {
@@ -140,17 +144,31 @@ export default function DashboardPage() {
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
-  const loadData = useCallback(() => {
+  // Multi-meter state
+  const [meters, setMetersState] = useState<Meter[]>([]);
+  const [activeMeter, setActiveMeter] = useState<Meter | null>(null);
+
+  const loadData = useCallback((meterId?: string) => {
     const s = getSettings();
     if (!s.onboardingComplete) {
       router.replace("/onboarding");
       return;
     }
     setSettingsState(s);
-    const readings = getAllReadings();
+
+    // Load meters
+    const allMeters = getMeters();
+    setMetersState(allMeters);
+    const currentMeter = meterId
+      ? allMeters.find((m) => m.id === meterId) ?? getDefaultMeter()
+      : getDefaultMeter();
+    setActiveMeter(currentMeter);
+
+    const mid = currentMeter?.id;
+    const readings = getAllReadings(mid);
     setAllReadings(readings);
     setMetrics(computeMetrics(readings, s));
-    setRecentReadings(getRecentReadings(7).slice(0, 10));
+    setRecentReadings(getRecentReadings(7, mid).slice(0, 10));
   }, [router]);
 
   useEffect(() => {
@@ -213,11 +231,17 @@ export default function DashboardPage() {
     }
   }, [metrics, settings]);
 
+  const handleSwitchMeter = (meter: Meter) => {
+    setDefaultMeter(meter.id);
+    setActiveMeter(meter);
+    loadData(meter.id);
+  };
+
   const handleDeleteReading = (id: string) => {
-    deleteReading(id);
+    deleteReading(id, activeMeter?.id);
     setDeletingReading(null);
     setExpandedReading(null);
-    loadData();
+    loadData(activeMeter?.id);
   };
 
   const handleLongPressStart = (id: string) => {
@@ -300,10 +324,10 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-full grow flex-col bg-bg-dark font-display min-h-screen text-gray-50">
-      <PullToRefresh onRefresh={loadData}>
+      <PullToRefresh onRefresh={() => loadData(activeMeter?.id)}>
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 pt-6 pb-24">
         {/* Greeting + Weather Row */}
-        <div className="flex items-start justify-between mb-6 animate-fade-in-up">
+        <div className="flex items-start justify-between mb-4 animate-fade-in-up">
           <div>
             <h1 className="text-2xl font-extrabold text-white tracking-tight">
               {getGreeting()}
@@ -332,6 +356,16 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Meter Switcher */}
+        {activeMeter && (
+          <MeterSwitcher
+            meters={meters}
+            activeMeter={activeMeter}
+            onSwitch={handleSwitchMeter}
+            onAddNew={() => router.push("/settings?addMeter=1")}
+          />
+        )}
 
         {/* Hero Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -431,7 +465,7 @@ export default function DashboardPage() {
                             lastBalanceDate: Date.now(),
                           });
                           setBalanceSaved(true);
-                          loadData();
+                          loadData(activeMeter?.id);
                         }}
                         className="h-10 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-violet-500 text-white text-sm font-bold hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.95]"
                       >
