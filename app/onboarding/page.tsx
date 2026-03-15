@@ -133,16 +133,17 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
           </p>
         </div>
 
-        {/* 3 Benefits */}
+        {/* 3 Benefits — tapping any card advances to next step */}
         <div className="space-y-3 relative z-10">
           {[
             { Icon: ScanLine, title: "Scan & Track", desc: "Point at your meter to log readings instantly", color: "text-blue-500", bg: "bg-blue-500/[0.08]" },
             { Icon: Shield, title: "Stay In Control", desc: "Know exactly how many days your credit will last", color: "text-violet-500", bg: "bg-violet-500/[0.08]" },
             { Icon: PiggyBank, title: "Save Money", desc: "Get tips to cut your electricity bill by up to 30%", color: "text-emerald-500", bg: "bg-emerald-500/[0.08]" },
           ].map((item) => (
-            <div
+            <button
               key={item.title}
-              className="flex items-center gap-3.5 py-3 px-4 rounded-[14px] bg-white/[0.03] border border-white/[0.05]"
+              onClick={onNext}
+              className="w-full flex items-center gap-3.5 py-3 px-4 rounded-[14px] bg-white/[0.03] border border-white/[0.05] text-left active:scale-[0.98] transition-transform"
             >
               <div className={`size-[42px] rounded-xl ${item.bg} flex items-center justify-center shrink-0`}>
                 <item.Icon size={22} className={item.color} />
@@ -151,7 +152,7 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
                 <p className="text-[15px] font-semibold text-white">{item.title}</p>
                 <p className="text-[13px] text-gray-400 mt-0.5">{item.desc}</p>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </main>
