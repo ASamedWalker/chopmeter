@@ -776,7 +776,7 @@ export default function DashboardPage() {
       )}
 
       {fabOpen && (
-        <div className="fixed right-5 z-50 flex flex-col items-end gap-4" style={{ bottom: "6.5rem" }}>
+        <div className="fixed right-5 z-50 flex flex-col items-end gap-4" style={{ bottom: "7.5rem" }}>
           {[
             { href: "/calculator", icon: Calculator, label: "Calculator", color: "#8B5CF6" },
             { href: "/topups", icon: Wallet, label: "Top-ups", color: "#10B981" },
@@ -812,7 +812,7 @@ export default function DashboardPage() {
         className="fixed z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90"
         style={{
           right: 20,
-          bottom: "5rem",
+          bottom: "6rem",
           background: fabOpen ? "#EF4444" : "linear-gradient(135deg, #3B82F6, #8B5CF6)",
           boxShadow: fabOpen ? "0 4px 20px rgba(239,68,68,0.4)" : "0 4px 20px rgba(59,130,246,0.4)",
           transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)",
