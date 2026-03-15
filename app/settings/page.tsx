@@ -32,6 +32,7 @@ import {
   RotateCcw,
   Database,
   Download,
+  FileText,
   Trash2,
   ChevronRight,
   User,
@@ -52,6 +53,7 @@ import {
   Factory,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 
 const METER_ICONS: { name: string; icon: LucideIcon; label: string }[] = [
@@ -890,6 +892,24 @@ export default function SettingsPage() {
           </h3>
 
           <div className="space-y-3">
+            <Link
+              href="/report"
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-blue-500/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <FileText size={20} className="text-blue-400" />
+                <div className="text-left">
+                  <p className="text-white text-sm font-bold">
+                    Generate Report
+                  </p>
+                  <p className="text-gray-400 text-xs">
+                    Monthly PDF summary
+                  </p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-gray-400" />
+            </Link>
+
             <button
               onClick={handleExportCSV}
               className="w-full flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-blue-500/50 transition-colors"

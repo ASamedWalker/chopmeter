@@ -54,6 +54,7 @@ import {
   Snowflake,
   CloudLightning,
   Calculator,
+  FileText,
   ChevronRight,
   Target,
   CheckCircle,
@@ -755,6 +756,18 @@ export default function DashboardPage() {
               <div className="flex-1">
                 <p className="text-white font-display font-semibold text-sm">Top-up History</p>
                 <p className="text-gray-500 text-xs font-display">Track your recharges &amp; spending</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            </Link>
+          </div>
+          <div className="glass-card p-4">
+            <Link href="/report" className="flex items-center gap-3 active:scale-[0.98] transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-display font-semibold text-sm">Monthly Report</p>
+                <p className="text-gray-500 text-xs font-display">Generate PDF summary</p>
               </div>
               <ChevronRight className="w-4 h-4 text-gray-600" />
             </Link>

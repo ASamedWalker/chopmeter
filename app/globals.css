@@ -124,3 +124,48 @@
     animation: shimmer 1.5s infinite;
   }
 }
+
+/* Print styles for PDF report export */
+@media print {
+  .no-print,
+  nav,
+  footer {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-content {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-content > div {
+    padding: 1.5rem !important;
+  }
+
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+
+  /* Ensure the report page fills the print area */
+  main {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Hide the dark bg wrapper */
+  .bg-bg-dark {
+    background: white !important;
+  }
+}
