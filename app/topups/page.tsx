@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   getAllTopUps,
@@ -55,16 +55,20 @@ export default function TopUpsPage() {
     setMounted(true);
   }, [loadData]);
 
+  const savingRef = useRef(false);
   const handleAdd = () => {
+    if (savingRef.current) return;
+    savingRef.current = true;
     const parsedAmount = parseFloat(amount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) return;
+    if (isNaN(parsedAmount) || parsedAmount <= 0 || parsedAmount > 999999.99) return;
+    const parsedUnits = Math.min(99999, Math.max(0, parseFloat(units) || 0));
 
     const topup: TopUp = {
       id: generateId(),
       amount: parsedAmount,
-      units: parseFloat(units) || 0,
+      units: parsedUnits,
       timestamp: Date.now(),
-      note: note.trim(),
+      note: note.replace(/<[^>]*>/g, "").trim().slice(0, 100),
     };
 
     saveTopUp(topup, activeMeterId);
@@ -73,6 +77,7 @@ export default function TopUpsPage() {
     setNote("");
     setShowForm(false);
     loadData();
+    savingRef.current = false;
   };
 
   const handleDelete = (id: string) => {
@@ -217,6 +222,8 @@ export default function TopUpsPage() {
                   <input
                     type="number"
                     inputMode="decimal"
+                    min="0"
+                    max="999999.99"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="e.g. 50.00"
@@ -234,6 +241,8 @@ export default function TopUpsPage() {
                   <input
                     type="number"
                     inputMode="decimal"
+                    min="0"
+                    max="99999"
                     value={units}
                     onChange={(e) => setUnits(e.target.value)}
                     placeholder="e.g. 25 kWh"
@@ -254,6 +263,7 @@ export default function TopUpsPage() {
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
+                  maxLength={100}
                   placeholder="e.g. MTN MoMo"
                   className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-4 pr-3 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                 />

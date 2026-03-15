@@ -126,8 +126,8 @@ export default function ScannerPage() {
 
   const handleSave = (value: string, source: "ocr" | "manual") => {
     const numValue = parseFloat(value);
-    if (isNaN(numValue) || numValue <= 0) {
-      setError("Please enter a valid meter reading.");
+    if (isNaN(numValue) || numValue <= 0 || numValue > 99999.99) {
+      setError("Please enter a valid meter reading (0–99,999.99).");
       return;
     }
 
@@ -139,7 +139,7 @@ export default function ScannerPage() {
     }, activeMeterId);
 
     const balNum = parseFloat(balanceValue);
-    if (!isNaN(balNum) && balNum > 0) {
+    if (!isNaN(balNum) && balNum > 0 && balNum <= 999999.99) {
       saveSettings({
         lastBalance: balNum,
         lastBalanceDate: Date.now(),
@@ -259,6 +259,8 @@ export default function ScannerPage() {
                   <input
                     type="number"
                     inputMode="decimal"
+                    min="0"
+                    max="999999.99"
                     value={balanceValue}
                     onChange={(e) => setBalanceValue(e.target.value)}
                     placeholder="e.g. 500.00"
@@ -309,6 +311,8 @@ export default function ScannerPage() {
               <input
                 type="number"
                 inputMode="decimal"
+                min="0"
+                max="99999.99"
                 value={manualValue}
                 onChange={(e) => setManualValue(e.target.value)}
                 placeholder="e.g. 2450.5"
@@ -328,6 +332,8 @@ export default function ScannerPage() {
                 <input
                   type="number"
                   inputMode="decimal"
+                  min="0"
+                  max="999999.99"
                   value={balanceValue}
                   onChange={(e) => setBalanceValue(e.target.value)}
                   placeholder="e.g. 500.00"

@@ -414,6 +414,8 @@ export default function DashboardPage() {
                         <input
                           type="number"
                           inputMode="decimal"
+                          min="0"
+                          max="999999.99"
                           value={balanceInput}
                           onChange={(e) => {
                             setBalanceInput(e.target.value);
@@ -425,10 +427,11 @@ export default function DashboardPage() {
                         />
                       </div>
                       <button
+                        disabled={balanceSaved}
                         onClick={(e) => {
                           e.stopPropagation();
                           const val = parseFloat(balanceInput);
-                          if (isNaN(val) || val <= 0) return;
+                          if (isNaN(val) || val <= 0 || val > 999999.99) return;
                           saveSettings({
                             lastBalance: val,
                             lastBalanceDate: Date.now(),

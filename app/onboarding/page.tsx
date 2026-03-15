@@ -30,15 +30,17 @@ export default function OnboardingPage() {
   const [tariffEdited, setTariffEdited] = useState(false);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
 
+  const sanitize = (s: string) => s.replace(/<[^>]*>/g, "").trim();
+
   const handleFinish = () => {
-    const balanceNum = parseFloat(balance) || 0;
-    const tariffNum = parseFloat(tariff) || selectedCountry.defaultTariff;
+    const balanceNum = Math.min(999999.99, Math.max(0, parseFloat(balance) || 0));
+    const tariffNum = Math.min(99.99, Math.max(0, parseFloat(tariff) || selectedCountry.defaultTariff));
 
     saveSettings({
       onboardingComplete: true,
       countryCode: selectedCountry.code,
-      displayName: displayName.trim(),
-      meterNumber,
+      displayName: sanitize(displayName).slice(0, 50),
+      meterNumber: sanitize(meterNumber).slice(0, 20),
       lastBalance: balanceNum,
       lastBalanceDate: Date.now(),
       tariffRate: tariffNum,
@@ -247,6 +249,7 @@ function QuickSetupScreen({
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
+              maxLength={50}
               placeholder="e.g. Kofi, Ama, Chidi..."
               autoCapitalize="words"
               className="w-full h-14 rounded-[14px] bg-white/[0.03] border border-white/[0.06] text-white text-[17px] font-medium px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -313,6 +316,8 @@ function QuickSetupScreen({
               <input
                 type="number"
                 inputMode="decimal"
+                min="0"
+                max="999999.99"
                 value={balance}
                 onChange={(e) => setBalance(e.target.value)}
                 placeholder="0.00"
@@ -334,6 +339,7 @@ function QuickSetupScreen({
               type="text"
               value={meterNumber}
               onChange={(e) => setMeterNumber(e.target.value)}
+              maxLength={20}
               placeholder="e.g. 01234567890"
               className="w-full h-14 rounded-[14px] bg-white/[0.03] border border-white/[0.06] text-white text-[17px] font-medium px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
@@ -349,6 +355,8 @@ function QuickSetupScreen({
               type="number"
               inputMode="decimal"
               step="0.01"
+              min="0"
+              max="99.99"
               value={tariff}
               onChange={(e) => setTariff(e.target.value)}
               className="w-full h-14 rounded-[14px] bg-white/[0.03] border border-white/[0.06] text-white text-[17px] font-medium px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"

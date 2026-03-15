@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import PullToRefresh from "@/components/PullToRefresh";
 import { useRouter } from "next/navigation";
 import {
@@ -126,9 +126,16 @@ export default function SettingsPage() {
     }
   }, [router]);
 
+  const savingRef = useRef(false);
   const flash = (msg: string) => {
     setSaved(msg);
+    savingRef.current = false;
     setTimeout(() => setSaved(null), 2000);
+  };
+  const guardSave = (fn: () => void) => {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    fn();
   };
 
   const handleCountryChange = (c: CountryConfig) => {
@@ -147,16 +154,31 @@ export default function SettingsPage() {
     flash("Country updated");
   };
 
+  const sanitize = (s: string) => s.replace(/<[^>]*>/g, "").trim();
+
   const handleSaveProfile = () => {
-    saveSettings({ displayName: displayName.trim() });
+    const clean = sanitize(displayName);
+    if (!clean) {
+      flash("Please enter a display name");
+      return;
+    }
+    if (clean.length > 50) {
+      flash("Name must be 50 characters or less");
+      return;
+    }
+    setDisplayName(clean);
+    saveSettings({ displayName: clean });
     flash("Profile updated");
   };
 
   const handleSaveMeter = () => {
-    const balNum = parseFloat(balance) || 0;
-    const tarNum = parseFloat(tariff) || country.defaultTariff;
+    const balNum = Math.min(999999.99, Math.max(0, parseFloat(balance) || 0));
+    const tarNum = Math.min(99.99, Math.max(0, parseFloat(tariff) || country.defaultTariff));
+    const cleanMeter = sanitize(meterNumber);
+    setMeterNumber(cleanMeter);
+    setBalance(balNum.toString());
     saveSettings({
-      meterNumber,
+      meterNumber: cleanMeter,
       lastBalance: balNum,
       lastBalanceDate: Date.now(),
       tariffRate: tarNum,
@@ -322,6 +344,7 @@ export default function SettingsPage() {
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
+                maxLength={50}
                 placeholder="e.g. Kofi"
                 className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
@@ -331,7 +354,7 @@ export default function SettingsPage() {
             </div>
 
             <button
-              onClick={handleSaveProfile}
+              onClick={() => guardSave(handleSaveProfile)}
               className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
             >
               Save Profile
@@ -562,11 +585,14 @@ export default function SettingsPage() {
                 <input
                   type="number"
                   inputMode="decimal"
+                  min="0"
+                  max="999999.99"
                   value={budgetAmount}
                   onChange={(e) => setBudgetAmount(e.target.value)}
                   onBlur={() => {
-                    const val = parseFloat(budgetAmount) || 0;
+                    const val = Math.min(999999.99, Math.max(0, parseFloat(budgetAmount) || 0));
                     saveSettings({ monthlyBudget: val });
+                    setBudgetAmount(val > 0 ? val.toString() : "");
                     flash(val > 0 ? "Budget updated" : "Budget cleared");
                   }}
                   placeholder="0.00"
@@ -816,6 +842,7 @@ export default function SettingsPage() {
                 type="text"
                 value={meterNumber}
                 onChange={(e) => setMeterNumber(e.target.value)}
+                maxLength={20}
                 placeholder="e.g. 01234567890"
                 className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
@@ -832,6 +859,8 @@ export default function SettingsPage() {
                 <input
                   type="number"
                   inputMode="decimal"
+                  min="0"
+                  max="999999.99"
                   value={balance}
                   onChange={(e) => setBalance(e.target.value)}
                   placeholder="0.00"
@@ -856,6 +885,8 @@ export default function SettingsPage() {
                     type="number"
                     inputMode="decimal"
                     step="0.01"
+                    min="0"
+                    max="99.99"
                     value={tariff}
                     onChange={(e) => setTariff(e.target.value)}
                     className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-14 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -876,7 +907,7 @@ export default function SettingsPage() {
             </div>
 
             <button
-              onClick={handleSaveMeter}
+              onClick={() => guardSave(handleSaveMeter)}
               className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
             >
               Update Meter Details
