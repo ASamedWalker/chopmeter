@@ -776,7 +776,7 @@ export default function DashboardPage() {
       )}
 
       {fabOpen && (
-        <div className="fixed right-5 z-50 flex flex-col items-end gap-4" style={{ bottom: "7.5rem" }}>
+        <div className="fixed right-5 z-50 flex flex-col items-end gap-4" style={{ bottom: "10rem" }}>
           {[
             { href: "/calculator", icon: Calculator, label: "Calculator", color: "#8B5CF6" },
             { href: "/topups", icon: Wallet, label: "Top-ups", color: "#10B981" },
