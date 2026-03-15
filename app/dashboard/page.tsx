@@ -47,6 +47,8 @@ import {
   Calculator,
   FileText,
   Lightbulb,
+  Plus,
+  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -128,6 +130,7 @@ export default function DashboardPage() {
   const [balanceInput, setBalanceInput] = useState("");
   const [balanceSaved, setBalanceSaved] = useState(false);
   const [weather, setWeather] = useState<WeatherCache | null>(null);
+  const [fabOpen, setFabOpen] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
@@ -599,33 +602,7 @@ export default function DashboardPage() {
           />
         )}
 
-        {/* Tools — compact row */}
-        <div className="flex gap-3 mb-6 animate-fade-in-up">
-          <Link href="/calculator" className="flex-1 glass-card p-3 flex flex-col items-center gap-1.5 active:scale-[0.98] transition-transform">
-            <div className="w-10 h-10 rounded-xl bg-violet-500/15 flex items-center justify-center">
-              <Calculator className="w-5 h-5 text-violet-400" />
-            </div>
-            <span className="text-gray-400 text-[10px] font-display font-medium">Calculator</span>
-          </Link>
-          <Link href="/topups" className="flex-1 glass-card p-3 flex flex-col items-center gap-1.5 active:scale-[0.98] transition-transform">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-emerald-400" />
-            </div>
-            <span className="text-gray-400 text-[10px] font-display font-medium">Top-ups</span>
-          </Link>
-          <Link href="/report" className="flex-1 glass-card p-3 flex flex-col items-center gap-1.5 active:scale-[0.98] transition-transform">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-blue-400" />
-            </div>
-            <span className="text-gray-400 text-[10px] font-display font-medium">Report</span>
-          </Link>
-          <Link href="/tips" className="flex-1 glass-card p-3 flex flex-col items-center gap-1.5 active:scale-[0.98] transition-transform">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center">
-              <Lightbulb className="w-5 h-5 text-amber-400" />
-            </div>
-            <span className="text-gray-400 text-[10px] font-display font-medium">Tips</span>
-          </Link>
-        </div>
+        {/* spacer for FAB clearance */}
 
         {/* Usage Chart */}
         {allReadings.length > 1 && (
@@ -789,6 +766,60 @@ export default function DashboardPage() {
         </div>
       </main>
       </PullToRefresh>
+
+      {/* FAB System */}
+      {fabOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm animate-[fadeIn_150ms_ease-out]"
+          onClick={() => setFabOpen(false)}
+        />
+      )}
+
+      {fabOpen && (
+        <div className="fixed right-5 z-50 flex flex-col items-end gap-4" style={{ bottom: "6.5rem" }}>
+          {[
+            { href: "/calculator", icon: Calculator, label: "Calculator", color: "#8B5CF6" },
+            { href: "/topups", icon: Wallet, label: "Top-ups", color: "#10B981" },
+            { href: "/report", icon: FileText, label: "Report", color: "#3B82F6" },
+            { href: "/tips", icon: Lightbulb, label: "Tips", color: "#F59E0B" },
+          ].map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setFabOpen(false)}
+                className="flex items-center gap-3 animate-[fabItem_200ms_ease-out_both]"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                <span className="text-white text-sm font-display font-semibold bg-[#1a1a2e]/90 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-xl">
+                  {item.label}
+                </span>
+                <div
+                  className="w-12 h-12 rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-transform"
+                  style={{ backgroundColor: item.color }}
+                >
+                  <Icon size={20} className="text-white" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      <button
+        onClick={() => setFabOpen(!fabOpen)}
+        className="fixed z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90"
+        style={{
+          right: 20,
+          bottom: "5rem",
+          background: fabOpen ? "#EF4444" : "linear-gradient(135deg, #3B82F6, #8B5CF6)",
+          boxShadow: fabOpen ? "0 4px 20px rgba(239,68,68,0.4)" : "0 4px 20px rgba(59,130,246,0.4)",
+          transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)",
+        }}
+      >
+        {fabOpen ? <X size={24} className="text-white" /> : <Plus size={24} className="text-white" />}
+      </button>
 
       <BottomNav active="dashboard" />
     </div>
