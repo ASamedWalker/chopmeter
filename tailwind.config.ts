@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import forms from "@tailwindcss/forms";
 
 const config: Config = {
   darkMode: "class",
@@ -21,7 +22,7 @@ const config: Config = {
         "surface-border": "rgba(255,255,255,0.08)",
       },
       fontFamily: {
-        display: ["Manrope", "sans-serif"],
+        display: ["Poppins", "sans-serif"],
       },
       borderRadius: {
         DEFAULT: "0.25rem",
@@ -74,7 +75,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [forms],
 };
 
 export default config;

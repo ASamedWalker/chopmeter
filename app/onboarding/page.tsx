@@ -8,12 +8,13 @@ import {
   Zap,
   ArrowRight,
   ArrowLeft,
-  Gauge,
-  PiggyBank,
   CheckCircle,
-  Rocket,
   ScanLine,
   TrendingUp,
+  PiggyBank,
+  Sparkles,
+  Shield,
+  Clock,
 } from "lucide-react";
 
 export default function OnboardingPage() {
@@ -27,6 +28,7 @@ export default function OnboardingPage() {
   const [balance, setBalance] = useState("");
   const [tariff, setTariff] = useState(COUNTRIES[0].defaultTariff.toString());
   const [tariffEdited, setTariffEdited] = useState(false);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
 
   const handleFinish = () => {
     const balanceNum = parseFloat(balance) || 0;
@@ -47,14 +49,14 @@ export default function OnboardingPage() {
 
   const handleCountrySelect = (country: CountryConfig) => {
     setSelectedCountry(country);
+    setShowCountryPicker(false);
     if (!tariffEdited) {
       setTariff(country.defaultTariff.toString());
     }
   };
 
   const next = () => {
-    if (step === 2 && !balance) return;
-    if (step < 3) setStep(step + 1);
+    if (step < 2) setStep(step + 1);
     else handleFinish();
   };
 
@@ -62,18 +64,13 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-bg-dark flex flex-col items-center justify-center">
-      {step === 0 && <WelcomeScreen onNext={next} onSkip={handleFinish} />}
+      {step === 0 && <WelcomeScreen onNext={next} />}
       {step === 1 && (
-        <CountryScreen
-          selected={selectedCountry}
-          onSelect={handleCountrySelect}
-          onNext={next}
-          onBack={back}
-        />
-      )}
-      {step === 2 && (
-        <MeterSetupScreen
+        <QuickSetupScreen
           country={selectedCountry}
+          showCountryPicker={showCountryPicker}
+          setShowCountryPicker={setShowCountryPicker}
+          onCountrySelect={handleCountrySelect}
           displayName={displayName}
           setDisplayName={setDisplayName}
           meterNumber={meterNumber}
@@ -87,181 +84,104 @@ export default function OnboardingPage() {
           }}
           onNext={next}
           onBack={back}
+          onSkip={handleFinish}
         />
       )}
-      {step === 3 && <ReadyScreen onFinish={handleFinish} onBack={back} />}
+      {step === 2 && (
+        <ReadyScreen
+          displayName={displayName}
+          onFinish={handleFinish}
+          onBack={back}
+        />
+      )}
     </div>
   );
 }
 
 /* ======================== SCREEN 0: WELCOME ======================== */
-function WelcomeScreen({
-  onNext,
-  onSkip,
-}: {
-  onNext: () => void;
-  onSkip: () => void;
-}) {
+function WelcomeScreen({ onNext }: { onNext: () => void }) {
   return (
     <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-white/[0.06]">
-      <header className="flex items-center justify-between px-6 py-5 z-20">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">
-            <Zap size={18} className="text-white" fill="white" />
+      {/* Logo */}
+      <header className="flex items-center px-6 py-5 z-20">
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center size-9 rounded-[10px] bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">
+            <Zap size={20} className="text-white" fill="white" />
           </div>
-          <h2 className="text-white text-lg font-bold tracking-tight">
+          <h2 className="text-white text-xl font-bold tracking-tight">
             ChopMeter
           </h2>
         </div>
-        <button
-          onClick={onSkip}
-          className="text-sm font-medium text-gray-400 hover:text-blue-400 transition-colors"
-        >
-          Skip
-        </button>
       </header>
 
-      <main className="flex-1 flex flex-col relative z-10 px-6 pb-6 overflow-y-auto">
-        <div className="flex-1 flex items-center justify-center min-h-[300px] py-4 relative">
-          <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-            <div className="w-64 h-64 bg-blue-500/30 rounded-full blur-3xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+      {/* Hero */}
+      <main className="flex-1 flex flex-col justify-center px-6 pb-6">
+        {/* Decorative glow */}
+        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/[0.08] rounded-full blur-2xl pointer-events-none" />
+
+        <div className="flex flex-col items-center mb-10 relative z-10">
+          <div className="size-24 rounded-full bg-blue-500/[0.12] border border-blue-500/20 flex items-center justify-center mb-8">
+            <Zap size={48} className="text-blue-500" fill="currentColor" />
           </div>
 
-          <div className="relative w-full aspect-[4/5] max-h-[400px] rounded-2xl overflow-hidden bg-gradient-to-b from-blue-500/5 to-violet-500/10 border border-white/[0.06] shadow-lg">
-            <div className="absolute inset-0 bg-gradient-to-t from-bg-dark/80 via-transparent to-transparent" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Gauge size={120} className="text-blue-500/20" strokeWidth={0.5} />
-            </div>
-            <div className="absolute bottom-4 left-4 right-4 bg-bg-dark/60 backdrop-blur-md border border-white/[0.08] rounded-xl p-3 flex items-center gap-3">
-              <div className="size-10 rounded-full bg-gradient-to-r from-blue-500 to-violet-500 flex items-center justify-center text-white shrink-0">
-                <PiggyBank size={20} />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-blue-400 font-bold uppercase tracking-wider">
-                  Smart Tracking
-                </span>
-                <span className="text-sm text-white font-medium">
-                  Know exactly where your money goes
-                </span>
-              </div>
-            </div>
-          </div>
+          <h1 className="text-[32px] font-extrabold text-white text-center leading-[1.25] mb-3">
+            Stop your meter<br />
+            from <span className="gradient-primary-text">chopping</span> your money
+          </h1>
+          <p className="text-gray-400 text-base text-center leading-relaxed max-w-[300px]">
+            Track every unit, know your balance, and take control of your electricity spend.
+          </p>
         </div>
 
-        <div className="flex flex-col items-center text-center mt-4 mb-2 space-y-4">
-          <h1 className="text-3xl font-extrabold text-white leading-tight tracking-tight">
-            No more meter dey{" "}
-            <span className="gradient-primary-text">chop your money</span>
-          </h1>
-          <p className="text-gray-400 text-base leading-relaxed max-w-xs mx-auto">
-            Take control of your electricity. Track usage in real-time and stop
-            overpaying for your utilities today.
-          </p>
+        {/* 3 Benefits */}
+        <div className="space-y-3 relative z-10">
+          {[
+            { Icon: ScanLine, title: "Scan & Track", desc: "Point at your meter to log readings instantly", color: "text-blue-500", bg: "bg-blue-500/[0.08]" },
+            { Icon: Shield, title: "Stay In Control", desc: "Know exactly how many days your credit will last", color: "text-violet-500", bg: "bg-violet-500/[0.08]" },
+            { Icon: PiggyBank, title: "Save Money", desc: "Get tips to cut your electricity bill by up to 30%", color: "text-emerald-500", bg: "bg-emerald-500/[0.08]" },
+          ].map((item) => (
+            <div
+              key={item.title}
+              className="flex items-center gap-3.5 py-3 px-4 rounded-[14px] bg-white/[0.03] border border-white/[0.05]"
+            >
+              <div className={`size-[42px] rounded-xl ${item.bg} flex items-center justify-center shrink-0`}>
+                <item.Icon size={22} className={item.color} />
+              </div>
+              <div>
+                <p className="text-[15px] font-semibold text-white">{item.title}</p>
+                <p className="text-[13px] text-gray-400 mt-0.5">{item.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </main>
 
+      {/* CTA */}
       <footer className="px-6 pb-8 pt-2 w-full z-20">
-        <StepDots current={0} total={4} />
+        <StepDots current={0} total={3} />
         <button
           onClick={onNext}
-          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-2xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
         >
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-          <span className="text-white text-lg font-bold tracking-wide mr-2 relative z-10">
+          <span className="text-white text-[17px] font-bold mr-2 relative z-10">
             Get Started
           </span>
           <ArrowRight size={20} className="text-white relative z-10 transition-transform group-hover:translate-x-1" />
         </button>
+        <p className="text-center text-[13px] text-gray-600 mt-3">
+          Takes less than 30 seconds
+        </p>
       </footer>
     </div>
   );
 }
 
-/* ======================== SCREEN 1: COUNTRY ======================== */
-function CountryScreen({
-  selected,
-  onSelect,
-  onNext,
-  onBack,
-}: {
-  selected: CountryConfig;
-  onSelect: (c: CountryConfig) => void;
-  onNext: () => void;
-  onBack: () => void;
-}) {
-  return (
-    <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-white/[0.06]">
-      <header className="flex items-center justify-between px-6 py-5 z-20">
-        <button
-          onClick={onBack}
-          className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-300 hover:text-white transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <h2 className="text-white text-lg font-bold tracking-tight">
-          Your Country
-        </h2>
-        <div className="size-10" />
-      </header>
-
-      <main className="flex-1 flex flex-col px-6 pb-6 overflow-y-auto">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-extrabold text-white mb-2">
-            Where are you?
-          </h1>
-          <p className="text-gray-400 text-sm">
-            We&apos;ll set your currency and default electricity rate.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          {COUNTRIES.map((country) => {
-            const isSelected = selected.code === country.code;
-            return (
-              <button
-                key={country.code}
-                onClick={() => onSelect(country)}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                  isSelected
-                    ? "border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/10"
-                    : "border-white/[0.06] bg-white/[0.03] hover:border-blue-500/40"
-                }`}
-              >
-                <span className="text-4xl">{country.flag}</span>
-                <span className="text-white font-bold text-sm">
-                  {country.name}
-                </span>
-                <span className="text-gray-400 text-xs">
-                  {country.currencySymbol}/kWh
-                </span>
-                {isSelected && (
-                  <CheckCircle size={18} className="text-blue-400" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </main>
-
-      <footer className="px-6 pb-8 pt-2 w-full z-20">
-        <StepDots current={1} total={4} />
-        <button
-          onClick={onNext}
-          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98]"
-        >
-          <span className="text-white text-lg font-bold tracking-wide mr-2 relative z-10">
-            Continue
-          </span>
-          <ArrowRight size={20} className="text-white relative z-10" />
-        </button>
-      </footer>
-    </div>
-  );
-}
-
-/* ======================== SCREEN 2: METER SETUP ======================== */
-function MeterSetupScreen({
+/* ======================== SCREEN 1: QUICK SETUP ======================== */
+function QuickSetupScreen({
   country,
+  showCountryPicker,
+  setShowCountryPicker,
+  onCountrySelect,
   displayName,
   setDisplayName,
   meterNumber,
@@ -272,8 +192,12 @@ function MeterSetupScreen({
   setTariff,
   onNext,
   onBack,
+  onSkip,
 }: {
   country: CountryConfig;
+  showCountryPicker: boolean;
+  setShowCountryPicker: (v: boolean) => void;
+  onCountrySelect: (c: CountryConfig) => void;
   displayName: string;
   setDisplayName: (v: string) => void;
   meterNumber: string;
@@ -284,145 +208,177 @@ function MeterSetupScreen({
   setTariff: (v: string) => void;
   onNext: () => void;
   onBack: () => void;
+  onSkip: () => void;
 }) {
-  const balanceValid = balance !== "" && parseFloat(balance) >= 0;
-
   return (
     <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-white/[0.06]">
-      <header className="flex items-center justify-between px-6 py-5 z-20">
+      <header className="flex items-center justify-between px-6 py-4 z-20">
         <button
           onClick={onBack}
           className="flex items-center justify-center size-10 rounded-full bg-white/[0.05] border border-white/[0.06] text-gray-300 hover:text-white transition-colors"
         >
           <ArrowLeft size={20} />
         </button>
-        <h2 className="text-white text-lg font-bold tracking-tight">
-          Meter Setup
-        </h2>
-        <div className="size-10" />
+        <h2 className="text-white text-[17px] font-semibold">Quick Setup</h2>
+        <button
+          onClick={onSkip}
+          className="text-sm font-medium text-gray-500 hover:text-blue-400 transition-colors"
+        >
+          Skip
+        </button>
       </header>
 
       <main className="flex-1 flex flex-col px-6 pb-6 overflow-y-auto">
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold mb-3 border border-blue-500/20">
-            <span className="text-lg">{country.flag}</span>
-            {country.name}
-          </div>
-          <h1 className="text-2xl font-extrabold text-white mb-2">
-            Set up your meter
-          </h1>
-          <p className="text-gray-400 text-sm">
-            Enter your current balance to start tracking.
-          </p>
-        </div>
+        <p className="text-gray-400 text-sm text-center mb-6">
+          Tell us a bit about yourself. Everything is optional — you can update later in Settings.
+        </p>
 
         <div className="space-y-5">
-          {/* Display Name (optional) */}
+          {/* Name */}
           <div>
-            <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
-              Your Name{" "}
-              <span className="text-gray-600 normal-case">(optional)</span>
+            <label className="block text-gray-300 text-[13px] font-semibold uppercase tracking-wider mb-2">
+              What should we call you?
             </label>
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="e.g. Kofi"
-              className="w-full h-14 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-lg font-bold px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              placeholder="e.g. Kofi, Ama, Chidi..."
+              autoCapitalize="words"
+              className="w-full h-14 rounded-[14px] bg-white/[0.03] border border-white/[0.06] text-white text-[17px] font-medium px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
-          {/* Meter Number (optional) */}
+          {/* Country */}
           <div>
-            <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
-              Meter Number{" "}
-              <span className="text-gray-600 normal-case">(optional)</span>
+            <label className="block text-gray-300 text-[13px] font-semibold uppercase tracking-wider mb-2">
+              Your Country
             </label>
-            <input
-              type="text"
-              value={meterNumber}
-              onChange={(e) => setMeterNumber(e.target.value)}
-              placeholder="e.g. 01234567890"
-              className="w-full h-14 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-lg font-bold px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
+            <button
+              onClick={() => setShowCountryPicker(!showCountryPicker)}
+              className="w-full flex items-center justify-between h-14 rounded-[14px] bg-white/[0.03] border border-white/[0.06] px-4"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-[28px]">{country.flag}</span>
+                <div className="text-left">
+                  <p className="text-[15px] font-semibold text-white">{country.name}</p>
+                  <p className="text-xs text-gray-400">
+                    {country.currencySymbol} {country.defaultTariff}/kWh
+                  </p>
+                </div>
+              </div>
+              <span className="text-sm font-medium text-blue-500">Change</span>
+            </button>
+
+            {showCountryPicker && (
+              <div className="grid grid-cols-2 gap-2.5 mt-3 pt-3 border-t border-white/[0.06]">
+                {COUNTRIES.map((c) => {
+                  const isSelected = country.code === c.code;
+                  return (
+                    <button
+                      key={c.code}
+                      onClick={() => onCountrySelect(c)}
+                      className={`flex items-center gap-2.5 p-3 rounded-xl border-[1.5px] transition-all ${
+                        isSelected
+                          ? "border-blue-500 bg-blue-500/10"
+                          : "border-white/[0.06] bg-white/[0.02] hover:border-blue-500/40"
+                      }`}
+                    >
+                      <span className="text-[22px]">{c.flag}</span>
+                      <div className="text-left flex-1 min-w-0">
+                        <p className="text-[13px] font-semibold text-white truncate">{c.name}</p>
+                        <p className="text-[11px] text-gray-400">{c.currencySymbol}</p>
+                      </div>
+                      {isSelected && <CheckCircle size={16} className="text-blue-500 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Current Balance (required) */}
+          {/* Balance */}
           <div>
-            <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
-              Current Balance{" "}
-              <span className="text-blue-400">*</span>
+            <label className="block text-gray-300 text-[13px] font-semibold uppercase tracking-wider mb-2">
+              Current Meter Balance
             </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">
-                {country.currencySymbol}
-              </span>
+            <div className="flex gap-2">
+              <div className="flex items-center justify-center h-14 px-4 rounded-[14px] bg-blue-500/[0.08] border border-blue-500/[0.15]">
+                <span className="text-base font-bold text-blue-500">{country.currencySymbol}</span>
+              </div>
               <input
                 type="number"
                 inputMode="decimal"
                 value={balance}
                 onChange={(e) => setBalance(e.target.value)}
                 placeholder="0.00"
-                className="w-full h-14 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-lg font-bold pl-16 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                className="flex-1 h-14 rounded-[14px] bg-white/[0.03] border border-white/[0.06] text-white text-[17px] font-medium px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
-            {balance !== "" && !balanceValid && (
-              <p className="text-danger text-xs mt-1">
-                Enter a valid balance amount
-              </p>
-            )}
+            <p className="text-gray-500 text-xs mt-1.5">
+              Optional — you can add this later from the dashboard
+            </p>
           </div>
 
-          {/* Tariff Rate */}
+          {/* Meter Number */}
           <div>
-            <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
-              Tariff Rate (per kWh)
+            <label className="block text-gray-300 text-[13px] font-semibold uppercase tracking-wider mb-2">
+              Meter Number{" "}
+              <span className="text-gray-600 normal-case font-normal">(optional)</span>
             </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-lg">
-                {country.currencySymbol}
-              </span>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                value={tariff}
-                onChange={(e) => setTariff(e.target.value)}
-                className="w-full h-14 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-lg font-bold pl-16 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <p className="text-gray-500 text-xs mt-1">
-              Default: {country.currencySymbol} {country.defaultTariff} for{" "}
-              {country.name}
+            <input
+              type="text"
+              value={meterNumber}
+              onChange={(e) => setMeterNumber(e.target.value)}
+              placeholder="e.g. 01234567890"
+              className="w-full h-14 rounded-[14px] bg-white/[0.03] border border-white/[0.06] text-white text-[17px] font-medium px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Tariff */}
+          <div>
+            <label className="block text-gray-300 text-[13px] font-semibold uppercase tracking-wider mb-2">
+              Tariff Rate{" "}
+              <span className="text-gray-600 normal-case font-normal">(per kWh)</span>
+            </label>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              value={tariff}
+              onChange={(e) => setTariff(e.target.value)}
+              className="w-full h-14 rounded-[14px] bg-white/[0.03] border border-white/[0.06] text-white text-[17px] font-medium px-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <p className="text-gray-500 text-xs mt-1.5">
+              Auto-filled for {country.name}. Change only if your rate is different.
             </p>
           </div>
         </div>
       </main>
 
       <footer className="px-6 pb-8 pt-2 w-full z-20">
-        <StepDots current={2} total={4} />
+        <StepDots current={1} total={3} />
         <button
           onClick={onNext}
-          disabled={!balanceValid}
-          className={`w-full flex items-center justify-center rounded-xl h-14 font-bold text-lg transition-all active:scale-[0.98] ${
-            balanceValid
-              ? "bg-gradient-to-r from-blue-500 to-violet-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]"
-              : "bg-white/[0.03] text-gray-600 cursor-not-allowed"
-          }`}
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-2xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98]"
         >
-          Continue
-          <ArrowRight size={20} className="ml-2" />
+          <span className="text-white text-[17px] font-bold mr-2 relative z-10">
+            Continue
+          </span>
+          <ArrowRight size={20} className="text-white relative z-10" />
         </button>
       </footer>
     </div>
   );
 }
 
-/* ======================== SCREEN 3: READY ======================== */
+/* ======================== SCREEN 2: READY ======================== */
 function ReadyScreen({
+  displayName,
   onFinish,
   onBack,
 }: {
+  displayName: string;
   onFinish: () => void;
   onBack: () => void;
 }) {
@@ -435,61 +391,57 @@ function ReadyScreen({
         >
           <ArrowLeft size={20} />
         </button>
-        <h2 className="text-white text-lg font-bold tracking-tight">
-          ChopMeter
-        </h2>
+        <div className="size-10" />
         <div className="size-10" />
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 pb-6">
-        <div className="relative mb-8">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-violet-500/5 rounded-full opacity-40 blur-3xl scale-150" />
-          <div className="relative z-10 flex flex-col items-center justify-center p-10 glass-card rounded-full shadow-2xl size-56">
-            <Rocket size={80} className="text-blue-400" fill="currentColor" strokeWidth={1} />
-            <div className="absolute -z-10 w-full h-full border border-blue-500/20 rounded-full animate-pulse" />
-          </div>
+        {/* Success icon */}
+        <div className="size-[120px] rounded-full bg-emerald-500/[0.12] border border-emerald-500/20 flex items-center justify-center mb-8">
+          <Sparkles size={56} className="text-emerald-500" />
         </div>
 
-        <div className="flex flex-col items-center text-center space-y-4 max-w-sm">
-          <h1 className="text-3xl font-extrabold text-white leading-tight">
-            You&apos;re all set!
-          </h1>
-          <p className="text-gray-400 text-base leading-relaxed">
-            Scan your meter, track your spending, and never be surprised by your
-            electricity bill again.
-          </p>
+        <h1 className="text-[28px] font-extrabold text-white text-center mb-2">
+          {displayName ? `Welcome, ${displayName}!` : "You\u2019re all set!"}
+        </h1>
+        <p className="text-gray-400 text-[15px] text-center leading-relaxed max-w-[300px] mb-8">
+          Your dashboard is ready. Here&apos;s what you can do next:
+        </p>
 
-          <div className="grid grid-cols-3 gap-3 w-full pt-4">
-            {[
-              { Icon: ScanLine, label: "Scan" },
-              { Icon: TrendingUp, label: "Track" },
-              { Icon: PiggyBank, label: "Save" },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]"
-              >
-                <item.Icon size={24} className="text-blue-400" />
-                <span className="text-gray-300 text-xs font-bold">
-                  {item.label}
-                </span>
+        {/* Next steps */}
+        <div className="w-full space-y-3">
+          {[
+            { Icon: ScanLine, title: "Scan your meter", desc: "Get your first reading in seconds", num: "1" },
+            { Icon: TrendingUp, title: "Track your usage", desc: "See daily trends and burn rate", num: "2" },
+            { Icon: Clock, title: "Check your runway", desc: "Know when your credit runs out", num: "3" },
+          ].map((item) => (
+            <div
+              key={item.num}
+              className="flex items-center gap-3.5 py-3.5 px-4 rounded-[14px] bg-white/[0.03] border border-white/[0.05]"
+            >
+              <div className="size-9 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                <span className="text-sm font-bold text-blue-500">{item.num}</span>
               </div>
-            ))}
-          </div>
+              <div className="flex-1">
+                <p className="text-[15px] font-semibold text-white">{item.title}</p>
+                <p className="text-[13px] text-gray-400 mt-0.5">{item.desc}</p>
+              </div>
+              <item.Icon size={20} className="text-blue-500 shrink-0" />
+            </div>
+          ))}
         </div>
       </main>
 
       <footer className="px-6 pb-8 pt-2 w-full z-20">
-        <StepDots current={3} total={4} />
+        <StepDots current={2} total={3} />
         <button
           onClick={onFinish}
-          className="w-full group relative flex items-center justify-center overflow-hidden rounded-xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
+          className="w-full group relative flex items-center justify-center overflow-hidden rounded-2xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
         >
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-          <span className="text-white text-lg font-bold tracking-wide mr-2 relative z-10">
-            Launch Dashboard
+          <Zap size={20} className="text-white relative z-10 mr-2" fill="currentColor" />
+          <span className="text-white text-[17px] font-bold relative z-10">
+            Open Dashboard
           </span>
-          <ArrowRight size={20} className="text-white relative z-10 transition-transform group-hover:translate-x-1" />
         </button>
       </footer>
     </div>
@@ -499,16 +451,16 @@ function ReadyScreen({
 /* ======================== STEP DOTS ======================== */
 function StepDots({ current, total }: { current: number; total: number }) {
   return (
-    <div className="flex justify-center gap-2 mb-6">
+    <div className="flex justify-center gap-2 mb-5">
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
-          className={`h-1.5 rounded-full transition-all duration-300 ${
+          className={`h-1 rounded-full transition-all duration-300 ${
             i === current
-              ? "w-6 bg-gradient-to-r from-blue-500 to-violet-500"
+              ? "w-7 bg-gradient-to-r from-blue-500 to-violet-500"
               : i < current
-              ? "w-3 bg-blue-500/40"
-              : "w-1.5 bg-gray-700"
+              ? "w-3.5 bg-blue-500/50"
+              : "w-2 bg-gray-700"
           }`}
         />
       ))}
