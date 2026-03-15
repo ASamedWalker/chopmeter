@@ -47,6 +47,7 @@ import {
   Calculator,
   FileText,
   Lightbulb,
+  Activity,
   Plus,
   X,
 } from "lucide-react";
@@ -591,6 +592,19 @@ export default function DashboardPage() {
           </Link>
         )}
 
+        {/* Meter Health Check Card */}
+        <Link href="/health" className="block glass-card p-4 mb-4 border-red-500/20 animate-fade-in-up">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-red-500/15 flex items-center justify-center">
+              <Activity className="w-6 h-6 text-red-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-white font-display font-bold text-sm">Meter Health Check</p>
+              <p className="text-gray-500 text-xs font-display">Is your meter running fast? Find out &rarr;</p>
+            </div>
+          </div>
+        </Link>
+
         {/* Low Balance Alert */}
         {metrics && (
           <LowBalanceAlert
@@ -778,6 +792,7 @@ export default function DashboardPage() {
       {fabOpen && (
         <div className="fixed right-5 z-50 flex flex-col items-end gap-4" style={{ bottom: "10rem" }}>
           {[
+            { href: "/health", icon: Activity, label: "Health Check", color: "#EF4444" },
             { href: "/calculator", icon: Calculator, label: "Calculator", color: "#8B5CF6" },
             { href: "/topups", icon: Wallet, label: "Top-ups", color: "#10B981" },
             { href: "/report", icon: FileText, label: "Report", color: "#3B82F6" },

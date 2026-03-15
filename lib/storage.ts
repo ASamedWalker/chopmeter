@@ -1,5 +1,6 @@
 import type { MeterReading, UserSettings, BookmarkedTip, WeatherCache, TopUp, Meter } from "./types";
 import type { ReminderSettings } from "./notifications";
+import type { ApplianceSelection } from "./healthcheck";
 import { DEFAULT_REMINDER_SETTINGS } from "./notifications";
 
 const READINGS_KEY = "chopmeter_readings";
@@ -9,6 +10,7 @@ const WEATHER_CACHE_KEY = "chopmeter_weather";
 const REMINDERS_KEY = "chopmeter_reminders";
 const TOPUPS_KEY = "chopmeter_topups";
 const METERS_KEY = "chopmeter_meters";
+const APPLIANCE_SELECTIONS_KEY = "chopmeter_appliance_selections";
 const WEATHER_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 /** The fixed ID used for the auto-created default meter (legacy migration). */
@@ -279,6 +281,23 @@ export function deleteTopUp(id: string, meterId?: string): void {
   localStorage.setItem(key, JSON.stringify(topups));
 }
 
+// ---- Appliance Selections ----
+
+export function getApplianceSelections(): ApplianceSelection[] {
+  if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(APPLIANCE_SELECTIONS_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as ApplianceSelection[];
+  } catch {
+    return [];
+  }
+}
+
+export function saveApplianceSelections(selections: ApplianceSelection[]): void {
+  localStorage.setItem(APPLIANCE_SELECTIONS_KEY, JSON.stringify(selections));
+}
+
 // ---- Data management ----
 
 export function clearAllData(): void {
@@ -289,6 +308,7 @@ export function clearAllData(): void {
   localStorage.removeItem(WEATHER_CACHE_KEY);
   localStorage.removeItem(REMINDERS_KEY);
   localStorage.removeItem(TOPUPS_KEY);
+  localStorage.removeItem(APPLIANCE_SELECTIONS_KEY);
 
   // Clear meter-specific keys
   const meters = getMeters();
