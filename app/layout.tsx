@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import InstallPrompt from "@/components/InstallPrompt";
-import UpdatePrompt from "@/components/UpdatePrompt";
 import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
 
@@ -146,7 +145,6 @@ export default function RootLayout({
         </Script>
         <SmoothScroll />
         <InstallPrompt />
-        <UpdatePrompt />
         {children}
       </body>
     </html>
