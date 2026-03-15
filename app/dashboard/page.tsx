@@ -31,11 +31,9 @@ import {
   ScanLine,
   Wallet,
   ChevronDown,
-  Timer,
   TrendingUp,
   Camera,
   Keyboard,
-  Gauge,
   Sun,
   CloudSun,
   Cloud,
@@ -257,20 +255,18 @@ export default function DashboardPage() {
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 pb-24">
           <div className="h-7 w-48 rounded skeleton-shimmer mb-1" />
           <div className="h-4 w-32 rounded skeleton-shimmer mb-6" />
-          <div className="glass-card gradient-hero p-6 mb-4">
-            <div className="h-4 w-32 rounded skeleton-shimmer mb-4" />
-            <div className="h-10 w-48 rounded-lg skeleton-shimmer mb-6" />
-            <div className="h-12 w-full rounded-xl skeleton-shimmer" />
+          <div className="rounded-3xl bg-[#0F1729] p-6 mb-6">
+            <div className="h-4 w-24 rounded skeleton-shimmer mb-3" />
+            <div className="h-14 w-56 rounded-lg skeleton-shimmer mb-2" />
+            <div className="h-3 w-40 rounded skeleton-shimmer mb-5" />
+            <div className="h-12 w-full rounded-2xl skeleton-shimmer" />
           </div>
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="glass-card p-5 h-32 skeleton-shimmer" />
             <div className="glass-card p-5 h-32 skeleton-shimmer" />
           </div>
-          <div className="h-5 w-36 rounded skeleton-shimmer mb-3" />
-          <div className="space-y-2">
-            <div className="glass-card p-4 h-16 skeleton-shimmer" />
-            <div className="glass-card p-4 h-16 skeleton-shimmer" />
-          </div>
+          <div className="glass-card p-5 h-52 skeleton-shimmer mb-6" />
+          <div className="glass-card p-4 h-16 skeleton-shimmer mb-6" />
         </main>
         <BottomNav active="dashboard" />
       </div>
@@ -290,15 +286,6 @@ export default function DashboardPage() {
       ? "text-yellow-400"
       : "text-white";
 
-  const runwayBarColor =
-    metrics.daysLeft === null
-      ? "bg-gray-700"
-      : metrics.daysLeft <= 3
-      ? "bg-danger"
-      : metrics.daysLeft <= 7
-      ? "bg-yellow-400"
-      : "bg-gradient-to-r from-blue-500 to-violet-500";
-
   const budget = getBudgetStatus(
     allReadings,
     settings.tariffRate,
@@ -310,7 +297,7 @@ export default function DashboardPage() {
       <PullToRefresh onRefresh={() => loadData()}>
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 pt-6 pb-24">
         {/* Greeting + Weather Row */}
-        <div className="flex items-start justify-between mb-4 animate-fade-in-up">
+        <div className="flex items-start justify-between mb-6 animate-fade-in-up">
           <div>
             <h1 className="text-2xl font-extrabold text-white tracking-tight">
               {getGreeting()}
@@ -340,170 +327,151 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Hero Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          {/* Main Balance Card */}
-          <div
-            onClick={() => toggleCard("balance")}
-            className="md:col-span-2 relative overflow-hidden glass-card gradient-hero p-6 shadow-xl cursor-pointer active:scale-[0.98] transition-transform"
-          >
-            <div className="absolute top-0 right-0 p-4 opacity-[0.07]">
-              <Wallet size={96} className="text-blue-400" />
+        {/* Hero Balance Card — THE focal point */}
+        <div
+          onClick={() => toggleCard("balance")}
+          className="relative overflow-hidden rounded-3xl bg-[#0F1729] p-6 pb-5 shadow-2xl shadow-blue-950/40 border border-white/[0.04] mb-6 cursor-pointer active:scale-[0.99] transition-transform"
+        >
+          <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/[0.06] rounded-full blur-3xl -translate-y-12 translate-x-12" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet-500/[0.04] rounded-full blur-2xl translate-y-8 -translate-x-8" />
+
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-gray-400 text-sm font-semibold tracking-wide">
+                Balance
+              </p>
+              <ChevronDown
+                size={18}
+                className={`text-gray-500 transition-transform ${
+                  expandedCard === "balance" ? "rotate-180" : ""
+                }`}
+              />
             </div>
-            <div className="relative z-10 flex flex-col h-full justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-gray-400 text-sm font-medium uppercase tracking-wider">
-                    Estimated Balance
-                  </p>
-                  <ChevronDown
-                    size={18}
-                    className={`text-gray-500 transition-transform ${
-                      expandedCard === "balance" ? "rotate-180" : ""
-                    }`}
-                  />
-                </div>
-                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-2 animate-number-pop">
-                  <span className="text-xl font-bold text-gray-500 align-top mt-1 inline-block">
-                    {currencySymbol}
-                  </span>{" "}
-                  <span className="gradient-primary-text">
-                    {displayBalance.toFixed(2)}
+
+            <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight mt-2 mb-1 animate-number-pop">
+              <span className="text-2xl sm:text-3xl font-bold text-gray-400 align-top inline-block mr-1">
+                {currencySymbol}
+              </span>
+              <span className="text-white">
+                {displayBalance.toFixed(2)}
+              </span>
+            </h1>
+
+            <p className="text-gray-500 text-xs mt-1">
+              {!hasData
+                ? "Scan your meter to start tracking"
+                : !metrics.dataAdequate
+                ? "Collecting data for estimates..."
+                : `${currencySymbol} ${metrics.dailyBurnRate.toFixed(2)}/day burn rate`}
+            </p>
+
+            {expandedCard === "balance" && (
+              <div className="mt-4 pt-4 border-t border-white/[0.06] space-y-2 animate-fade-in-up">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Last updated</span>
+                  <span className="text-gray-200">
+                    {new Date(settings.lastBalanceDate).toLocaleDateString(
+                      country.locale,
+                      {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
                   </span>
-                </h1>
-              </div>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Tariff</span>
+                  <span className="text-gray-200">
+                    {currencySymbol} {settings.tariffRate}/kWh
+                  </span>
+                </div>
 
-              {expandedCard === "balance" && (
-                <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2 animate-fade-in-up">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Last updated</span>
-                    <span className="text-gray-200">
-                      {new Date(settings.lastBalanceDate).toLocaleDateString(
-                        country.locale,
-                        {
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Daily burn rate</span>
-                    <span className="text-gray-200">
-                      {!hasData
-                        ? "No data yet"
-                        : !metrics.dataAdequate
-                        ? "Need more readings"
-                        : `${currencySymbol} ${metrics.dailyBurnRate.toFixed(2)}/day`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-400">Tariff</span>
-                    <span className="text-gray-200">
-                      {currencySymbol} {settings.tariffRate}/kWh
-                    </span>
-                  </div>
-
-                  {/* Quick balance update */}
-                  <div className="pt-2 border-t border-white/[0.06]">
-                    <label className="flex items-center gap-1.5 text-gray-400 text-xs uppercase tracking-wider mb-1.5">
-                      <Wallet size={12} />
-                      Update Balance
-                    </label>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold">
-                          {currencySymbol}
-                        </span>
-                        <input
-                          type="number"
-                          inputMode="decimal"
-                          min="0"
-                          max="999999.99"
-                          value={balanceInput}
-                          onChange={(e) => {
-                            setBalanceInput(e.target.value);
-                            setBalanceSaved(false);
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          placeholder="e.g. 500.00"
-                          className="w-full h-10 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-10 pr-3 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        />
-                      </div>
-                      <button
-                        disabled={balanceSaved}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const val = parseFloat(balanceInput);
-                          if (isNaN(val) || val <= 0 || val > 999999.99) return;
-                          saveSettings({
-                            lastBalance: val,
-                            lastBalanceDate: Date.now(),
-                          });
-                          setBalanceSaved(true);
-                          loadData();
+                {/* Quick balance update */}
+                <div className="pt-2 border-t border-white/[0.06]">
+                  <label className="flex items-center gap-1.5 text-gray-400 text-xs uppercase tracking-wider mb-1.5">
+                    <Wallet size={12} />
+                    Update Balance
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold">
+                        {currencySymbol}
+                      </span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        max="999999.99"
+                        value={balanceInput}
+                        onChange={(e) => {
+                          setBalanceInput(e.target.value);
+                          setBalanceSaved(false);
                         }}
-                        className="h-10 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-violet-500 text-white text-sm font-bold hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.95]"
-                      >
-                        {balanceSaved ? "Saved!" : "Save"}
-                      </button>
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="e.g. 500.00"
+                        className="w-full h-10 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white text-sm font-bold pl-10 pr-3 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
                     </div>
+                    <button
+                      disabled={balanceSaved}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const val = parseFloat(balanceInput);
+                        if (isNaN(val) || val <= 0 || val > 999999.99) return;
+                        saveSettings({
+                          lastBalance: val,
+                          lastBalanceDate: Date.now(),
+                        });
+                        setBalanceSaved(true);
+                        loadData();
+                      }}
+                      className="h-10 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-violet-500 text-white text-sm font-bold hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.95]"
+                    >
+                      {balanceSaved ? "Saved!" : "Save"}
+                    </button>
                   </div>
                 </div>
-              )}
-
-              <div className="mt-6 flex gap-3">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push("/scanner");
-                  }}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 active:scale-[0.98]"
-                >
-                  <ScanLine size={20} />
-                  Scan Meter
-                </button>
               </div>
+            )}
+
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push("/scanner");
+                }}
+                className="flex-1 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold py-3.5 px-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 active:scale-[0.98]"
+              >
+                <ScanLine size={20} />
+                Scan Meter
+              </button>
             </div>
           </div>
+        </div>
 
-          {/* Side cards */}
-          <div className="flex flex-col gap-4">
-            {/* Runway Card */}
-            <div
-              onClick={() => toggleCard("runway")}
-              className="flex-1 glass-card p-5 flex flex-col justify-center relative overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
-            >
-              <div className="absolute -right-4 -bottom-4 size-28 bg-blue-500/10 rounded-full blur-2xl" />
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">
-                  Est. Runway
+        {/* Runway Card — full width with semicircular gauge */}
+        <div
+          onClick={() => toggleCard("runway")}
+          className="glass-card p-5 mb-6 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">
+                Est. Runway
+              </p>
+              <p className="text-gray-500 text-xs">
+                Meter Usage Runway
+              </p>
+              {hasData && !metrics.dataAdequate && (
+                <p className="text-gray-500 text-xs mt-1">
+                  {metrics.dataSpanDays < 1 ? "<1 day" : `${metrics.dataSpanDays}d`} of data
                 </p>
-                <Timer size={20} className="text-blue-400" />
-              </div>
-              <div className="flex items-baseline gap-2">
-                <h3 className={`text-3xl font-bold ${runwayColor}`}>
-                  {metrics.daysLeft !== null ? `~${metrics.daysLeft}` : "--"}
-                </h3>
-                <span className="text-lg text-gray-400 font-medium">Days</span>
-              </div>
-
-              {metrics.daysLeft !== null ? (
-                <div className="w-full bg-white/[0.05] rounded-full h-2 mt-3">
-                  <div
-                    className={`${runwayBarColor} h-2 rounded-full transition-all`}
-                    style={{
-                      width: `${Math.min(100, (metrics.daysLeft / 30) * 100)}%`,
-                    }}
-                  />
-                </div>
-              ) : (
-                <p className="text-gray-500 text-xs mt-2">
-                  {hasData && !metrics.dataAdequate
-                    ? `Based on ${metrics.dataSpanDays < 1 ? "less than 1 day" : `${metrics.dataSpanDays} days`} of data — need 1+ day for estimates`
-                    : "Scan meter to start tracking"}
+              )}
+              {!hasData && (
+                <p className="text-gray-500 text-xs mt-1">
+                  Scan your meter to start tracking
                 </p>
               )}
 
@@ -534,53 +502,189 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Daily Avg Card */}
-            <div
-              onClick={() => toggleCard("daily")}
-              className="flex-1 glass-card p-5 flex flex-col justify-center cursor-pointer active:scale-[0.98] transition-transform"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-gray-400 text-xs font-medium uppercase tracking-wider">
-                  Daily Avg
-                </p>
-                <TrendingUp size={20} className="text-blue-400" />
+            {/* Semicircular Gauge */}
+            <div className="relative w-28 h-16 flex items-center justify-center">
+              <svg viewBox="0 0 120 70" className="w-full h-full">
+                {/* Background arc */}
+                <path
+                  d="M 10 65 A 50 50 0 0 1 110 65"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.06)"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                />
+                {/* Filled arc */}
+                <path
+                  d="M 10 65 A 50 50 0 0 1 110 65"
+                  fill="none"
+                  stroke="url(#gaugeGradient)"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(metrics.daysLeft !== null ? Math.min(100, (metrics.daysLeft / 30) * 100) : 0) * 1.57} 157`}
+                  className="transition-all duration-700"
+                />
+                <defs>
+                  <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#3B82F6" />
+                    <stop offset="100%" stopColor="#8B5CF6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="absolute bottom-0 text-center">
+                <span className={`text-lg font-extrabold ${runwayColor}`}>
+                  {metrics.daysLeft !== null ? `${Math.min(100, Math.round((metrics.daysLeft / 30) * 100))}%` : "0%"}
+                </span>
               </div>
-              {hasData ? (
-                <h3 className="text-2xl font-bold text-white">
-                  {currencySymbol} {metrics.dailyBurnRate.toFixed(2)}
-                </h3>
-              ) : (
-                <h3 className="text-2xl font-bold text-gray-500">--</h3>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                {hasData
-                  ? "Per day estimated"
-                  : "Add readings to see daily average"}
-              </p>
-
-              {expandedCard === "daily" && hasData && (
-                <div className="mt-3 pt-3 border-t border-white/[0.06] text-xs text-gray-400 space-y-1 animate-fade-in-up">
-                  <div className="flex justify-between">
-                    <span>Weekly usage</span>
-                    <span className="text-gray-200">
-                      {metrics.weeklyUsage.toFixed(1)} kWh
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Today usage</span>
-                    <span className="text-gray-200">
-                      {metrics.todayUsage.toFixed(1)} kWh
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
-        {/* Budget — slim bar under balance */}
+        {/* Metric cards row — Daily Avg + Daily Trend */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {/* Daily Avg Card */}
+          <div
+            onClick={() => toggleCard("daily")}
+            className="glass-card p-5 flex flex-col justify-between cursor-pointer active:scale-[0.98] transition-transform"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">
+                Daily Avg
+              </p>
+              <TrendingUp size={18} className="text-blue-400" />
+            </div>
+            {hasData ? (
+              <h3 className="text-xl font-bold text-white">
+                {currencySymbol} {metrics.dailyBurnRate.toFixed(2)}
+              </h3>
+            ) : (
+              <h3 className="text-xl font-bold text-gray-500">--</h3>
+            )}
+            <p className="text-[10px] text-gray-500 mt-1">
+              {hasData
+                ? "Per day estimated"
+                : "Add readings to see daily average"}
+            </p>
+
+            {expandedCard === "daily" && hasData && (
+              <div className="mt-3 pt-3 border-t border-white/[0.06] text-xs text-gray-400 space-y-1 animate-fade-in-up">
+                <div className="flex justify-between">
+                  <span>Weekly</span>
+                  <span className="text-gray-200">
+                    {metrics.weeklyUsage.toFixed(1)} kWh
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Today</span>
+                  <span className="text-gray-200">
+                    {metrics.todayUsage.toFixed(1)} kWh
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Daily Average Trend Card — mini sparkline bars */}
+          <div className="glass-card p-5 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">
+                Daily Average Trend
+              </p>
+              <Activity size={18} className="text-violet-400" />
+            </div>
+
+            {/* Mini sparkline bars */}
+            <div className="flex items-end gap-1 h-10 mt-1">
+              {(() => {
+                if (!hasData || allReadings.length < 2) {
+                  return Array.from({ length: 7 }).map((_, i) => (
+                    <div key={i} className="flex-1 bg-white/[0.04] rounded-sm h-2" />
+                  ));
+                }
+                const sorted = [...allReadings].sort((a, b) => a.timestamp - b.timestamp);
+                const now = new Date();
+                const bars: number[] = [];
+                for (let d = 6; d >= 0; d--) {
+                  const date = new Date(now);
+                  date.setDate(date.getDate() - d);
+                  date.setHours(0, 0, 0, 0);
+                  const next = new Date(date);
+                  next.setDate(next.getDate() + 1);
+                  const dayR = sorted.filter(r => r.timestamp >= date.getTime() && r.timestamp < next.getTime());
+                  let kWh = 0;
+                  for (let j = 0; j < dayR.length - 1; j++) {
+                    kWh += Math.abs(dayR[j + 1].value - dayR[j].value);
+                  }
+                  bars.push(kWh);
+                }
+                const maxBar = Math.max(...bars, 0.1);
+                return bars.map((v, i) => (
+                  <div
+                    key={i}
+                    className={`flex-1 rounded-sm transition-all ${
+                      v > 0
+                        ? i === bars.length - 1
+                          ? "bg-gradient-to-t from-violet-500 to-blue-400"
+                          : "bg-white/[0.15]"
+                        : "bg-white/[0.04]"
+                    }`}
+                    style={{ height: `${Math.max(v > 0 ? 20 : 8, (v / maxBar) * 100)}%` }}
+                  />
+                ));
+              })()}
+            </div>
+
+            <p className="text-[10px] text-gray-500 mt-2">
+              {hasData && allReadings.length >= 2
+                ? "7-day usage pattern"
+                : "Add readings to see daily average"}
+            </p>
+          </div>
+        </div>
+
+        {/* Usage Chart — right after balance like the mockup */}
+        {allReadings.length > 1 && (
+          <div className="mb-6">
+            <UsageChart
+              readings={allReadings}
+              tariffRate={settings.tariffRate}
+              currencySymbol={currencySymbol}
+            />
+          </div>
+        )}
+
+        {/* Meter Health Check Card — with trend badge */}
+        <Link href="/health" className="block glass-card p-4 mb-6 animate-fade-in-up hover:border-blue-500/20 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+              <Activity className="w-6 h-6 text-blue-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-white font-display font-bold text-sm">Health check</p>
+              <p className="text-gray-500 text-xs font-display">Is your meter running fast? Find out &rarr;</p>
+            </div>
+            {hasData && metrics.dataAdequate && metrics.todayUsage > 0 && (() => {
+              const avgDaily = metrics.weeklyUsage / Math.max(1, metrics.dataSpanDays);
+              if (avgDaily <= 0) return null;
+              const pctChange = Math.round(((metrics.todayUsage - avgDaily) / avgDaily) * 100);
+              if (pctChange === 0) return null;
+              return (
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                  pctChange > 20
+                    ? "bg-red-500/10 text-red-400"
+                    : pctChange > 0
+                    ? "bg-amber-500/10 text-amber-400"
+                    : "bg-emerald-500/10 text-emerald-400"
+                }`}>
+                  {pctChange > 0 ? "+" : ""}{pctChange}%
+                </span>
+              );
+            })()}
+          </div>
+        </Link>
+
+        {/* Budget — slim bar */}
         {budget ? (
-          <div className="glass-card p-3 mb-4 animate-fade-in-up">
+          <div className="glass-card p-3 mb-6 animate-fade-in-up">
             <div className="flex justify-between items-center mb-1.5">
               <span className="text-gray-400 text-xs font-display font-medium">Monthly Budget</span>
               <span className="text-gray-400 text-xs font-display">
@@ -597,24 +701,11 @@ export default function DashboardPage() {
         ) : (
           <Link
             href="/settings"
-            className="block text-center text-gray-500 text-xs font-display mb-4 hover:text-gray-400 transition-colors"
+            className="block text-center text-gray-500 text-xs font-display mb-6 hover:text-gray-400 transition-colors"
           >
             Set a monthly budget &rarr;
           </Link>
         )}
-
-        {/* Meter Health Check Card */}
-        <Link href="/health" className="block glass-card p-4 mb-4 border-red-500/20 animate-fade-in-up">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-red-500/15 flex items-center justify-center">
-              <Activity className="w-6 h-6 text-red-400" />
-            </div>
-            <div className="flex-1">
-              <p className="text-white font-display font-bold text-sm">Meter Health Check</p>
-              <p className="text-gray-500 text-xs font-display">Is your meter running fast? Find out &rarr;</p>
-            </div>
-          </div>
-        </Link>
 
         {/* Low Balance Alert */}
         {metrics && (
@@ -624,17 +715,6 @@ export default function DashboardPage() {
             dailyBurnRate={metrics.dailyBurnRate}
             currencySymbol={currencySymbol}
             onScanNow={() => router.push("/scanner")}
-          />
-        )}
-
-        {/* spacer for FAB clearance */}
-
-        {/* Usage Chart */}
-        {allReadings.length > 1 && (
-          <UsageChart
-            readings={allReadings}
-            tariffRate={settings.tariffRate}
-            currencySymbol={currencySymbol}
           />
         )}
 
@@ -776,9 +856,9 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="glass-card p-8 text-center">
-              <Gauge size={40} className="text-gray-600 mx-auto mb-3" />
+              <FileText size={40} className="text-gray-600 mx-auto mb-3" />
               <p className="text-gray-400 text-sm mb-4">
-                No readings yet. Scan your meter to get started!
+                No recent readings. Log your first to see your history.
               </p>
               <button
                 onClick={() => router.push("/scanner")}

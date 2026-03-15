@@ -58,6 +58,16 @@ function getDailyUsage(
   return result;
 }
 
+const BAR_COLORS = [
+  "bg-blue-500",
+  "bg-violet-500",
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-rose-500",
+  "bg-cyan-500",
+  "bg-blue-500",
+];
+
 export default function UsageChart({
   readings,
   tariffRate,
@@ -78,8 +88,8 @@ export default function UsageChart({
 
   return (
     <div className="glass-card p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white text-sm font-bold">Daily Usage</h3>
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-white text-base font-bold">Usage</h3>
         <div className="flex items-center gap-2">
           {trend !== 0 && todayUsage > 0 && (
             <span
@@ -90,15 +100,15 @@ export default function UsageChart({
               }`}
             >
               {trend > 0 ? "+" : ""}
-              {trend}% vs yesterday
+              {trend}%
             </span>
           )}
-          <span className="text-xs text-gray-500">7 days</span>
+          <span className="text-xs text-gray-500 bg-white/[0.03] px-2 py-0.5 rounded-full border border-white/[0.06]">7 days</span>
         </div>
       </div>
 
       {/* Bar Chart */}
-      <div className="flex items-end gap-2 h-32 mb-3">
+      <div className="flex items-end gap-2.5 h-36 mb-3">
         {daily.map((day, i) => {
           const heightPct = maxKwh > 0 ? (day.kWh / maxKwh) * 100 : 0;
           const isToday = i === daily.length - 1;
@@ -117,10 +127,10 @@ export default function UsageChart({
               {/* Bar */}
               <div className="w-full flex-1 flex items-end">
                 <div
-                  className={`w-full rounded-t-md transition-all duration-500 ${
+                  className={`w-full rounded-lg transition-all duration-500 ${
                     isToday
-                      ? "bg-gradient-to-t from-blue-500 to-violet-500"
-                      : "bg-white/[0.08]"
+                      ? "bg-gradient-to-t from-blue-500 to-violet-500 shadow-lg shadow-blue-500/20"
+                      : BAR_COLORS[i % BAR_COLORS.length] + " opacity-70"
                   }`}
                   style={{
                     height: `${Math.max(heightPct, day.kWh > 0 ? 8 : 2)}%`,
@@ -129,7 +139,7 @@ export default function UsageChart({
               </div>
               {/* Label */}
               <span
-                className={`text-[10px] font-medium ${
+                className={`text-[10px] font-semibold ${
                   isToday ? "text-blue-400" : "text-gray-500"
                 }`}
               >
