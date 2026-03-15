@@ -10,19 +10,26 @@ import {
   Activity,
   TrendingUp,
   Shield,
-  PiggyBank,
   BarChart3,
   AlertTriangle,
   CheckCircle,
   ChevronDown,
   Wallet,
   FileText,
-  Lightbulb,
+  Home,
+  Store,
+  Building,
+  Scale,
+  Camera,
+  Menu,
+  X,
+  UserX,
 } from "lucide-react";
 
 export default function LandingPage() {
   const router = useRouter();
   const [isReturningUser, setIsReturningUser] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const settings = getSettings();
@@ -31,368 +38,382 @@ export default function LandingPage() {
     }
   }, []);
 
+  const handleCTA = () => {
+    router.push(isReturningUser ? "/dashboard" : "/onboarding");
+  };
+
+  const ctaLabel = isReturningUser ? "Open Dashboard" : "Start Tracking — It\u2019s Free";
+
   return (
-    <div className="min-h-screen bg-bg-dark font-display text-gray-50 overflow-x-hidden">
-      {/* ===================== NAVBAR ===================== */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0A0E1A]/80 backdrop-blur-xl border-b border-white/[0.06]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center size-9 rounded-[10px] bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">
-              <Zap size={20} className="text-white" fill="white" />
+    <div className="min-h-screen bg-bg-dark font-display text-slate-100 overflow-x-hidden">
+      {/* ===================== NAVIGATION ===================== */}
+      <nav className="fixed top-0 w-full z-50 glass-nav border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3">
+              <div className="size-10 bg-gradient-to-br from-primary to-primary-violet rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/25">
+                <Zap size={22} fill="currentColor" />
+              </div>
+              <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                ChopMeter
+              </span>
             </div>
-            <span className="text-white text-xl font-bold tracking-tight">
-              ChopMeter
-            </span>
+            <div className="hidden md:flex items-center gap-8">
+              <a className="text-sm font-medium hover:text-primary transition-colors" href="#how-it-works">
+                How It Works
+              </a>
+              <a className="text-sm font-medium hover:text-primary transition-colors" href="#features">
+                Features
+              </a>
+              <a className="text-sm font-medium hover:text-primary transition-colors" href="#faq">
+                FAQ
+              </a>
+              <button
+                onClick={handleCTA}
+                className="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all"
+              >
+                {isReturningUser ? "Open Dashboard" : "Start Tracking"}
+              </button>
+            </div>
+            <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
-          <button
-            onClick={() => router.push(isReturningUser ? "/dashboard" : "/onboarding")}
-            className="bg-gradient-to-r from-blue-500 to-violet-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.97]"
-          >
-            {isReturningUser ? "Open Dashboard" : "Get Started"}
-          </button>
+
+          {/* Mobile menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden pb-4 border-t border-white/10 mt-2 pt-4 space-y-3 animate-fade-in-up">
+              <a
+                className="block text-sm font-medium hover:text-primary transition-colors py-2"
+                href="#how-it-works"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                How It Works
+              </a>
+              <a
+                className="block text-sm font-medium hover:text-primary transition-colors py-2"
+                href="#features"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Features
+              </a>
+              <a
+                className="block text-sm font-medium hover:text-primary transition-colors py-2"
+                href="#faq"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                FAQ
+              </a>
+              <button
+                onClick={handleCTA}
+                className="w-full bg-primary hover:bg-primary/90 text-white px-5 py-3 rounded-lg text-sm font-bold transition-all"
+              >
+                {isReturningUser ? "Open Dashboard" : "Start Tracking"}
+              </button>
+            </div>
+          )}
         </div>
       </nav>
 
-      {/* ===================== HERO ===================== */}
-      <section className="relative pt-32 pb-16 sm:pt-40 sm:pb-24 px-4 sm:px-6">
-        {/* Glow effects */}
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-blue-500/[0.06] rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute top-40 left-1/4 w-[300px] h-[300px] bg-violet-500/[0.04] rounded-full blur-[80px] pointer-events-none" />
+      {/* ===================== HERO SECTION ===================== */}
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        {/* Radial glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full glow-radial -z-10" />
 
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 mb-8 animate-fade-in-up">
-            <AlertTriangle size={14} className="text-red-400" />
-            <span className="text-red-300 text-xs font-bold uppercase tracking-wider">
-              Ghana Smart Meter Crisis
-            </span>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="text-left">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-6">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                </span>
+                NEW: SMART METER VERIFIER
+              </div>
 
-          <h1 className="text-[36px] sm:text-[52px] font-extrabold text-white leading-[1.15] mb-6 animate-fade-in-up">
-            Is your meter{" "}
-            <span className="gradient-primary-text">chopping</span>
-            <br />
-            your money?
-          </h1>
-          <p className="text-gray-400 text-lg sm:text-xl leading-relaxed max-w-[600px] mx-auto mb-10 animate-fade-in-up">
-            ChopMeter helps you track your electricity usage, detect if your
-            prepaid meter is running too fast, and{" "}
-            <span className="text-white font-semibold">
-              get the evidence you need
-            </span>{" "}
-            to challenge unfair billing.
-          </p>
+              <h1 className="text-5xl lg:text-7xl font-black leading-[1.1] mb-6 tracking-tight">
+                Is your meter{" "}
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-violet">
+                  chopping
+                </span>{" "}
+                your money?
+              </h1>
+              <p className="text-lg text-slate-400 mb-8 max-w-xl">
+                Verify your smart prepaid meter for free. No download. No sign-up.
+                100% private. Join thousands of Ghanaians taking back control.
+              </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 animate-fade-in-up">
-            <button
-              onClick={() => router.push(isReturningUser ? "/dashboard" : "/onboarding")}
-              className="w-full sm:w-auto group relative flex items-center justify-center overflow-hidden rounded-2xl h-14 px-8 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
-            >
-              <span className="text-white text-[17px] font-bold mr-2 relative z-10">
-                {isReturningUser ? "Open Dashboard" : "Start Tracking Free"}
-              </span>
-              <ArrowRight
-                size={20}
-                className="text-white relative z-10 transition-transform group-hover:translate-x-1"
-              />
-            </button>
-            <a
-              href="#how-it-works"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 h-14 px-8 rounded-2xl bg-white/[0.05] border border-white/[0.08] text-gray-300 font-bold hover:text-white hover:border-white/[0.15] transition-all"
-            >
-              See How It Works
-              <ChevronDown size={18} />
-            </a>
-          </div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={handleCTA}
+                  className="bg-primary text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                >
+                  {ctaLabel}
+                  <ArrowRight size={20} />
+                </button>
+                <a
+                  href="#how-it-works"
+                  className="glass-landing text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition-all text-center"
+                >
+                  See How It Works
+                </a>
+              </div>
 
-          {/* Social proof */}
-          <div className="flex items-center justify-center gap-6 text-gray-500 text-sm animate-fade-in-up">
-            <div className="flex items-center gap-1.5">
-              <Shield size={14} className="text-emerald-500" />
-              <span>100% Free</span>
+              <div className="mt-10 flex flex-wrap gap-6 text-slate-500 text-sm font-medium">
+                <div className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-primary" /> 100% Free
+                </div>
+                <div className="flex items-center gap-2">
+                  <UserX size={16} className="text-primary" /> No Sign-up
+                </div>
+                <div className="flex items-center gap-2">
+                  <Shield size={16} className="text-primary" /> Privacy-First
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Zap size={14} className="text-blue-400" />
-              <span>No sign-up needed</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Shield size={14} className="text-violet-400" />
-              <span>Data stays on your phone</span>
+
+            {/* Phone mockup */}
+            <div className="relative hidden lg:block">
+              <div className="absolute -inset-4 bg-gradient-to-tr from-primary/30 to-primary-violet/30 blur-3xl rounded-full opacity-50" />
+              <div className="relative glass-landing rounded-[2.5rem] p-4 border-white/20 shadow-2xl">
+                <div className="bg-[#0a0f18] rounded-[2rem] overflow-hidden aspect-[9/19] relative">
+                  {/* Mock dashboard UI */}
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-center gap-2 mt-4">
+                      <div className="size-8 bg-gradient-to-br from-primary to-primary-violet rounded-lg flex items-center justify-center">
+                        <Zap size={16} className="text-white" fill="currentColor" />
+                      </div>
+                      <span className="text-white text-sm font-bold">ChopMeter</span>
+                    </div>
+                    <p className="text-slate-400 text-xs">Good evening, Kofi</p>
+                    <div className="glass-landing rounded-xl p-4 mt-2">
+                      <p className="text-slate-400 text-[10px] uppercase tracking-wider">Balance</p>
+                      <p className="text-white text-2xl font-black mt-1">GH₵ 124.50</p>
+                      <p className="text-emerald-400 text-xs mt-1 font-bold">~8 days left</p>
+                    </div>
+                    <div className="glass-landing rounded-xl p-4">
+                      <p className="text-slate-400 text-[10px] uppercase tracking-wider">Daily Usage</p>
+                      <p className="text-white text-xl font-bold mt-1">4.2 kWh</p>
+                      <div className="flex gap-1 mt-2">
+                        {[40, 65, 55, 70, 45, 60, 50].map((h, i) => (
+                          <div key={i} className="flex-1 bg-white/5 rounded-full overflow-hidden h-12">
+                            <div
+                              className="w-full bg-gradient-to-t from-primary to-primary-violet rounded-full mt-auto"
+                              style={{ height: `${h}%`, marginTop: `${100 - h}%` }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Overlay card at bottom */}
+                  <div className="absolute bottom-8 left-4 right-4">
+                    <div className="glass-landing p-4 rounded-2xl border border-red-500/20">
+                      <p className="text-xs text-slate-400 mb-1">Health Check Result</p>
+                      <p className="text-2xl font-bold text-red-500">34.2% Suspicious</p>
+                      <div className="w-full bg-white/10 h-2 rounded-full mt-2 overflow-hidden">
+                        <div className="bg-red-500 h-full rounded-full" style={{ width: "34%" }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===================== THE PROBLEM ===================== */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 border-t border-white/[0.04]">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-red-400 text-xs font-bold uppercase tracking-wider mb-3">
-              The Problem
-            </p>
-            <h2 className="text-[28px] sm:text-[36px] font-extrabold text-white leading-tight mb-4">
-              GH₵50 top-up gone in 2 days?
-              <br />
-              <span className="text-gray-500">You&apos;re not alone.</span>
-            </h2>
-            <p className="text-gray-400 text-base sm:text-lg max-w-[550px] mx-auto leading-relaxed">
-              Since ECG began installing smart prepaid meters, thousands of
-              Ghanaians have reported their credit disappearing far too quickly
-              — even with minimal usage.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              {
-                stat: "1M+",
-                label: "Smart meters installed across Ghana since 2024",
-                color: "text-blue-400",
-              },
-              {
-                stat: "70%",
-                label: "Of complaints are about rapid credit depletion",
-                color: "text-red-400",
-              },
-              {
-                stat: "???",
-                label: "No consumer tool existed to verify meter accuracy — until now",
-                color: "text-violet-400",
-              },
-            ].map((item) => (
-              <div
-                key={item.stat}
-                className="glass-card p-6 text-center"
-              >
-                <p className={`text-3xl font-extrabold ${item.color} mb-2`}>
-                  {item.stat}
-                </p>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  {item.label}
+      {/* ===================== PROBLEM SECTION ===================== */}
+      <section className="py-24 bg-slate-900/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="order-2 lg:order-1 grid grid-cols-2 gap-4">
+              <div className="glass-landing p-8 rounded-2xl flex flex-col gap-2">
+                <p className="text-slate-400 text-sm">Meters Installed</p>
+                <p className="text-4xl font-black text-white">1M+</p>
+                <p className="text-emerald-500 text-sm flex items-center gap-1 font-bold">
+                  <TrendingUp size={14} /> Since 2024
                 </p>
               </div>
-            ))}
+              <div className="glass-landing p-8 rounded-2xl flex flex-col gap-2 translate-y-8">
+                <p className="text-slate-400 text-sm">Complaints Rising</p>
+                <p className="text-4xl font-black text-white">70%+</p>
+                <p className="text-red-400 text-sm flex items-center gap-1 font-bold">
+                  <TrendingUp size={14} /> Rapid depletion
+                </p>
+              </div>
+            </div>
+            <div className="order-1 lg:order-2">
+              <h2 className="text-3xl lg:text-5xl font-bold mb-6">
+                GH₵50 gone in 2 days? You are not alone.
+              </h2>
+              <p className="text-lg text-slate-400 mb-6">
+                The Ghana smart meter crisis is real. Thousands of users are
+                reporting rapid credit depletion without a change in usage habits.
+              </p>
+              <p className="text-lg text-slate-400 mb-8">
+                Electricity costs are high enough — you shouldn&apos;t be paying for
+                &quot;ghost&quot; consumption or faulty meter calibrations.
+                ChopMeter helps you gather the evidence you need.
+              </p>
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <p className="text-red-400 font-medium flex items-center gap-2">
+                  <AlertTriangle size={18} />
+                  The Energy Minister ordered ECG to investigate. PURC summoned ECG for emergency meetings.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ===================== KILLER FEATURE: METER HEALTH CHECK ===================== */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 relative">
-        {/* Background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-red-500/[0.04] rounded-full blur-[100px] pointer-events-none" />
-
-        <div className="max-w-4xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 mb-6">
-              <Activity size={14} className="text-red-400" />
-              <span className="text-red-300 text-xs font-bold uppercase tracking-wider">
-                Killer Feature
-              </span>
-            </div>
-            <h2 className="text-[28px] sm:text-[36px] font-extrabold text-white leading-tight mb-4">
-              Meter Health Check
-            </h2>
-            <p className="text-gray-400 text-base sm:text-lg max-w-[550px] mx-auto leading-relaxed">
-              The first tool that lets you independently verify if your meter is
-              running too fast — with{" "}
-              <span className="text-white font-semibold">
-                evidence you can take to ECG
-              </span>
-              .
-            </p>
+      {/* ===================== KILLER FEATURE: HEALTH CHECK ===================== */}
+      <section className="py-24 relative" id="health-check">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold mb-6">
+            <Activity size={14} />
+            KILLER FEATURE
           </div>
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4">Meter Health Check</h2>
+          <p className="text-slate-400 mb-16 text-lg">
+            Our verification system works in 3 simple steps.
+          </p>
 
-          {/* How it works steps */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+          <div className="grid md:grid-cols-3 gap-8 mb-20 relative">
+            {/* Dashed connector line */}
+            <div className="hidden md:block absolute top-1/2 left-[30%] right-[30%] h-0.5 border-t-2 border-dashed border-primary/30 -z-10" />
+
             {[
               {
                 step: "1",
-                title: "Tell us what you use",
-                desc: "Select your appliances — fans, fridge, TV, lights — and how many hours you use each one daily.",
-                icon: Lightbulb,
-                color: "text-violet-400",
-                bg: "bg-violet-500/10",
+                title: "Select Appliances",
+                desc: "Tell us what\u2019s running (Fan, Fridge, TV, Lights). We know their exact power draw.",
+                icon: CheckCircle,
               },
               {
                 step: "2",
-                title: "Scan your meter",
-                desc: "Take a few meter readings over several days. Just point your camera at your meter — we read it automatically.",
-                icon: ScanLine,
-                color: "text-blue-400",
-                bg: "bg-blue-500/10",
+                title: "Scan Meter",
+                desc: "Use your phone camera to scan your meter\u2019s display. Our OCR reads it automatically.",
+                icon: Camera,
               },
               {
                 step: "3",
-                title: "See the truth",
-                desc: "We compare what your meter says vs what your appliances should actually use. If there's a mismatch — you'll know.",
+                title: "Get Verdict",
+                desc: "We compare expected usage to actual readings and flag any mismatches instantly.",
                 icon: Activity,
-                color: "text-red-400",
-                bg: "bg-red-500/10",
               },
             ].map((item) => (
-              <div key={item.step} className="glass-card p-6 relative">
-                <div className="absolute -top-3 -left-2 size-8 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center text-white text-sm font-bold shadow-lg">
+              <div key={item.step} className="glass-landing p-8 rounded-3xl relative">
+                <div className="size-14 bg-primary rounded-2xl flex items-center justify-center text-white font-bold text-2xl mb-6 mx-auto">
                   {item.step}
                 </div>
-                <div
-                  className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center mb-4 mt-2`}
-                >
-                  <item.icon size={24} className={item.color} />
-                </div>
-                <h3 className="text-white font-bold text-base mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  {item.desc}
-                </p>
+                <h3 className="text-xl font-bold mb-3">{item.title}</h3>
+                <p className="text-slate-400 text-sm">{item.desc}</p>
               </div>
             ))}
           </div>
 
-          {/* Status tiers preview */}
-          <div className="glass-card p-6 sm:p-8">
-            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">
-              Your meter gets a clear verdict
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                {
-                  status: "HEALTHY",
-                  range: "< 15%",
-                  color: "text-emerald-400",
-                  bg: "bg-emerald-500/10",
-                  border: "border-emerald-500/20",
-                  icon: CheckCircle,
-                },
-                {
-                  status: "WATCH",
-                  range: "15-30%",
-                  color: "text-yellow-400",
-                  bg: "bg-yellow-500/10",
-                  border: "border-yellow-500/20",
-                  icon: TrendingUp,
-                },
-                {
-                  status: "SUSPICIOUS",
-                  range: "30-50%",
-                  color: "text-orange-400",
-                  bg: "bg-orange-500/10",
-                  border: "border-orange-500/20",
-                  icon: AlertTriangle,
-                },
-                {
-                  status: "ALERT",
-                  range: "> 50%",
-                  color: "text-red-400",
-                  bg: "bg-red-500/10",
-                  border: "border-red-500/20",
-                  icon: AlertTriangle,
-                },
-              ].map((tier) => (
-                <div
-                  key={tier.status}
-                  className={`rounded-xl ${tier.bg} border ${tier.border} p-4 text-center`}
-                >
-                  <tier.icon size={24} className={`${tier.color} mx-auto mb-2`} />
-                  <p className={`text-sm font-extrabold ${tier.color}`}>
-                    {tier.status}
-                  </p>
-                  <p className="text-gray-500 text-xs mt-1">
-                    {tier.range} off
+          {/* Health Status Tiers */}
+          <div className="glass-landing p-8 lg:p-12 rounded-[2.5rem] border-primary/20">
+            <h3 className="text-2xl font-bold mb-8">Understanding Your Verdict</h3>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                <div className="size-3 bg-emerald-500 rounded-full mb-3 mx-auto" />
+                <p className="font-bold text-emerald-500">Healthy</p>
+                <p className="text-xs text-slate-400">&lt;15% variance</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-yellow-500/10 border border-yellow-500/20">
+                <div className="size-3 bg-yellow-500 rounded-full mb-3 mx-auto" />
+                <p className="font-bold text-yellow-500">Watch</p>
+                <p className="text-xs text-slate-400">15-30% variance</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20">
+                <div className="size-3 bg-orange-500 rounded-full mb-3 mx-auto" />
+                <p className="font-bold text-orange-500">Suspicious</p>
+                <p className="text-xs text-slate-400">30-50% variance</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20">
+                <div className="size-3 bg-red-500 rounded-full mb-3 mx-auto" />
+                <p className="font-bold text-red-500">Alert</p>
+                <p className="text-xs text-slate-400">&gt;50% variance</p>
+              </div>
+            </div>
+
+            <div className="mt-10 p-6 bg-white/5 rounded-2xl text-left border border-white/10">
+              <div className="flex items-start gap-4">
+                <BarChart3 size={28} className="text-primary shrink-0 mt-1" />
+                <div>
+                  <p className="font-bold text-white mb-1">Evidence for PURC/ECG</p>
+                  <p className="text-sm text-slate-400">
+                    If your meter is in &quot;ALERT&quot; status, generate a timestamped
+                    report you can use to file a formal complaint with the Public
+                    Utilities Regulatory Commission.
                   </p>
                 </div>
-              ))}
+              </div>
             </div>
-            <p className="text-gray-500 text-xs text-center mt-4">
-              If your meter is running 30%+ higher than expected, you have
-              evidence to file a complaint with ECG or request a PURC audit.
-            </p>
           </div>
         </div>
       </section>
 
-      {/* ===================== HOW IT WORKS ===================== */}
-      <section
-        id="how-it-works"
-        className="py-16 sm:py-24 px-4 sm:px-6 border-t border-white/[0.04]"
-      >
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-blue-400 text-xs font-bold uppercase tracking-wider mb-3">
-              How It Works
-            </p>
-            <h2 className="text-[28px] sm:text-[36px] font-extrabold text-white leading-tight mb-4">
-              Simple. Free. Private.
+      {/* ===================== HOW IT WORKS / FEATURES ===================== */}
+      <section className="py-24 bg-slate-900/30" id="features">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16" id="how-it-works">
+            <h2 className="text-4xl font-bold mb-4">
+              Everything you need to stop the &quot;Chop&quot;
             </h2>
-            <p className="text-gray-400 text-base sm:text-lg max-w-[500px] mx-auto">
-              No account needed. No data leaves your phone. Everything runs
-              right in your browser.
+            <p className="text-slate-400">
+              A full suite of tools designed for the modern Ghanaian energy consumer.
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
                 icon: ScanLine,
-                title: "Scan Your Meter",
-                desc: "Open the scanner, point your camera at your prepaid meter display. ChopMeter reads the numbers automatically using OCR — no typing needed.",
-                color: "text-blue-400",
-                bg: "bg-blue-500/10",
+                title: "Scan (OCR)",
+                desc: "Simply point your camera. Our AI reads your meter\u2019s screen automatically. No more typing long serial numbers.",
               },
               {
                 icon: BarChart3,
-                title: "Track Your Usage",
-                desc: "See your daily consumption, burn rate (how fast your credit is being used), and how many days you have left before your balance hits zero.",
-                color: "text-violet-400",
-                bg: "bg-violet-500/10",
+                title: "Daily Usage Tracking",
+                desc: "See exactly how much credit you use every 24 hours. Identify which days are costing you the most.",
               },
               {
                 icon: Activity,
-                title: "Run a Health Check",
-                desc: "Select your appliances (fans, fridge, TV, etc.) and we calculate what your meter should read. If there's a big gap between expected and actual — your meter might be faulty.",
-                color: "text-red-400",
-                bg: "bg-red-500/10",
+                title: "Health Mismatches",
+                desc: "We flag discrepancies between what your appliances should use and what your meter actually charges.",
               },
               {
                 icon: Wallet,
-                title: "Track Your Top-ups",
-                desc: "Log every time you buy credit. See how long each top-up actually lasts vs how long it should last based on your usage.",
-                color: "text-emerald-400",
-                bg: "bg-emerald-500/10",
-              },
-              {
-                icon: PiggyBank,
-                title: "Set a Monthly Budget",
-                desc: "Set a target amount per month and track whether you're on pace. Get warnings when you're spending faster than planned.",
-                color: "text-yellow-400",
-                bg: "bg-yellow-500/10",
+                title: "Top-up History",
+                desc: "Maintain a digital log of every scratch card or mobile money top-up to see where the money goes.",
               },
               {
                 icon: FileText,
-                title: "Generate a Report",
-                desc: "Create a printable report of your readings, usage patterns, and health check results — evidence you can take to ECG or PURC.",
-                color: "text-blue-400",
-                bg: "bg-blue-500/10",
+                title: "Budgeting Tools",
+                desc: "Set a monthly limit. Get alerts when you\u2019ve reached 50%, 80%, and 100% of your allocated budget.",
               },
-            ].map((item) => (
+              {
+                icon: FileText,
+                title: "Monthly Reports",
+                desc: "Generate a printable PDF summary of your consumption trends and any suspicious activity as evidence.",
+              },
+            ].map((feature) => (
               <div
-                key={item.title}
-                className="glass-card p-5 flex items-start gap-4"
+                key={feature.title}
+                className="glass-landing p-8 rounded-3xl hover:border-primary/50 transition-colors group"
               >
-                <div
-                  className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center shrink-0`}
-                >
-                  <item.icon size={24} className={item.color} />
-                </div>
-                <div>
-                  <h3 className="text-white font-bold text-base mb-1">
-                    {item.title}
-                  </h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
+                <feature.icon
+                  size={36}
+                  className="text-primary mb-6 group-hover:scale-110 transition-transform"
+                />
+                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  {feature.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -400,45 +421,40 @@ export default function LandingPage() {
       </section>
 
       {/* ===================== WHO IS THIS FOR ===================== */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 border-t border-white/[0.04]">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-violet-400 text-xs font-bold uppercase tracking-wider mb-3">
-              Who Is This For
-            </p>
-            <h2 className="text-[28px] sm:text-[36px] font-extrabold text-white leading-tight mb-4">
-              Built for Ghanaians who are
-              <br />
-              <span className="text-gray-500">tired of unexplained bills</span>
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <section className="py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            Built for everyone in the ecosystem
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               {
-                title: "Homeowners & Tenants",
-                desc: "Track your family's daily electricity usage and catch when something doesn't add up.",
+                icon: Home,
+                title: "Homeowners",
+                desc: "Stop the leak in your household budget.",
               },
               {
-                title: "Small Business Owners",
-                desc: "Your shop's electricity cost shouldn't be a mystery. Know exactly where every pesewa goes.",
+                icon: Store,
+                title: "Small Businesses",
+                desc: "Keep your overheads predictable and fair.",
               },
               {
-                title: "Landlords & Property Managers",
-                desc: "Monitor multiple meters (coming soon) and help your tenants understand their usage.",
+                icon: Building,
+                title: "Landlords",
+                desc: "Manage multi-tenant billing with transparency.",
               },
               {
-                title: "Consumer Advocates",
-                desc: "Use ChopMeter reports as evidence when filing complaints with ECG, PURC, or your MP.",
+                icon: Scale,
+                title: "Advocates",
+                desc: "Gather data to push for better utility policies.",
               },
             ].map((item) => (
-              <div key={item.title} className="glass-card p-6">
-                <h3 className="text-white font-bold text-base mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  {item.desc}
-                </p>
+              <div key={item.title} className="text-center p-6">
+                <div className="size-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                  <item.icon size={24} className="text-primary" />
+                </div>
+                <h4 className="font-bold mb-2">{item.title}</h4>
+                <p className="text-sm text-slate-400">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -446,62 +462,49 @@ export default function LandingPage() {
       </section>
 
       {/* ===================== FAQ ===================== */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 border-t border-white/[0.04]">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-blue-400 text-xs font-bold uppercase tracking-wider mb-3">
-              Common Questions
-            </p>
-            <h2 className="text-[28px] sm:text-[36px] font-extrabold text-white leading-tight">
-              Got questions?
-            </h2>
-          </div>
-
+      <section className="py-24 bg-slate-900/50" id="faq">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            Frequently Asked Questions
+          </h2>
           <div className="space-y-4">
             {[
               {
-                q: "Does ChopMeter connect to my ECG meter?",
-                a: "No. ChopMeter doesn't connect to any utility company system. You are the data source — you scan your own meter and log your own top-ups. This means you have independent, unbiased data.",
+                q: "How accurate is the Health Check?",
+                a: "Our algorithms are calibrated based on official PURC tariff guidelines and standard consumption rates for common appliances. The more readings you take over 5\u20137 days, the more accurate your results. We recommend scanning your meter twice daily (morning and evening).",
               },
               {
-                q: "Is it really free?",
-                a: "Yes, 100% free. No sign-up, no subscription, no ads. We built this to help Ghanaians take control of their electricity spend.",
+                q: "Is my data shared with ECG?",
+                a: "No. Your data is 100% private and stored locally on your device. Nothing is sent to any server. We are an independent consumer tool, not affiliated with any utility provider.",
               },
               {
-                q: "Is my data safe?",
-                a: "All your data stays on your device — in your browser's local storage. Nothing is sent to any server. Your readings, balance, and usage data never leave your phone.",
+                q: "What should I do if my status is \u2018ALERT\u2019?",
+                a: "First, run the check again to confirm. If it persists, use the \u201CGenerate Report\u201D button to create a formal evidence report. Take this to your local ECG district office or file an online complaint with PURC.",
               },
               {
-                q: "How accurate is the Meter Health Check?",
-                a: "The more readings you take over time, the more accurate it gets. We recommend scanning your meter twice a day (morning and evening) for at least 5-7 days for the best results. The health check compares your actual consumption against standard wattage ratings for your selected appliances.",
-              },
-              {
-                q: "What should I do if my meter shows SUSPICIOUS or ALERT?",
-                a: "Document your readings daily (the app does this for you), generate a report, and take it to your nearest ECG district office. You can also file a complaint with PURC (Public Utilities Regulatory Commission) and request an independent meter audit.",
+                q: "Does it connect to my ECG meter?",
+                a: "No. ChopMeter doesn\u2019t connect to any utility system. You scan your own meter and log your own top-ups. This means you have independent, unbiased data that you control.",
               },
               {
                 q: "Can I use this outside Ghana?",
-                a: "Yes! ChopMeter supports multiple African countries including Nigeria, Kenya, South Africa, and more. Select your country during setup and we'll adjust the currency and default tariff rate.",
+                a: "Yes! ChopMeter supports multiple African countries including Nigeria, Kenya, South Africa, and more. Select your country during setup and we\u2019ll adjust the currency and default tariff rate.",
+              },
+              {
+                q: "Is it really free?",
+                a: "Yes, 100% free. No sign-up, no subscription, no ads. We built this to help consumers take control of their electricity spend.",
               },
             ].map((item) => (
-              <details
-                key={item.q}
-                className="glass-card group"
-              >
-                <summary className="flex items-center justify-between cursor-pointer p-5 list-none">
-                  <span className="text-white font-bold text-sm pr-4">
-                    {item.q}
-                  </span>
+              <details key={item.q} className="glass-landing rounded-2xl p-6 group">
+                <summary className="flex justify-between items-center cursor-pointer list-none">
+                  <span className="font-bold pr-4">{item.q}</span>
                   <ChevronDown
-                    size={18}
-                    className="text-gray-500 shrink-0 transition-transform group-open:rotate-180"
+                    size={20}
+                    className="text-slate-400 shrink-0 transition-transform group-open:rotate-180"
                   />
                 </summary>
-                <div className="px-5 pb-5 -mt-1">
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    {item.a}
-                  </p>
-                </div>
+                <p className="mt-4 text-slate-400 text-sm leading-relaxed">
+                  {item.a}
+                </p>
               </details>
             ))}
           </div>
@@ -509,52 +512,43 @@ export default function LandingPage() {
       </section>
 
       {/* ===================== FINAL CTA ===================== */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 border-t border-white/[0.04] relative">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[300px] bg-blue-500/[0.05] rounded-full blur-[100px] pointer-events-none" />
-        <div className="max-w-2xl mx-auto text-center relative z-10">
-          <div className="size-20 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
-            <Zap size={36} className="text-blue-400" fill="currentColor" />
-          </div>
-          <h2 className="text-[28px] sm:text-[36px] font-extrabold text-white leading-tight mb-4">
-            Take control of your
-            <br />
-            electricity today
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-primary/10 -z-10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/[0.08] rounded-full blur-[100px] pointer-events-none" />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <h2 className="text-4xl lg:text-5xl font-black mb-6">
+            Take control of your electricity today.
           </h2>
-          <p className="text-gray-400 text-base sm:text-lg max-w-[450px] mx-auto mb-8 leading-relaxed">
-            Stop guessing. Start tracking. Know if your meter is cheating you.
+          <p className="text-xl text-slate-300 mb-10">
+            Stop guessing. Start tracking. Join the movement fighting back.
           </p>
           <button
-            onClick={() => router.push(isReturningUser ? "/dashboard" : "/onboarding")}
-            className="w-full sm:w-auto group relative inline-flex items-center justify-center overflow-hidden rounded-2xl h-14 px-10 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
+            onClick={handleCTA}
+            className="bg-white text-primary px-10 py-5 rounded-2xl font-black text-xl hover:shadow-2xl hover:scale-105 transition-all active:scale-[0.98]"
           >
-            <span className="text-white text-[17px] font-bold mr-2 relative z-10">
-              {isReturningUser ? "Open Dashboard" : "Get Started — It\u0027s Free"}
-            </span>
-            <ArrowRight
-              size={20}
-              className="text-white relative z-10 transition-transform group-hover:translate-x-1"
-            />
+            {ctaLabel}
           </button>
-          <p className="text-gray-600 text-xs mt-4">
-            No sign-up. No download. Works in your browser.
+          <p className="mt-6 text-slate-400 text-sm">
+            No credit card required. No sign-up necessary.
           </p>
         </div>
       </section>
 
       {/* ===================== FOOTER ===================== */}
-      <footer className="py-8 px-4 sm:px-6 border-t border-white/[0.04]">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center size-7 rounded-lg bg-gradient-to-br from-blue-500 to-violet-500">
-              <Zap size={14} className="text-white" fill="white" />
+      <footer className="py-12 border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex items-center gap-3">
+              <div className="size-8 bg-gradient-to-br from-primary to-primary-violet rounded-lg flex items-center justify-center text-white">
+                <Zap size={16} fill="currentColor" />
+              </div>
+              <span className="text-lg font-bold tracking-tight">ChopMeter</span>
             </div>
-            <span className="text-gray-500 text-sm font-semibold">
-              ChopMeter
-            </span>
+            <p className="text-sm text-slate-500">
+              Built with love for Ghana. Your data never leaves your device.
+            </p>
+            <p className="text-sm text-slate-500">&copy; 2025 ChopMeter. All rights reserved.</p>
           </div>
-          <p className="text-gray-600 text-xs">
-            Built with love for Ghana. Your data never leaves your device.
-          </p>
         </div>
       </footer>
     </div>

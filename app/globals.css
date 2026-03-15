@@ -81,6 +81,24 @@
     @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl shadow-lg shadow-black/20;
   }
 
+  /* Landing page glass */
+  .glass-landing {
+    background: rgba(34, 49, 73, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-nav {
+    background: rgba(34, 49, 73, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .glow-radial {
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+  }
+
   .glass-surface {
     @apply bg-white/[0.05] backdrop-blur-md border border-white/[0.08];
   }
