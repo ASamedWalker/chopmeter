@@ -57,6 +57,19 @@ export interface BookmarkedTip {
   timestamp: number;
 }
 
+/** A single prepaid electricity top-up */
+export interface TopUp {
+  id: string;
+  /** Currency amount paid */
+  amount: number;
+  /** kWh received (0 if unknown) */
+  units: number;
+  /** Unix timestamp (ms) */
+  timestamp: number;
+  /** Optional note (e.g. "MTN MoMo", "vendor") */
+  note: string;
+}
+
 /** Energy saving tip */
 export interface EnergyTip {
   id: string;

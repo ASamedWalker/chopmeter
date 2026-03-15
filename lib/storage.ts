@@ -1,4 +1,4 @@
-import type { MeterReading, UserSettings, BookmarkedTip, WeatherCache } from "./types";
+import type { MeterReading, UserSettings, BookmarkedTip, WeatherCache, TopUp } from "./types";
 import type { ReminderSettings } from "./notifications";
 import { DEFAULT_REMINDER_SETTINGS } from "./notifications";
 
@@ -7,6 +7,7 @@ const SETTINGS_KEY = "chopmeter_settings";
 const BOOKMARKS_KEY = "chopmeter_bookmarks";
 const WEATHER_CACHE_KEY = "chopmeter_weather";
 const REMINDERS_KEY = "chopmeter_reminders";
+const TOPUPS_KEY = "chopmeter_topups";
 const WEATHER_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -147,6 +148,30 @@ export function saveReminderSettings(partial: Partial<ReminderSettings>): void {
   localStorage.setItem(REMINDERS_KEY, JSON.stringify(updated));
 }
 
+// ---- Top-ups ----
+
+export function saveTopUp(topup: TopUp): void {
+  const topups = getAllTopUps();
+  topups.unshift(topup);
+  localStorage.setItem(TOPUPS_KEY, JSON.stringify(topups));
+}
+
+export function getAllTopUps(): TopUp[] {
+  if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(TOPUPS_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as TopUp[];
+  } catch {
+    return [];
+  }
+}
+
+export function deleteTopUp(id: string): void {
+  const topups = getAllTopUps().filter((t) => t.id !== id);
+  localStorage.setItem(TOPUPS_KEY, JSON.stringify(topups));
+}
+
 // ---- Data management ----
 
 export function clearAllData(): void {
@@ -155,6 +180,7 @@ export function clearAllData(): void {
   localStorage.removeItem(BOOKMARKS_KEY);
   localStorage.removeItem(WEATHER_CACHE_KEY);
   localStorage.removeItem(REMINDERS_KEY);
+  localStorage.removeItem(TOPUPS_KEY);
 }
 
 // ---- Weather cache ----

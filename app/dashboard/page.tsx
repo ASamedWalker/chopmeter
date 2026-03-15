@@ -699,17 +699,32 @@ export default function DashboardPage() {
         })()}
 
         {/* Quick Tools */}
-        <div className="glass-card p-4 mb-6 animate-fade-in-up">
-          <Link href="/calculator" className="flex items-center gap-3 active:scale-[0.98] transition-transform">
-            <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
-              <Calculator className="w-5 h-5 text-violet-400" />
-            </div>
-            <div className="flex-1">
-              <p className="text-white font-display font-semibold text-sm">Appliance Calculator</p>
-              <p className="text-gray-500 text-xs font-display">See which appliances cost you the most</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-600" />
-          </Link>
+        <div className="space-y-2 mb-6 animate-fade-in-up">
+          <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Quick Tools</p>
+          <div className="glass-card p-4">
+            <Link href="/calculator" className="flex items-center gap-3 active:scale-[0.98] transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
+                <Calculator className="w-5 h-5 text-violet-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-display font-semibold text-sm">Appliance Calculator</p>
+                <p className="text-gray-500 text-xs font-display">See which appliances cost you the most</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            </Link>
+          </div>
+          <div className="glass-card p-4">
+            <Link href="/topups" className="flex items-center gap-3 active:scale-[0.98] transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                <Wallet className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-display font-semibold text-sm">Top-up History</p>
+                <p className="text-gray-500 text-xs font-display">Track your recharges &amp; spending</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            </Link>
+          </div>
         </div>
 
         {/* Usage Comparison */}
