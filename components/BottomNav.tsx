@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Home, ScanLine, Lightbulb, Settings } from "lucide-react";
+import { Home, ScanLine, Settings } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface BottomNavProps {
@@ -16,7 +16,6 @@ const NAV_ITEMS: {
 }[] = [
   { key: "dashboard", label: "Home", Icon: Home, href: "/dashboard" },
   { key: "scanner", label: "Scan", Icon: ScanLine, href: "/scanner" },
-  { key: "tips", label: "Tips", Icon: Lightbulb, href: "/tips" },
   { key: "settings", label: "Settings", Icon: Settings, href: "/settings" },
 ];
 
