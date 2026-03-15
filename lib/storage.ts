@@ -1,9 +1,12 @@
 import type { MeterReading, UserSettings, BookmarkedTip, WeatherCache } from "./types";
+import type { ReminderSettings } from "./notifications";
+import { DEFAULT_REMINDER_SETTINGS } from "./notifications";
 
 const READINGS_KEY = "chopmeter_readings";
 const SETTINGS_KEY = "chopmeter_settings";
 const BOOKMARKS_KEY = "chopmeter_bookmarks";
 const WEATHER_CACHE_KEY = "chopmeter_weather";
+const REMINDERS_KEY = "chopmeter_reminders";
 const WEATHER_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -15,6 +18,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   lastBalance: 0,
   lastBalanceDate: Date.now(),
   displayName: "",
+  monthlyBudget: 0,
 };
 
 // ---- Legacy migration ----
@@ -33,6 +37,9 @@ function migrateSettings(raw: Record<string, unknown>): Record<string, unknown> 
   }
   if (raw.displayName === undefined) {
     raw.displayName = "";
+  }
+  if (raw.monthlyBudget === undefined) {
+    raw.monthlyBudget = 0;
   }
   return raw;
 }
@@ -121,6 +128,25 @@ export function getBookmarkedTipIds(): string[] {
   return getBookmarks().map((b) => b.tipId);
 }
 
+// ---- Reminder Settings ----
+
+export function getReminderSettings(): ReminderSettings {
+  if (typeof window === "undefined") return DEFAULT_REMINDER_SETTINGS;
+  const raw = localStorage.getItem(REMINDERS_KEY);
+  if (!raw) return DEFAULT_REMINDER_SETTINGS;
+  try {
+    return { ...DEFAULT_REMINDER_SETTINGS, ...JSON.parse(raw) };
+  } catch {
+    return DEFAULT_REMINDER_SETTINGS;
+  }
+}
+
+export function saveReminderSettings(partial: Partial<ReminderSettings>): void {
+  const current = getReminderSettings();
+  const updated = { ...current, ...partial };
+  localStorage.setItem(REMINDERS_KEY, JSON.stringify(updated));
+}
+
 // ---- Data management ----
 
 export function clearAllData(): void {
@@ -128,6 +154,7 @@ export function clearAllData(): void {
   localStorage.removeItem(SETTINGS_KEY);
   localStorage.removeItem(BOOKMARKS_KEY);
   localStorage.removeItem(WEATHER_CACHE_KEY);
+  localStorage.removeItem(REMINDERS_KEY);
 }
 
 // ---- Weather cache ----

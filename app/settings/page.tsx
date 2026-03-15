@@ -8,9 +8,16 @@ import {
   saveSettings,
   getAllReadings,
   clearAllData,
+  getReminderSettings,
+  saveReminderSettings,
 } from "@/lib/storage";
 import { COUNTRIES, getCountry, type CountryConfig } from "@/lib/countries";
 import type { UserSettings } from "@/lib/types";
+import type { ReminderSettings } from "@/lib/notifications";
+import {
+  requestNotificationPermission,
+  getNotificationStatus,
+} from "@/lib/notifications";
 import {
   Zap,
   Globe,
@@ -22,6 +29,12 @@ import {
   Trash2,
   ChevronRight,
   User,
+  Target,
+  Bell,
+  BellOff,
+  AlertTriangle,
+  Clock,
+  Calendar,
 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 
@@ -34,8 +47,11 @@ export default function SettingsPage() {
   const [balance, setBalance] = useState("");
   const [tariff, setTariff] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [budgetAmount, setBudgetAmount] = useState("");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
+  const [reminders, setReminders] = useState<ReminderSettings | null>(null);
+  const [notifStatus, setNotifStatus] = useState<"granted" | "denied" | "default" | "unsupported">("default");
 
   useEffect(() => {
     const s = getSettings();
@@ -49,6 +65,9 @@ export default function SettingsPage() {
     setBalance(s.lastBalance.toString());
     setTariff(s.tariffRate.toString());
     setDisplayName(s.displayName || "");
+    setBudgetAmount(s.monthlyBudget > 0 ? s.monthlyBudget.toString() : "");
+    setReminders(getReminderSettings());
+    setNotifStatus(getNotificationStatus());
   }, [router]);
 
   const flash = (msg: string) => {
@@ -88,6 +107,23 @@ export default function SettingsPage() {
       tariffOverridden: tarNum !== country.defaultTariff,
     });
     flash("Meter details saved");
+  };
+
+  const updateReminder = async (partial: Partial<ReminderSettings>) => {
+    const updated = { ...reminders!, ...partial };
+    // If enabling notifications, request permission first
+    if (partial.enabled && !reminders?.enabled) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        setNotifStatus(getNotificationStatus());
+        flash("Notification permission denied");
+        return;
+      }
+      setNotifStatus("granted");
+    }
+    saveReminderSettings(updated);
+    setReminders(updated);
+    flash("Notification settings updated");
   };
 
   const handleResetTariff = () => {
@@ -180,6 +216,210 @@ export default function SettingsPage() {
             </button>
           </div>
         </section>
+
+        {/* Monthly Budget */}
+        <section className="glass-card p-5">
+          <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Target size={18} className="text-blue-400" />
+            Monthly Budget
+          </h3>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-1.5">
+                Budget Amount
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">
+                  {country.currencySymbol}
+                </span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={budgetAmount}
+                  onChange={(e) => setBudgetAmount(e.target.value)}
+                  onBlur={() => {
+                    const val = parseFloat(budgetAmount) || 0;
+                    saveSettings({ monthlyBudget: val });
+                    flash(val > 0 ? "Budget updated" : "Budget cleared");
+                  }}
+                  placeholder="0.00"
+                  className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-14 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+              <p className="text-gray-500 text-xs mt-1">
+                Set a monthly spending target to track your electricity costs
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Notifications */}
+        {reminders && (
+          <section className="glass-card p-5">
+            <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+              <Bell size={18} className="text-blue-400" />
+              Notifications
+            </h3>
+
+            <div className="space-y-4">
+              {/* Main toggle */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white text-sm font-bold">Enable Notifications</p>
+                  <p className="text-gray-500 text-xs">Get alerts about your electricity usage</p>
+                </div>
+                <button
+                  onClick={() => updateReminder({ enabled: !reminders.enabled })}
+                  className={`relative w-12 h-7 rounded-full transition-colors ${
+                    reminders.enabled ? "bg-blue-500" : "bg-white/[0.1]"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                      reminders.enabled ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {reminders.enabled && (
+                <div className="space-y-4 pt-2 border-t border-white/[0.06] animate-fade-in-up">
+                  {/* Low Balance Alert */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle size={16} className="text-yellow-400" />
+                        <p className="text-white text-sm font-bold">Low Balance Alert</p>
+                      </div>
+                      <button
+                        onClick={() => updateReminder({ lowBalanceAlert: !reminders.lowBalanceAlert })}
+                        className={`relative w-12 h-7 rounded-full transition-colors ${
+                          reminders.lowBalanceAlert ? "bg-blue-500" : "bg-white/[0.1]"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                            reminders.lowBalanceAlert ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    {reminders.lowBalanceAlert && (
+                      <div className="ml-6">
+                        <label className="text-gray-400 text-xs">
+                          Alert when credit drops below
+                        </label>
+                        <div className="flex items-center gap-2 mt-1">
+                          <input
+                            type="number"
+                            min={1}
+                            max={30}
+                            value={reminders.lowBalanceThreshold}
+                            onChange={(e) => {
+                              const val = Math.max(1, Math.min(30, parseInt(e.target.value) || 3));
+                              updateReminder({ lowBalanceThreshold: val });
+                            }}
+                            className="w-20 h-10 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold px-3 text-center focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          />
+                          <span className="text-gray-400 text-sm">days remaining</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Daily Check Reminder */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Clock size={16} className="text-blue-400" />
+                        <p className="text-white text-sm font-bold">Daily Check Reminder</p>
+                      </div>
+                      <button
+                        onClick={() => updateReminder({ dailyCheckReminder: !reminders.dailyCheckReminder })}
+                        className={`relative w-12 h-7 rounded-full transition-colors ${
+                          reminders.dailyCheckReminder ? "bg-blue-500" : "bg-white/[0.1]"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                            reminders.dailyCheckReminder ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    {reminders.dailyCheckReminder && (
+                      <div className="ml-6">
+                        <label className="text-gray-400 text-xs">Remind me at</label>
+                        <input
+                          type="time"
+                          value={reminders.dailyCheckTime}
+                          onChange={(e) => updateReminder({ dailyCheckTime: e.target.value })}
+                          className="mt-1 w-32 h-10 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold px-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        />
+                        <p className="text-gray-500 text-xs mt-1">
+                          Remind me to scan my meter at this time
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Weekly Report */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={16} className="text-violet-400" />
+                        <div>
+                          <p className="text-white text-sm font-bold">Weekly Report</p>
+                          <p className="text-gray-500 text-xs">Get a summary every Sunday</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => updateReminder({ weeklyReport: !reminders.weeklyReport })}
+                        className={`relative w-12 h-7 rounded-full transition-colors ${
+                          reminders.weeklyReport ? "bg-blue-500" : "bg-white/[0.1]"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                            reminders.weeklyReport ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Status indicator */}
+                  <div className="pt-3 border-t border-white/[0.06]">
+                    {notifStatus === "granted" ? (
+                      <div className="flex items-center gap-2 text-emerald-400 text-xs font-medium">
+                        <Bell size={14} />
+                        <span>Notifications permitted</span>
+                      </div>
+                    ) : notifStatus === "denied" ? (
+                      <div className="flex items-start gap-2 text-red-400 text-xs font-medium">
+                        <BellOff size={14} className="mt-0.5 shrink-0" />
+                        <span>
+                          Notifications blocked. Please enable them in your browser settings for this site and reload.
+                        </span>
+                      </div>
+                    ) : notifStatus === "unsupported" ? (
+                      <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">
+                        <BellOff size={14} />
+                        <span>Notifications are not supported in this browser</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-yellow-400 text-xs font-medium">
+                        <Bell size={14} />
+                        <span>Notification permission not yet granted</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Country & Currency */}
         <section className="glass-card p-5">

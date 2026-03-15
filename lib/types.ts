@@ -25,6 +25,8 @@ export interface UserSettings {
   lastBalanceDate: number;
   /** User's display name for personalized greeting */
   displayName: string;
+  /** Monthly spending target in local currency (0 = not set) */
+  monthlyBudget: number;
 }
 
 /** Cached weather data from Open-Meteo */

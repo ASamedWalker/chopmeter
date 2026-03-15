@@ -8,22 +8,36 @@ import {
   saveSettings,
   getRecentReadings,
   deleteReading,
+  getReminderSettings,
 } from "@/lib/storage";
+import {
+  checkLowBalanceNotification,
+  checkDailyReminder,
+  checkWeeklyReport,
+} from "@/lib/notifications";
 import type { MeterReading, UserSettings, DashboardMetrics, WeatherCache } from "@/lib/types";
 import { getCountry } from "@/lib/countries";
 import { getGreeting } from "@/lib/greeting";
+import { getWeeklyComparison, getMonthlyComparison } from "@/lib/comparison";
+import { getBudgetStatus } from "@/lib/budget";
+import type { BudgetStatus } from "@/lib/budget";
+import type { PeriodComparison } from "@/lib/comparison";
 import { fetchWeather, decodeWeatherCode } from "@/lib/weather";
 import BottomNav from "@/components/BottomNav";
 import PullToRefresh from "@/components/PullToRefresh";
 import UsageChart from "@/components/UsageChart";
 import LowBalanceAlert from "@/components/LowBalanceAlert";
 
+import Link from "next/link";
 import {
   ScanLine,
   Wallet,
   ChevronDown,
   Timer,
   TrendingUp,
+  TrendingDown,
+  ArrowDownRight,
+  ArrowUpRight,
   Camera,
   Keyboard,
   Gauge,
@@ -35,6 +49,13 @@ import {
   CloudRain,
   Snowflake,
   CloudLightning,
+  Calculator,
+  ChevronRight,
+  Target,
+  CheckCircle,
+  AlertTriangle,
+  AlertCircle,
+  XCircle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -164,6 +185,33 @@ export default function DashboardPage() {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, [metrics]);
+
+  // Check notification reminders when dashboard loads
+  useEffect(() => {
+    if (!metrics || !settings) return;
+    const reminderSettings = getReminderSettings();
+    if (!reminderSettings.enabled) return;
+
+    // Low balance check (once per session)
+    if (reminderSettings.lowBalanceAlert) {
+      const alreadyShown = sessionStorage.getItem("chopmeter_low_balance_shown");
+      if (!alreadyShown && metrics.daysLeft !== null && metrics.daysLeft <= reminderSettings.lowBalanceThreshold) {
+        sessionStorage.setItem("chopmeter_low_balance_shown", "true");
+        checkLowBalanceNotification(metrics.daysLeft, reminderSettings.lowBalanceThreshold);
+      }
+    }
+
+    // Daily check reminder
+    if (reminderSettings.dailyCheckReminder) {
+      checkDailyReminder(reminderSettings.dailyCheckTime);
+    }
+
+    // Weekly report
+    if (reminderSettings.weeklyReport) {
+      const country = getCountry(settings.countryCode);
+      checkWeeklyReport(metrics.weeklyUsage, country.currencySymbol, metrics.dailyBurnRate);
+    }
+  }, [metrics, settings]);
 
   const handleDeleteReading = (id: string) => {
     deleteReading(id);
@@ -526,6 +574,238 @@ export default function DashboardPage() {
             onScanNow={() => router.push("/scanner")}
           />
         )}
+
+        {/* Budget Progress */}
+        {(() => {
+          const budgetStatus = getBudgetStatus(
+            allReadings,
+            settings.tariffRate,
+            settings.monthlyBudget
+          );
+          if (!budgetStatus) {
+            // No budget set — show subtle link
+            return (
+              <Link
+                href="/settings"
+                className="glass-card p-4 mb-6 animate-fade-in-up flex items-center gap-3 active:scale-[0.98] transition-transform"
+              >
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-display font-semibold text-sm">Set a Monthly Budget</p>
+                  <p className="text-gray-500 text-xs font-display">Track your electricity spending target</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-gray-600" />
+              </Link>
+            );
+          }
+
+          const statusConfig = {
+            on_track: {
+              icon: CheckCircle,
+              label: "On track",
+              color: "text-emerald-400",
+              barColor: "from-blue-500 to-violet-500",
+            },
+            warning: {
+              icon: AlertTriangle,
+              label: "Watch spending",
+              color: "text-yellow-400",
+              barColor: "from-yellow-400 to-orange-500",
+            },
+            danger: {
+              icon: AlertCircle,
+              label: "Over budget risk",
+              color: "text-red-400",
+              barColor: "from-orange-500 to-red-500",
+            },
+            over: {
+              icon: XCircle,
+              label: "Over budget!",
+              color: "text-red-500",
+              barColor: "from-red-500 to-red-600",
+            },
+          };
+
+          const cfg = statusConfig[budgetStatus.status];
+          const StatusIcon = cfg.icon;
+
+          return (
+            <div className="glass-card p-5 mb-6 animate-fade-in-up">
+              <div className="flex items-center gap-2 mb-4">
+                <Target size={20} className="text-blue-400" />
+                <h2 className="text-white text-lg font-bold">Monthly Budget</h2>
+              </div>
+
+              {/* Spent / Budget */}
+              <div className="flex items-baseline justify-between mb-2">
+                <p className="text-white font-bold text-lg">
+                  <span className="text-gray-500 text-sm">{country.currencySymbol}</span>{" "}
+                  {budgetStatus.spent.toFixed(2)}
+                  <span className="text-gray-500 text-sm font-medium">
+                    {" "}/ {country.currencySymbol} {budgetStatus.budget.toFixed(2)}
+                  </span>
+                </p>
+                <span className="text-gray-400 text-sm font-bold">
+                  {budgetStatus.percentage.toFixed(0)}%
+                </span>
+              </div>
+
+              {/* Progress bar */}
+              <div className="w-full h-2 rounded-full bg-white/[0.06] mb-4">
+                <div
+                  className={`h-2 rounded-full bg-gradient-to-r ${cfg.barColor} transition-all duration-500`}
+                  style={{
+                    width: `${Math.min(100, budgetStatus.percentage)}%`,
+                  }}
+                />
+              </div>
+
+              {/* Status + details */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <StatusIcon size={16} className={cfg.color} />
+                  <span className={`text-sm font-semibold ${cfg.color}`}>
+                    {cfg.label}
+                  </span>
+                  <span className="text-gray-600 text-sm">·</span>
+                  <span className="text-gray-400 text-sm">
+                    {budgetStatus.daysLeft} day{budgetStatus.daysLeft !== 1 ? "s" : ""} left
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-2.5">
+                    <p className="text-gray-500 text-[10px] uppercase tracking-wider font-semibold mb-0.5">
+                      Daily Average
+                    </p>
+                    <p className="text-white text-sm font-bold">
+                      {country.currencySymbol} {budgetStatus.dailyAverage.toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-2.5">
+                    <p className="text-gray-500 text-[10px] uppercase tracking-wider font-semibold mb-0.5">
+                      Safe Daily Limit
+                    </p>
+                    <p className={`text-sm font-bold ${budgetStatus.safeDailyLimit > 0 ? "text-white" : "text-red-400"}`}>
+                      {country.currencySymbol} {budgetStatus.safeDailyLimit.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Quick Tools */}
+        <div className="glass-card p-4 mb-6 animate-fade-in-up">
+          <Link href="/calculator" className="flex items-center gap-3 active:scale-[0.98] transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
+              <Calculator className="w-5 h-5 text-violet-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-white font-display font-semibold text-sm">Appliance Calculator</p>
+              <p className="text-gray-500 text-xs font-display">See which appliances cost you the most</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-gray-600" />
+          </Link>
+        </div>
+
+        {/* Usage Comparison */}
+        {(() => {
+          const weekly = getWeeklyComparison(allReadings, settings.tariffRate);
+          const monthly = getMonthlyComparison(allReadings, settings.tariffRate);
+
+          function ComparisonRow({ comparison, periodType }: { comparison: PeriodComparison; periodType: string }) {
+            if (!comparison.hasSufficientData) {
+              return (
+                <div className="glass-card p-4 text-center">
+                  <p className="text-gray-500 text-sm">Need more readings to compare {periodType.toLowerCase()} usage</p>
+                </div>
+              );
+            }
+
+            const decreased = comparison.changePercent < 0;
+            const noChange = comparison.changePercent === 0;
+            const absPercent = Math.abs(comparison.changePercent).toFixed(1);
+
+            return (
+              <div>
+                <div className="grid grid-cols-2 gap-3 mb-2">
+                  {/* Current period */}
+                  <div className="rounded-xl bg-white/[0.06] border border-blue-500/20 p-3">
+                    <p className="text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                      {comparison.currentPeriodLabel}
+                    </p>
+                    <p className="text-white text-xl font-bold">
+                      {comparison.currentPeriodUsage.toFixed(1)} <span className="text-sm text-gray-400 font-medium">kWh</span>
+                    </p>
+                    <p className="text-gray-400 text-sm mt-1">
+                      {country.currencySymbol} {comparison.currentPeriodCost.toFixed(2)}
+                    </p>
+                  </div>
+                  {/* Previous period */}
+                  <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2">
+                      {comparison.previousPeriodLabel}
+                    </p>
+                    <p className="text-gray-300 text-xl font-bold">
+                      {comparison.previousPeriodUsage.toFixed(1)} <span className="text-sm text-gray-500 font-medium">kWh</span>
+                    </p>
+                    <p className="text-gray-500 text-sm mt-1">
+                      {country.currencySymbol} {comparison.previousPeriodCost.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                {/* Change indicator */}
+                <div className="flex items-center justify-center gap-1.5 py-1">
+                  {noChange ? (
+                    <span className="text-gray-500 text-sm font-medium">No change</span>
+                  ) : decreased ? (
+                    <>
+                      <ArrowDownRight size={16} className="text-emerald-400" />
+                      <span className="text-emerald-400 text-sm font-bold">
+                        {absPercent}% less than last {periodType.toLowerCase()}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <ArrowUpRight size={16} className="text-orange-400" />
+                      <span className="text-orange-400 text-sm font-bold">
+                        {absPercent}% more than last {periodType.toLowerCase()}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="glass-card p-5 mb-6 animate-fade-in-up">
+              <div className="flex items-center gap-2 mb-4">
+                {weekly.hasSufficientData && weekly.changePercent <= 0 ? (
+                  <TrendingDown size={20} className="text-emerald-400" />
+                ) : (
+                  <TrendingUp size={20} className="text-orange-400" />
+                )}
+                <h2 className="text-white text-lg font-bold">Usage Comparison</h2>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-3">Weekly</p>
+                  <ComparisonRow comparison={weekly} periodType="Week" />
+                </div>
+                <div className="border-t border-white/[0.06] pt-5">
+                  <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-3">Monthly</p>
+                  <ComparisonRow comparison={monthly} periodType="Month" />
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Usage Chart */}
         {allReadings.length > 1 && (
