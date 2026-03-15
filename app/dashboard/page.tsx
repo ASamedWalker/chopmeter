@@ -770,7 +770,7 @@ export default function DashboardPage() {
       {/* FAB System */}
       {fabOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm animate-[fadeIn_150ms_ease-out]"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm animate-[fadeIn_200ms_ease-out]"
           onClick={() => setFabOpen(false)}
         />
       )}
@@ -789,15 +789,15 @@ export default function DashboardPage() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setFabOpen(false)}
-                className="flex items-center gap-3 animate-[fabItem_200ms_ease-out_both]"
-                style={{ animationDelay: `${i * 60}ms` }}
+                className="flex items-center gap-3 animate-[fabItem_350ms_cubic-bezier(0.34,1.56,0.64,1)_both]"
+                style={{ animationDelay: `${(3 - i) * 80}ms` }}
               >
-                <span className="text-white text-sm font-display font-semibold bg-[#1a1a2e]/90 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-xl">
+                <span className="text-white text-sm font-display font-semibold bg-[#1a1a2e]/90 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-xl border border-white/[0.08]">
                   {item.label}
                 </span>
                 <div
                   className="w-12 h-12 rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-transform"
-                  style={{ backgroundColor: item.color }}
+                  style={{ backgroundColor: item.color, boxShadow: `0 4px 15px ${item.color}50` }}
                 >
                   <Icon size={20} className="text-white" />
                 </div>
@@ -809,12 +809,13 @@ export default function DashboardPage() {
 
       <button
         onClick={() => setFabOpen(!fabOpen)}
-        className="fixed z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-200 active:scale-90"
+        className={`fixed z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center active:scale-90 ${fabOpen ? "animate-[fabButtonPop_250ms_ease-out_both]" : ""}`}
         style={{
           right: 20,
           bottom: "6rem",
           background: fabOpen ? "#EF4444" : "linear-gradient(135deg, #3B82F6, #8B5CF6)",
-          boxShadow: fabOpen ? "0 4px 20px rgba(239,68,68,0.4)" : "0 4px 20px rgba(59,130,246,0.4)",
+          boxShadow: fabOpen ? "0 4px 24px rgba(239,68,68,0.5)" : "0 4px 24px rgba(59,130,246,0.4)",
+          transition: "background 200ms ease, box-shadow 200ms ease",
           transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)",
         }}
       >
