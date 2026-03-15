@@ -19,7 +19,7 @@ import {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(1);
   const [selectedCountry, setSelectedCountry] = useState<CountryConfig>(
     COUNTRIES[0]
   );
@@ -60,7 +60,10 @@ export default function OnboardingPage() {
     else handleFinish();
   };
 
-  const back = () => step > 0 && setStep(step - 1);
+  const back = () => {
+    if (step > 1) setStep(step - 1);
+    else router.back();
+  };
 
   return (
     <div className="min-h-screen bg-bg-dark flex flex-col items-center justify-center">
@@ -358,7 +361,7 @@ function QuickSetupScreen({
       </main>
 
       <footer className="px-6 pb-8 pt-2 w-full z-20">
-        <StepDots current={1} total={3} />
+        <StepDots current={0} total={2} />
         <button
           onClick={onNext}
           className="w-full group relative flex items-center justify-center overflow-hidden rounded-2xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98]"
@@ -434,7 +437,7 @@ function ReadyScreen({
       </main>
 
       <footer className="px-6 pb-8 pt-2 w-full z-20">
-        <StepDots current={2} total={3} />
+        <StepDots current={1} total={2} />
         <button
           onClick={onFinish}
           className="w-full group relative flex items-center justify-center overflow-hidden rounded-2xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
