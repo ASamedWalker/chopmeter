@@ -23,7 +23,7 @@ export function ChopMeterLogo({
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="ChopMeter"
+      aria-label="ChopMetr"
     >
       {/* "Ch" */}
       <text
@@ -45,7 +45,7 @@ export function ChopMeterLogo({
         fill={color}
       />
 
-      {/* "pMeter" */}
+      {/* "pMetr" */}
       <text
         x="83"
         y="36"
@@ -55,7 +55,7 @@ export function ChopMeterLogo({
         fill={color}
         letterSpacing="-0.5"
       >
-        pMeter
+        pMetr
       </text>
     </svg>
   );

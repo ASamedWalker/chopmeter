@@ -19,7 +19,7 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
-import { ChopMeterLogo } from "@/components/ChopMeterLogo";
+import { ChopMeterLogo, ChopMeterTagline } from "@/components/ChopMeterLogo";
 
 // Theme-aware classes — since <html> has "dark" hardcoded,
 // we can't use Tailwind dark: on the landing page. Instead we
@@ -427,8 +427,9 @@ export default function LandingPage() {
       {/* ============================== FOOTER ============================== */}
       <footer className={`py-12 border-t ${border}`}>
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center">
+          <div className="flex flex-col items-center md:items-start gap-2">
             <ChopMeterLogo size={110} color={isDark ? "rgba(255,255,255,0.3)" : "#111827"} />
+            <ChopMeterTagline color={isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.35)"} />
           </div>
           <p className={`text-sm ${muted}`}>
             &copy; 2026 ChopMeter &middot; Built for Ghana.
