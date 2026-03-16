@@ -234,7 +234,7 @@ export default function LandingPage() {
       {/* ============================== HOW IT WORKS ============================== */}
       <section className={`py-24 lg:py-32 ${bg} border-t ${border}`} id="how-it-works">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center">
-          <h2 className={`text-3xl lg:text-4xl font-bold ${heading} mb-16`}>How ChopMeter Works</h2>
+          <h2 className={`text-3xl lg:text-4xl font-bold ${heading} mb-16`}>How ChopMetr Works</h2>
 
           <div className="grid md:grid-cols-3 gap-6 mb-20">
             {[
@@ -375,7 +375,7 @@ export default function LandingPage() {
             {[
               {
                 q: "Is this affiliated with ECG or NEDCo?",
-                a: "No, ChopMeter is an independent utility tool built to empower consumers with their own data. We use standard PURC tariff rates to calculate your expected costs.",
+                a: "No, ChopMetr is an independent utility tool built to empower consumers with their own data. We use standard PURC tariff rates to calculate your expected costs.",
               },
               {
                 q: "How accurate is the camera scan?",
@@ -412,7 +412,7 @@ export default function LandingPage() {
             Take control of your electricity
           </h2>
           <p className={`${t(isDark, "text-blue-200", "text-white/45")} text-lg mb-10 max-w-xl mx-auto`}>
-            Join thousands of Ghanaians using ChopMeter to audit their bills and save money.
+            Join thousands of Ghanaians using ChopMetr to audit their bills and save money.
           </p>
           <button
             onClick={handleCTA}
@@ -432,7 +432,7 @@ export default function LandingPage() {
             <ChopMeterTagline color={isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.35)"} />
           </div>
           <p className={`text-sm ${muted}`}>
-            &copy; 2026 ChopMeter &middot; Built for Ghana.
+            &copy; 2026 ChopMetr &middot; Built for Ghana.
           </p>
           <div className={`flex gap-6 text-sm font-medium ${subtext}`}>
             <a href="#" className="hover:text-primary transition-colors">Privacy</a>
