@@ -11,15 +11,13 @@ import {
   CheckCircle,
   ScanLine,
   TrendingUp,
-  PiggyBank,
   Sparkles,
-  Shield,
   Clock,
 } from "lucide-react";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [selectedCountry, setSelectedCountry] = useState<CountryConfig>(
     COUNTRIES[0]
   );
@@ -63,8 +61,7 @@ export default function OnboardingPage() {
   };
 
   const back = () => {
-    if (step > 1) setStep(step - 1);
-    else router.back();
+    if (step > 0) setStep(step - 1);
   };
 
   return (
@@ -107,63 +104,29 @@ export default function OnboardingPage() {
 function WelcomeScreen({ onNext }: { onNext: () => void }) {
   return (
     <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-white/[0.06]">
-      {/* Logo */}
-      <header className="flex items-center px-6 py-5 z-20">
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center size-9 rounded-[10px] bg-gradient-to-br from-blue-500 to-violet-500 shadow-lg shadow-blue-500/25">
-            <Zap size={20} className="text-white" fill="white" />
-          </div>
-          <h2 className="text-white text-xl font-bold tracking-tight">
-            ChopMeter
-          </h2>
-        </div>
-      </header>
+      {/* Hero — centered, clean, minimal */}
+      <main className="flex-1 flex flex-col items-center justify-center px-8 relative">
+        {/* Soft glow behind icon */}
+        <div className="absolute w-60 h-60 rounded-full bg-blue-500/[0.06] blur-2xl pointer-events-none" />
 
-      {/* Hero */}
-      <main className="flex-1 flex flex-col justify-center px-6 pb-6">
-        {/* Decorative glow */}
-        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/[0.08] rounded-full blur-2xl pointer-events-none" />
-
-        <div className="flex flex-col items-center mb-10 relative z-10">
-          <div className="size-24 rounded-full bg-blue-500/[0.12] border border-blue-500/20 flex items-center justify-center mb-8">
-            <Zap size={48} className="text-blue-500" fill="currentColor" />
-          </div>
-
-          <h1 className="text-[32px] font-extrabold text-white text-center leading-[1.25] mb-3">
-            Stop your meter<br />
-            from <span className="gradient-primary-text">chopping</span> your money
-          </h1>
-          <p className="text-gray-400 text-base text-center leading-relaxed max-w-[300px]">
-            Track every unit, know your balance, and take control of your electricity spend.
-          </p>
+        {/* App icon */}
+        <div className="size-[120px] rounded-[32px] bg-blue-500 flex items-center justify-center mb-10 shadow-[0_8px_24px_rgba(59,130,246,0.3)] relative z-10">
+          <Zap size={56} className="text-white" fill="white" />
         </div>
 
-        {/* 3 Benefits — tapping any card advances to next step */}
-        <div className="space-y-3 relative z-10">
-          {[
-            { Icon: ScanLine, title: "Scan & Track", desc: "Point at your meter to log readings instantly", color: "text-blue-500", bg: "bg-blue-500/[0.08]" },
-            { Icon: Shield, title: "Stay In Control", desc: "Know exactly how many days your credit will last", color: "text-violet-500", bg: "bg-violet-500/[0.08]" },
-            { Icon: PiggyBank, title: "Save Money", desc: "Get tips to cut your electricity bill by up to 30%", color: "text-emerald-500", bg: "bg-emerald-500/[0.08]" },
-          ].map((item) => (
-            <button
-              key={item.title}
-              onClick={onNext}
-              className="w-full flex items-center gap-3.5 py-3 px-4 rounded-[14px] bg-white/[0.03] border border-white/[0.05] text-left active:scale-[0.98] transition-transform"
-            >
-              <div className={`size-[42px] rounded-xl ${item.bg} flex items-center justify-center shrink-0`}>
-                <item.Icon size={22} className={item.color} />
-              </div>
-              <div>
-                <p className="text-[15px] font-semibold text-white">{item.title}</p>
-                <p className="text-[13px] text-gray-400 mt-0.5">{item.desc}</p>
-              </div>
-            </button>
-          ))}
-        </div>
+        {/* App name */}
+        <h1 className="text-4xl font-extrabold text-white text-center mb-3 relative z-10">
+          ChopMeter
+        </h1>
+
+        {/* Tagline */}
+        <p className="text-lg font-medium text-gray-400 text-center leading-relaxed max-w-[280px] relative z-10">
+          Take control of your<br />electricity spend
+        </p>
       </main>
 
       {/* CTA */}
-      <footer className="px-6 pb-8 pt-2 w-full z-20">
+      <footer className="px-6 pb-10 pt-2 w-full z-20">
         <StepDots current={0} total={3} />
         <button
           onClick={onNext}
@@ -174,8 +137,8 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
           </span>
           <ArrowRight size={20} className="text-white relative z-10 transition-transform group-hover:translate-x-1" />
         </button>
-        <p className="text-center text-[13px] text-gray-600 mt-3">
-          Takes less than 30 seconds
+        <p className="text-center text-[13px] text-gray-600 mt-4">
+          Setup takes 30 seconds
         </p>
       </footer>
     </div>
@@ -369,7 +332,7 @@ function QuickSetupScreen({
       </main>
 
       <footer className="px-6 pb-8 pt-2 w-full z-20">
-        <StepDots current={0} total={2} />
+        <StepDots current={1} total={3} />
         <button
           onClick={onNext}
           className="w-full group relative flex items-center justify-center overflow-hidden rounded-2xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] active:scale-[0.98]"
@@ -445,7 +408,7 @@ function ReadyScreen({
       </main>
 
       <footer className="px-6 pb-8 pt-2 w-full z-20">
-        <StepDots current={1} total={2} />
+        <StepDots current={2} total={3} />
         <button
           onClick={onFinish}
           className="w-full group relative flex items-center justify-center overflow-hidden rounded-2xl h-14 bg-gradient-to-r from-blue-500 to-violet-500 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
