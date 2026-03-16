@@ -14,6 +14,7 @@ import {
   Sparkles,
   Clock,
 } from "lucide-react";
+import { ChopMeterLogo, ChopMeterTagline } from "@/components/ChopMeterLogo";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -106,21 +107,26 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
     <div className="w-full max-w-[480px] h-screen max-h-[900px] flex flex-col bg-bg-dark relative shadow-2xl overflow-hidden sm:rounded-xl sm:h-[85vh] sm:border sm:border-white/[0.06]">
       {/* Hero — centered, clean, minimal */}
       <main className="flex-1 flex flex-col items-center justify-center px-8 relative">
-        {/* Soft glow behind icon */}
-        <div className="absolute w-60 h-60 rounded-full bg-blue-500/[0.06] blur-2xl pointer-events-none" />
+        {/* Soft glow behind logo */}
+        <div className="absolute w-72 h-72 rounded-full bg-blue-500/[0.08] blur-3xl pointer-events-none" />
 
         {/* App icon */}
-        <div className="size-[120px] rounded-[32px] bg-blue-500 flex items-center justify-center mb-10 shadow-[0_8px_24px_rgba(59,130,246,0.3)] relative z-10">
-          <Zap size={56} className="text-white" fill="white" />
+        <div className="size-[100px] rounded-[28px] bg-blue-500 flex items-center justify-center mb-8 shadow-[0_8px_24px_rgba(59,130,246,0.3)] relative z-10">
+          <Zap size={48} className="text-white" fill="white" />
         </div>
 
-        {/* App name */}
-        <h1 className="text-4xl font-extrabold text-white text-center mb-3 relative z-10">
-          ChopMeter
-        </h1>
+        {/* Wordmark logo */}
+        <div className="relative z-10 mb-4">
+          <ChopMeterLogo size={260} color="#FFFFFF" />
+        </div>
 
         {/* Tagline */}
-        <p className="text-lg font-medium text-gray-400 text-center leading-relaxed max-w-[280px] relative z-10">
+        <div className="relative z-10 mb-2">
+          <ChopMeterTagline color="rgba(255,255,255,0.5)" />
+        </div>
+
+        {/* Subtitle */}
+        <p className="text-base font-medium text-gray-400 text-center leading-relaxed max-w-[280px] relative z-10 mt-4">
           Take control of your<br />electricity spend
         </p>
       </main>

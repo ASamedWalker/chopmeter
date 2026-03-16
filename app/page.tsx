@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSettings } from "@/lib/storage";
 import {
-  Zap,
   ArrowRight,
   ScanLine,
   Activity,
@@ -20,6 +19,7 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
+import { ChopMeterLogo } from "@/components/ChopMeterLogo";
 
 // Theme-aware classes — since <html> has "dark" hardcoded,
 // we can't use Tailwind dark: on the landing page. Instead we
@@ -79,10 +79,7 @@ export default function LandingPage() {
       {/* ============================== NAV ============================== */}
       <nav className={`sticky top-0 z-50 w-full h-16 ${navBg} backdrop-blur-xl border-b ${border} flex items-center px-6 lg:px-12 justify-between transition-colors`}>
         <div className="flex items-center gap-2.5">
-          <div className="size-9 bg-primary rounded-lg flex items-center justify-center">
-            <Zap size={17} className="text-white" fill="currentColor" />
-          </div>
-          <span className={`font-bold text-base ${heading}`}>ChopMeter</span>
+          <ChopMeterLogo size={130} color={isDark ? "#FFFFFF" : "#111827"} />
         </div>
         <div className="hidden md:flex items-center gap-8">
           <a href="#how-it-works" className={`text-sm font-medium ${subtext} hover:text-primary transition-colors`}>How It Works</a>
@@ -180,10 +177,7 @@ export default function LandingPage() {
                 <div className="space-y-3 px-1">
                   <div className="flex items-center justify-between px-0.5">
                     <div className="flex items-center gap-2">
-                      <div className="size-6 bg-primary rounded-md flex items-center justify-center">
-                        <Zap size={11} className="text-white" fill="currentColor" />
-                      </div>
-                      <span className="text-white/80 text-[10px] font-bold">ChopMeter</span>
+                      <ChopMeterLogo size={70} color="rgba(255,255,255,0.8)" />
                     </div>
                     <span className="text-white/30 text-[9px] font-medium">9:41</span>
                   </div>
@@ -433,11 +427,8 @@ export default function LandingPage() {
       {/* ============================== FOOTER ============================== */}
       <footer className={`py-12 border-t ${border}`}>
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="size-7 bg-primary rounded-md flex items-center justify-center">
-              <Zap size={13} className="text-white" fill="currentColor" />
-            </div>
-            <span className={`font-bold ${t(isDark, "text-gray-900", "text-white/30")}`}>ChopMeter</span>
+          <div className="flex items-center">
+            <ChopMeterLogo size={110} color={isDark ? "rgba(255,255,255,0.3)" : "#111827"} />
           </div>
           <p className={`text-sm ${muted}`}>
             &copy; 2026 ChopMeter &middot; Built for Ghana.
