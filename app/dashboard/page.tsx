@@ -162,17 +162,35 @@ export default function DashboardPage() {
     }
   }, [settings?.countryCode]);
 
-  // Animated balance counter
+  // Animated balance counter — only animate on actual value change
+  const prevBalanceRef = useRef<number | null>(null);
   useEffect(() => {
     if (!metrics) return;
     const target = metrics.currentBalance;
-    const duration = 800;
+    const from = prevBalanceRef.current;
+
+    // Skip animation if value hasn't changed (e.g. pull-to-refresh with no new data)
+    if (from !== null && Math.abs(from - target) < 0.01) {
+      setDisplayBalance(target);
+      return;
+    }
+
+    // First load: snap to value, no animation
+    if (from === null) {
+      setDisplayBalance(target);
+      prevBalanceRef.current = target;
+      return;
+    }
+
+    // Animate from previous value to new value
+    prevBalanceRef.current = target;
+    const duration = 600;
     const start = performance.now();
 
     const animate = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
-      setDisplayBalance(target * easeOutCubic(progress));
+      setDisplayBalance(from + (target - from) * easeOutCubic(progress));
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animate);
       }
@@ -182,7 +200,7 @@ export default function DashboardPage() {
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [metrics]);
+  }, [metrics?.currentBalance]);
 
   // Check notification reminders when dashboard loads
   useEffect(() => {
