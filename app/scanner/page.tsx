@@ -44,7 +44,11 @@ export default function ScannerPage() {
   const captureAndScan = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current || scanningRef.current) return;
     scanningRef.current = true;
-    setScanState("scanning");
+    // Only show "Analyzing..." after a few silent attempts so the user
+    // has time to position their camera without the status flickering
+    if (failCountRef.current >= 2) {
+      setScanState("scanning");
+    }
     setError("");
     setProgress(0);
 
