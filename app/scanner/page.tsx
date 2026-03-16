@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { saveReading, saveSettings, getSettings, generateId, getDefaultMeter } from "@/lib/storage";
 import { getCountry } from "@/lib/countries";
 import { recognizeMeterReading } from "@/lib/ocr";
-import { X, Zap, Keyboard, Wallet } from "lucide-react";
+import { X, Zap, Keyboard, Wallet, Check, RotateCcw, AlertCircle } from "lucide-react";
 
 type ScanState = "idle" | "scanning" | "success" | "manual";
 
@@ -16,6 +16,7 @@ export default function ScannerPage() {
   const streamRef = useRef<MediaStream | null>(null);
   const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const scanningRef = useRef(false);
+  const failCountRef = useRef(0);
 
   const [scanState, setScanState] = useState<ScanState>("idle");
   const [scannedValue, setScannedValue] = useState<string>("");
@@ -24,11 +25,12 @@ export default function ScannerPage() {
   const [flashOn, setFlashOn] = useState(false);
   const [error, setError] = useState<string>("");
   const [progress, setProgress] = useState(0);
+  const [scanAttempts, setScanAttempts] = useState(0);
+  const [showTip, setShowTip] = useState(false);
 
   const settings = getSettings();
   const country = getCountry(settings.countryCode);
 
-  // Get active meter ID for saving readings
   const activeMeter = typeof window !== "undefined" ? getDefaultMeter() : null;
   const activeMeterId = activeMeter?.id;
 
@@ -61,9 +63,17 @@ export default function ScannerPage() {
       setScannedValue(result.value.toString());
       setScanState("success");
       stopScanning();
+      failCountRef.current = 0;
       navigator.vibrate?.(100);
     } else {
+      failCountRef.current += 1;
+      setScanAttempts(failCountRef.current);
       setScanState("idle");
+
+      // After 3 failed attempts, show helpful tip
+      if (failCountRef.current === 3) {
+        setShowTip(true);
+      }
     }
     setProgress(0);
     scanningRef.current = false;
@@ -71,8 +81,11 @@ export default function ScannerPage() {
 
   const startScanning = useCallback(() => {
     stopScanning();
+    failCountRef.current = 0;
+    setScanAttempts(0);
+    setShowTip(false);
     captureAndScan();
-    scanIntervalRef.current = setInterval(captureAndScan, 3000);
+    scanIntervalRef.current = setInterval(captureAndScan, 3500);
   }, [stopScanning, captureAndScan]);
 
   const startCamera = useCallback(async () => {
@@ -86,7 +99,6 @@ export default function ScannerPage() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
-      // Auto-scan starts as soon as camera is ready
       startScanning();
     } catch {
       setError("Camera access denied.");
@@ -151,6 +163,19 @@ export default function ScannerPage() {
     router.push("/dashboard");
   };
 
+  const goToManual = () => {
+    setScanState("manual");
+    stopCamera();
+    stopScanning();
+  };
+
+  // Status badge config
+  const statusBadge = scanState === "scanning"
+    ? { label: `Analyzing... ${progress}%`, color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" }
+    : scanState === "success"
+    ? { label: "Reading found!", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" }
+    : { label: "Point camera at meter display", color: "text-gray-400", bg: "bg-black/60" };
+
   return (
     <div className="fixed inset-0 bg-black flex flex-col z-40">
       <canvas ref={canvasRef} className="hidden" />
@@ -198,15 +223,29 @@ export default function ScannerPage() {
       {/* Scanner Mode */}
       {scanState !== "manual" && (
         <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 w-full">
-          <div className="relative w-full aspect-[4/3] max-h-[300px] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/20">
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-lg z-20" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-lg z-20" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-lg z-20" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-lg z-20" />
+          <div className={`relative w-full aspect-[4/3] max-h-[280px] rounded-xl overflow-hidden shadow-2xl transition-all duration-300 ${
+            scanState === "success" ? "ring-2 ring-emerald-500" : "ring-1 ring-white/20"
+          }`}>
+            {/* Corner markers */}
+            {[
+              { pos: "top-0 left-0", border: "border-t-4 border-l-4 rounded-tl-lg" },
+              { pos: "top-0 right-0", border: "border-t-4 border-r-4 rounded-tr-lg" },
+              { pos: "bottom-0 left-0", border: "border-b-4 border-l-4 rounded-bl-lg" },
+              { pos: "bottom-0 right-0", border: "border-b-4 border-r-4 rounded-br-lg" },
+            ].map((c, i) => (
+              <div key={i} className={`absolute ${c.pos} w-8 h-8 ${c.border} z-20 transition-colors ${
+                scanState === "success" ? "border-emerald-500" : "border-blue-500"
+              }`} />
+            ))}
 
-            <div className="absolute inset-x-0 top-0 h-0.5 bg-blue-500/80 shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-scan z-10 w-full" />
+            {/* Scanning line — only animates when actively scanning */}
+            {scanState === "scanning" && (
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-blue-500/80 shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-scan z-10 w-full" />
+            )}
+
             <div className="absolute inset-0 bg-transparent ring-[1000px] ring-black/50 pointer-events-none" />
 
+            {/* Progress bar — only during active scan */}
             {scanState === "scanning" && (
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/50 z-30">
                 <div
@@ -216,29 +255,22 @@ export default function ScannerPage() {
               </div>
             )}
 
+            {/* Status badge */}
             <div className="absolute bottom-4 left-0 right-0 text-center z-20">
-              <span className="inline-block px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full text-xs font-medium text-blue-400 uppercase tracking-wider">
-                {scanState === "scanning"
-                  ? `Reading... ${progress}%`
-                  : scanState === "success"
-                  ? "Found!"
-                  : "Point at meter"}
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm rounded-full text-xs font-semibold border ${statusBadge.bg} ${statusBadge.color}`}>
+                {scanState === "scanning" && (
+                  <span className="size-2 rounded-full bg-amber-400 animate-pulse" />
+                )}
+                {scanState === "success" && <Check size={14} />}
+                {statusBadge.label}
               </span>
             </div>
           </div>
 
-          {scanState !== "success" && (
-            <p className="mt-6 text-gray-400 text-sm text-center">
-              Hold steady — scanning automatically
-            </p>
-          )}
-
-          {error && (
-            <p className="mt-3 text-danger text-sm text-center">{error}</p>
-          )}
-
-          {scanState === "success" && (
-            <div className="mt-4 bg-white/[0.05] backdrop-blur-xl border border-blue-500/30 rounded-xl p-4 w-full max-w-xs">
+          {/* Guidance text below viewfinder */}
+          {scanState === "success" ? (
+            /* Found result card */
+            <div className="mt-4 bg-white/[0.05] backdrop-blur-xl border border-emerald-500/30 rounded-xl p-4 w-full max-w-xs animate-[fadeIn_300ms_ease-out]">
               <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">
                 Detected Reading
               </p>
@@ -277,18 +309,77 @@ export default function ScannerPage() {
                     setBalanceValue("");
                     startScanning();
                   }}
-                  className="flex-1 py-2 rounded-lg border border-white/[0.06] text-white text-sm font-bold hover:bg-white/[0.05] transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-white/[0.06] text-white text-sm font-bold hover:bg-white/[0.05] transition-colors"
                 >
+                  <RotateCcw size={14} />
                   Rescan
                 </button>
                 <button
                   onClick={() => handleSave(scannedValue, "ocr")}
-                  className="flex-1 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-violet-500 text-white text-sm font-bold hover:shadow-lg hover:shadow-blue-500/20 transition-all"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-gradient-to-r from-blue-500 to-violet-500 text-white text-sm font-bold hover:shadow-lg hover:shadow-blue-500/20 transition-all"
                 >
+                  <Check size={14} />
                   Save
                 </button>
               </div>
+
+              <button
+                onClick={() => { setManualValue(scannedValue); goToManual(); }}
+                className="w-full text-center text-gray-500 text-xs mt-3 hover:text-blue-400 transition-colors"
+              >
+                Wrong number? Edit manually
+              </button>
             </div>
+          ) : (
+            /* Guidance area when not found */
+            <div className="mt-5 w-full max-w-xs text-center">
+              {/* Attempt counter */}
+              {scanAttempts > 0 && scanAttempts < 5 && (
+                <p className="text-gray-500 text-xs mb-2">
+                  Scan attempt {scanAttempts}... looking for meter numbers
+                </p>
+              )}
+
+              {/* Tip after 3 failed attempts */}
+              {showTip && (
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 mb-3 text-left animate-[fadeIn_300ms_ease-out]">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle size={16} className="text-amber-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-amber-300 text-xs font-semibold mb-1">Having trouble scanning?</p>
+                      <ul className="text-gray-400 text-xs space-y-0.5">
+                        <li>- Hold phone closer to the meter display</li>
+                        <li>- Make sure the numbers are well-lit</li>
+                        <li>- Try turning on the flash</li>
+                        <li>- Or just enter the reading manually below</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* After 5+ attempts, strongly suggest manual */}
+              {scanAttempts >= 5 && (
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mb-3 animate-[fadeIn_300ms_ease-out]">
+                  <p className="text-blue-300 text-sm font-semibold mb-1">
+                    Can&apos;t detect the reading?
+                  </p>
+                  <p className="text-gray-400 text-xs">
+                    No worries — just type it in. It&apos;s just as fast.
+                  </p>
+                </div>
+              )}
+
+              {!showTip && scanAttempts === 0 && (
+                <p className="text-gray-400 text-sm">
+                  Point camera at the number display on your meter
+                </p>
+              )}
+            </div>
+          )}
+
+          {error && (
+            <p className="mt-3 text-danger text-sm text-center">{error}</p>
           )}
         </main>
       )}
@@ -299,9 +390,12 @@ export default function ScannerPage() {
           <div className="w-full max-w-xs space-y-6">
             <div className="text-center">
               <Keyboard size={48} className="text-blue-400 mx-auto mb-4" />
-              <h3 className="text-white text-xl font-bold mb-2">
-                Manual Entry
+              <h3 className="text-white text-xl font-bold mb-1">
+                Enter Reading
               </h3>
+              <p className="text-gray-500 text-sm">
+                Type the number shown on your meter
+              </p>
             </div>
 
             <div>
@@ -316,6 +410,7 @@ export default function ScannerPage() {
                 value={manualValue}
                 onChange={(e) => setManualValue(e.target.value)}
                 placeholder="e.g. 2450.5"
+                autoFocus
                 className="w-full h-16 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-2xl font-bold text-center placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
@@ -348,7 +443,7 @@ export default function ScannerPage() {
 
             <button
               onClick={() => handleSave(manualValue, "manual")}
-              className="w-full h-14 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-lg hover:shadow-lg hover:shadow-blue-500/20 transition-all"
+              className="w-full h-14 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-lg hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
             >
               Save Reading
             </button>
@@ -369,23 +464,23 @@ export default function ScannerPage() {
 
       {/* Footer */}
       <footer className="relative z-10 w-full p-6 pb-8 bg-gradient-to-t from-black via-black/90 to-transparent">
-        {scanState !== "manual" ? (
+        {scanState !== "manual" && scanState !== "success" ? (
           <button
-            onClick={() => {
-              setScanState("manual");
-              stopCamera();
-              stopScanning();
-            }}
-            className="w-full flex items-center justify-center gap-3 h-14 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-white font-bold text-base hover:bg-white/20 active:bg-white/5 transition-all group"
+            onClick={goToManual}
+            className={`w-full flex items-center justify-center gap-3 h-14 rounded-xl backdrop-blur-md border text-white font-bold text-base active:bg-white/5 transition-all group ${
+              scanAttempts >= 3
+                ? "bg-blue-500/20 border-blue-500/30 hover:bg-blue-500/30"
+                : "bg-white/10 border-white/10 hover:bg-white/20"
+            }`}
           >
-            <Keyboard size={20} className="text-blue-400 group-hover:text-white transition-colors" />
+            <Keyboard size={20} className={`${scanAttempts >= 3 ? "text-white" : "text-blue-400"} group-hover:text-white transition-colors`} />
             <span>Enter Manually</span>
           </button>
-        ) : (
+        ) : scanState === "manual" ? (
           <p className="text-center text-xs text-gray-500">
             Powered by ChopMeter
           </p>
-        )}
+        ) : null}
       </footer>
     </div>
   );
