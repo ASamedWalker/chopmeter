@@ -38,11 +38,11 @@ export function ChopMeterLogo({
         Ch
       </text>
 
-      {/* "o" replaced with lightning bolt in circle */}
+      {/* "o" with lightning bolt striking through — bolt extends well outside circle */}
       <circle cx="68" cy="24" r="14" stroke={color} strokeWidth="3" fill="none" />
       <path
-        d="M65 16 L62 26 H67 L64 32 L73 22 H68 L71 16 Z"
-        fill={color}
+        d="M67 2 L60 24 H67 L62 46 L78 18 H70 L75 2 Z"
+        fill="#3B82F6"
       />
 
       {/* "pMetr" */}
