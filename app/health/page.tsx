@@ -181,7 +181,7 @@ export default function HealthCheckPage() {
     if (!result) return;
 
     const text = [
-      `ChopMeter Health Check Results`,
+      `ChopMetr Health Check Results`,
       `Status: ${STATUS_CONFIG[result.status].label}`,
       ``,
       `Expected: ${result.expectedDailyKwh.toFixed(1)} kWh/day (${currencySymbol} ${result.expectedDailyCost.toFixed(2)}/day)`,
@@ -192,12 +192,12 @@ export default function HealthCheckPage() {
       ``,
       result.statusMessage,
       ``,
-      `Tracked with ChopMeter - chopmeter.app`,
+      `Tracked with ChopMetr - chopmeter.app`,
     ].join("\n");
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: "ChopMeter Health Check", text });
+        await navigator.share({ title: "ChopMetr Health Check", text });
         return;
       } catch {
         // fallback to clipboard
@@ -740,7 +740,7 @@ export default function HealthCheckPage() {
                           className="text-blue-400 shrink-0 mt-0.5"
                         />
                         <p className="text-gray-400">
-                          Use your ChopMeter Report as evidence
+                          Use your ChopMetr Report as evidence
                         </p>
                       </div>
                     </div>

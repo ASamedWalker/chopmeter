@@ -2,7 +2,7 @@
 
 const WHATSAPP_NUMBER = "+233592184737";
 const PRE_FILLED_MESSAGE = encodeURIComponent(
-  "Hello ChopMeter! I need help with my electricity meter readings. 🔌"
+  "Hello ChopMetr! I need help with my electricity meter readings. 🔌"
 );
 
 /**

@@ -482,7 +482,7 @@ export default function ScannerPage() {
           </button>
         ) : scanState === "manual" ? (
           <p className="text-center text-xs text-gray-500">
-            Powered by ChopMeter
+            Powered by ChopMetr
           </p>
         ) : null}
       </footer>

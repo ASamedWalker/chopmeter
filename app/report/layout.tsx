@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Monthly Report — ChopMeter",
+  title: "Monthly Report — ChopMetr",
   description: "Generate and download your monthly energy usage PDF report",
 };
 

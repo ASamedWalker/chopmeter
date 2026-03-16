@@ -71,7 +71,7 @@ export default function InstallPrompt() {
         <div className="flex items-center gap-3 min-w-0">
           <Download className="text-white shrink-0" size={20} />
           <p className="text-white font-bold text-sm truncate">
-            Install ChopMeter for offline use
+            Install ChopMetr for offline use
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -107,7 +107,7 @@ export default function InstallPrompt() {
             <Download size={20} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-bold text-sm">Install ChopMeter</p>
+            <p className="text-white font-bold text-sm">Install ChopMetr</p>
             <p className="text-gray-400 text-xs mt-1 leading-relaxed">
               Tap <Share size={14} className="inline text-blue-400 -mt-0.5" /> then <span className="text-white font-semibold">&quot;Add to Home Screen&quot;</span>
             </p>

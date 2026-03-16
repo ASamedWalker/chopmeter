@@ -1008,7 +1008,7 @@ export default function SettingsPage() {
             <div className="size-16 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center shadow-lg shadow-blue-500/20 mb-4">
               <Zap size={32} className="text-white" fill="white" />
             </div>
-            <h3 className="text-white text-lg font-bold">ChopMeter</h3>
+            <h3 className="text-white text-lg font-bold">ChopMetr</h3>
             <p className="text-gray-500 text-xs mt-1">Version 1.0.0</p>
             <p className="text-gray-400 text-sm mt-3 max-w-[260px] leading-relaxed">
               Track your prepaid electricity usage and spending with ease.

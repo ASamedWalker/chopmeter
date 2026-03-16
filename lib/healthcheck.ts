@@ -151,7 +151,7 @@ export function runHealthCheck(options: {
     status = "alert";
     statusMessage = "Significant discrepancy detected in your meter readings";
     recommendation =
-      "We recommend filing a formal complaint with ECG and requesting a meter audit from PURC (Public Utilities Regulatory Commission). Use your ChopMeter report as evidence.";
+      "We recommend filing a formal complaint with ECG and requesting a meter audit from PURC (Public Utilities Regulatory Commission). Use your ChopMetr report as evidence.";
   }
 
   return {

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "ChopMeter - Track Your Prepaid Electricity Usage";
+export const alt = "ChopMetr - Track Your Prepaid Electricity Usage";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -50,7 +50,7 @@ export default function OGImage() {
             marginBottom: 16,
           }}
         >
-          ChopMeter
+          ChopMetr
         </div>
         <div
           style={{

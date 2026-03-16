@@ -9,8 +9,8 @@ const siteUrl = "https://chopmeter.me";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "ChopMeter - Track Your Prepaid Electricity Usage in Ghana",
-    template: "%s | ChopMeter",
+    default: "ChopMetr - Track Your Prepaid Electricity Usage in Ghana",
+    template: "%s | ChopMetr",
   },
   description:
     "Free app to track prepaid electricity meter readings, monitor daily energy usage, and manage your spending. Works offline. Built for Ghana, Nigeria, and Africa.",
@@ -30,18 +30,18 @@ export const metadata: Metadata = {
     "electricity budget",
     "smart meter tracker",
   ],
-  authors: [{ name: "ChopMeter" }],
-  creator: "ChopMeter",
-  publisher: "ChopMeter",
-  applicationName: "ChopMeter",
+  authors: [{ name: "ChopMetr" }],
+  creator: "ChopMetr",
+  publisher: "ChopMetr",
+  applicationName: "ChopMetr",
   category: "utilities",
   classification: "Energy & Utilities",
   openGraph: {
     type: "website",
     locale: "en_GH",
     url: siteUrl,
-    siteName: "ChopMeter",
-    title: "ChopMeter - Track Your Prepaid Electricity Usage",
+    siteName: "ChopMetr",
+    title: "ChopMetr - Track Your Prepaid Electricity Usage",
     description:
       "Stop guessing where your electricity goes. Scan your prepaid meter, track daily usage, and save money on energy. Free, offline, no signup.",
     images: [
@@ -49,13 +49,13 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ChopMeter - Prepaid Electricity Tracker",
+        alt: "ChopMetr - Prepaid Electricity Tracker",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ChopMeter - Track Your Prepaid Electricity",
+    title: "ChopMetr - Track Your Prepaid Electricity",
     description:
       "Free app to scan your prepaid meter, track energy usage, and manage electricity spending. Built for Ghana & Africa.",
     images: ["/og-image.png"],
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "ChopMeter",
+    title: "ChopMetr",
   },
   other: {
     "geo.region": "GH",
@@ -97,7 +97,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
-              name: "ChopMeter",
+              name: "ChopMetr",
               applicationCategory: "UtilitiesApplication",
               operatingSystem: "Web",
               description:
@@ -115,7 +115,7 @@ export default function RootLayout({
               },
               author: {
                 "@type": "Organization",
-                name: "ChopMeter",
+                name: "ChopMetr",
                 url: "https://chopmeter.me",
               },
               areaServed: {

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Appliance Calculator — ChopMeter",
+  title: "Appliance Calculator — ChopMetr",
   description: "Calculate electricity costs for your household appliances",
 };
 

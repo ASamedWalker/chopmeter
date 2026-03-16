@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Top-up History — ChopMeter",
+  title: "Top-up History — ChopMetr",
   description: "Track your prepaid electricity recharges and spending",
 };
 

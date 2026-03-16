@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "ChopMeter - Track Your Electricity",
-    short_name: "ChopMeter",
+    name: "ChopMetr - Track Your Electricity",
+    short_name: "ChopMetr",
     description:
       "No more meter dey chop my money! Track your prepaid electricity meter in real-time.",
     start_url: "/",
