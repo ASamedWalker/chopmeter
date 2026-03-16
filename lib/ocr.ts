@@ -2,7 +2,8 @@ import Tesseract from "tesseract.js";
 
 /**
  * Extract numeric meter reading from an image.
- * Uses Tesseract.js with digit-only whitelist for best accuracy on LCD displays.
+ * Uses Tesseract.js — only accepts 4+ digit numbers to avoid false positives
+ * from random text, single digits, dates, etc.
  */
 export async function recognizeMeterReading(
   imageSource: string | File | Blob,
@@ -24,8 +25,14 @@ export async function recognizeMeterReading(
     const rawText = result.data.text.trim();
     const confidence = result.data.confidence;
 
-    // Extract numeric value — look for sequences of digits (with optional decimal)
-    const matches = rawText.match(/[\d]+\.?[\d]*/g);
+    // Reject low-confidence results — likely not looking at a meter
+    if (confidence < 40) {
+      return { value: null, rawText, confidence };
+    }
+
+    // Look for 4-7 digit numbers (with optional 1-2 decimal places)
+    // This filters out random single digits, dates, short numbers
+    const matches = rawText.match(/\b(\d{4,7}(?:\.\d{1,2})?)\b/g);
     if (matches && matches.length > 0) {
       // Pick the longest numeric sequence (most likely the meter reading)
       const longest = matches.sort((a, b) => b.length - a.length)[0];
