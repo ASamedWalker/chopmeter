@@ -16,7 +16,7 @@ import {
   checkWeeklyReport,
 } from "@/lib/notifications";
 import type { MeterReading, UserSettings, DashboardMetrics, WeatherCache } from "@/lib/types";
-import { getCountry } from "@/lib/countries";
+import { getCountry, getEffectiveRate } from "@/lib/countries";
 import { getGreeting } from "@/lib/greeting";
 import { getBudgetStatus } from "@/lib/budget";
 import type { BudgetStatus } from "@/lib/budget";
@@ -57,8 +57,10 @@ const WEATHER_ICON_MAP: Record<string, LucideIcon> = {
 
 function computeMetrics(
   readings: MeterReading[],
-  settings: UserSettings
+  settings: UserSettings,
+  countryCode: string
 ): DashboardMetrics {
+  const country = getCountry(countryCode);
   const sorted = [...readings].sort((a, b) => b.timestamp - a.timestamp);
   const lastReading = sorted[0] ?? null;
 
@@ -78,7 +80,13 @@ function computeMetrics(
   const daysWithData = Math.max(1, dataSpanDays);
   const dataAdequate = weekReadings.length >= 2 && dataSpanDays >= 1;
   const dailyKwh = weekReadings.length > 1 ? weeklyUsage / daysWithData : 0;
-  const dailyBurnRate = dailyKwh * settings.tariffRate;
+
+  // Use tiered billing: estimate monthly kWh to get effective rate
+  const estimatedMonthlyKwh = dailyKwh * 30;
+  const effectiveRate = country.tariffTiers
+    ? getEffectiveRate(estimatedMonthlyKwh, country)
+    : settings.tariffRate;
+  const dailyBurnRate = dailyKwh * effectiveRate;
 
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
@@ -147,7 +155,7 @@ export default function DashboardPage() {
 
     const readings = getAllReadings();
     setAllReadings(readings);
-    setMetrics(computeMetrics(readings, s));
+    setMetrics(computeMetrics(readings, s, s.countryCode));
     setRecentReadings(getRecentReadings(7).slice(0, 10));
   }, [router]);
 
