@@ -268,7 +268,7 @@ export default function DashboardPage() {
   if (!metrics || !settings) {
     return (
       <div className="flex flex-col min-h-screen bg-bg-dark">
-        <header className="sticky top-0 z-10 bg-[#0A0E1A] border-b border-white/[0.06] px-4 py-3">
+        <header className="app-header sticky top-0 z-10 bg-[#0A0E1A] border-b border-white/[0.06] px-4 py-3">
           <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-full skeleton-shimmer" />
@@ -358,7 +358,7 @@ export default function DashboardPage() {
         {/* Hero Balance Card — THE focal point */}
         <div
           onClick={() => toggleCard("balance")}
-          className="relative overflow-hidden rounded-3xl bg-[#0F1729] p-6 pb-5 shadow-2xl shadow-blue-950/40 border border-white/[0.04] mb-6 cursor-pointer active:scale-[0.99] transition-transform"
+          className="keep-dark relative overflow-hidden rounded-3xl bg-[#0F1729] p-6 pb-5 shadow-2xl shadow-blue-950/40 border border-white/[0.04] mb-6 cursor-pointer active:scale-[0.99] transition-transform"
         >
           <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/[0.06] rounded-full blur-3xl -translate-y-12 translate-x-12" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet-500/[0.04] rounded-full blur-2xl translate-y-8 -translate-x-8" />

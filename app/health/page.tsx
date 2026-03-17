@@ -270,7 +270,7 @@ export default function HealthCheckPage() {
   return (
     <div className="flex h-full grow flex-col bg-bg-dark font-display min-h-screen text-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0A0E1A]/95 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
+      <header className="app-header sticky top-0 z-10 bg-[#0A0E1A]/95 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3">
         <div className="max-w-7xl mx-auto w-full flex items-center gap-3 relative z-10">
           <button
             onClick={() => router.back()}

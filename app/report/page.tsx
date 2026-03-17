@@ -155,7 +155,7 @@ export default function ReportPage() {
   return (
     <div className="flex h-full grow flex-col bg-bg-dark font-display min-h-screen text-gray-50">
       {/* Screen-only toolbar */}
-      <header className="no-print sticky top-0 z-20 bg-[#0A0E1A]/95 backdrop-blur-md border-b border-white/[0.06] px-4 py-3 isolate">
+      <header className="app-header no-print sticky top-0 z-20 bg-[#0A0E1A]/95 backdrop-blur-md border-b border-white/[0.06] px-4 py-3 isolate">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             onClick={() => router.back()}
