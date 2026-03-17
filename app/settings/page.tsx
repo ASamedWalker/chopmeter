@@ -51,10 +51,15 @@ import {
   Building,
   Warehouse,
   Factory,
+  Sun,
+  Moon,
+  Monitor,
+  Palette,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { ChopMeterLogo, ChopMeterTagline } from "@/components/ChopMeterLogo";
+import { useTheme } from "@/lib/ThemeContext";
 import BottomNav from "@/components/BottomNav";
 
 const METER_ICONS: { name: string; icon: LucideIcon; label: string }[] = [
@@ -76,6 +81,7 @@ const METER_COLORS = [
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [settings, setSettingsLocal] = useState<UserSettings | null>(null);
   const [country, setCountry] = useState<CountryConfig>(COUNTRIES[0]);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
@@ -914,6 +920,38 @@ export default function SettingsPage() {
             >
               Update Meter Details
             </button>
+          </div>
+        </section>
+
+        {/* Appearance */}
+        <section className="glass-card p-5">
+          <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Palette size={18} className="text-violet-400" />
+            Appearance
+          </h3>
+          <div className="flex gap-2">
+            {([
+              { value: "dark" as const, label: "Dark", icon: Moon },
+              { value: "light" as const, label: "Light", icon: Sun },
+              { value: "system" as const, label: "System", icon: Monitor },
+            ]).map((opt) => {
+              const Icon = opt.icon;
+              const active = theme === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setTheme(opt.value)}
+                  className={`flex-1 flex flex-col items-center gap-2 py-3 rounded-xl border transition-all active:scale-95 ${
+                    active
+                      ? "bg-blue-500/15 border-blue-500/30 text-blue-400"
+                      : "bg-white/[0.03] border-white/[0.06] text-gray-500 hover:text-gray-300"
+                  }`}
+                >
+                  <Icon size={20} />
+                  <span className="text-xs font-bold">{opt.label}</span>
+                </button>
+              );
+            })}
           </div>
         </section>
 

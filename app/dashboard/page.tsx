@@ -48,6 +48,7 @@ import {
   Activity,
   Plus,
   X,
+  Info,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -899,10 +900,17 @@ export default function DashboardPage() {
 
         {/* Tariff disclaimer */}
         {country.tariffEffective && (
-          <p className="text-[10px] text-gray-600 text-center mt-6 px-4">
-            Estimates based on PURC {country.tariffEffective} rates incl. levies.
-            For official billing, contact ECG/PDS.
-          </p>
+          <div className="mx-2 mt-6 mb-2 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+            <div className="flex items-start gap-2.5">
+              <Info size={14} className="text-gray-500 shrink-0 mt-0.5" />
+              <p className="text-[11px] text-gray-500 leading-relaxed">
+                <span className="font-bold text-gray-400">Disclaimer:</span>{" "}
+                Estimates based on <span className="font-bold text-gray-400">PURC {country.tariffEffective} rates</span> incl. levies.{" "}
+                <span className="font-bold text-gray-400">Not an official billing tool.</span>{" "}
+                For official billing, contact ECG/PDS.
+              </p>
+            </div>
+          </div>
         )}
       </main>
       </PullToRefresh>

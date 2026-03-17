@@ -20,6 +20,11 @@ import {
   Check,
   Minus,
   Plus,
+  Moon,
+  TrendingUp,
+  Zap,
+  Home,
+  Info,
 } from "lucide-react";
 import { APPLIANCES, CATEGORIES } from "@/lib/appliances";
 import type { Appliance } from "@/lib/appliances";
@@ -32,6 +37,7 @@ import {
 } from "@/lib/storage";
 import { runHealthCheck } from "@/lib/healthcheck";
 import type { HealthCheckResult, ApplianceSelection } from "@/lib/healthcheck";
+import { HOUSEHOLD_BENCHMARKS } from "@/lib/healthcheck";
 import { getCountry } from "@/lib/countries";
 import BottomNav from "@/components/BottomNav";
 
@@ -73,6 +79,52 @@ const STATUS_CONFIG = {
     barColor: "bg-red-500",
   },
 };
+
+function getScoreColor(score: number): string {
+  if (score >= 85) return "#10B981";
+  if (score >= 70) return "#3B82F6";
+  if (score >= 50) return "#F59E0B";
+  if (score >= 30) return "#F97316";
+  return "#EF4444";
+}
+
+function ScoreGauge({ score, size = 160 }: { score: number; size?: number }) {
+  const radius = (size - 20) / 2;
+  const circumference = Math.PI * radius; // semicircle
+  const offset = circumference - (score / 100) * circumference;
+  const color = getScoreColor(score);
+
+  return (
+    <div className="relative" style={{ width: size, height: size / 2 + 30 }}>
+      <svg width={size} height={size / 2 + 10} viewBox={`0 0 ${size} ${size / 2 + 10}`}>
+        {/* Background arc */}
+        <path
+          d={`M 10 ${size / 2} A ${radius} ${radius} 0 0 1 ${size - 10} ${size / 2}`}
+          fill="none"
+          stroke="rgba(255,255,255,0.06)"
+          strokeWidth="10"
+          strokeLinecap="round"
+        />
+        {/* Score arc */}
+        <path
+          d={`M 10 ${size / 2} A ${radius} ${radius} 0 0 1 ${size - 10} ${size / 2}`}
+          fill="none"
+          stroke={color}
+          strokeWidth="10"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 1s ease-out" }}
+        />
+      </svg>
+      {/* Score number */}
+      <div className="absolute inset-0 flex flex-col items-center justify-end pb-0">
+        <span className="text-4xl font-extrabold" style={{ color }}>{score}</span>
+        <span className="text-gray-500 text-xs font-medium">out of 100</span>
+      </div>
+    </div>
+  );
+}
 
 export default function HealthCheckPage() {
   const router = useRouter();
@@ -181,7 +233,7 @@ export default function HealthCheckPage() {
     if (!result) return;
 
     const text = [
-      `ChopMetr Health Check Results`,
+      `ChopMetr Meter Health Score: ${result.healthScore.overall}/100 (${result.healthScore.grade})`,
       `Status: ${STATUS_CONFIG[result.status].label}`,
       ``,
       `Expected: ${result.expectedDailyKwh.toFixed(1)} kWh/day (${currencySymbol} ${result.expectedDailyCost.toFixed(2)}/day)`,
@@ -189,11 +241,13 @@ export default function HealthCheckPage() {
       `Discrepancy: ${result.discrepancyPercent >= 0 ? "+" : ""}${result.discrepancyPercent.toFixed(0)}%`,
       ``,
       `Monthly difference: ${currencySymbol} ${Math.abs(result.discrepancyCost * 30).toFixed(2)}`,
+      result.nightDrain.detected ? `Night drain: ${result.nightDrain.averageOvernightKwh.toFixed(1)} kWh (expected ${result.nightDrain.expectedStandbyKwh.toFixed(1)} kWh)` : "",
+      result.spikes.hasSpikes ? `Usage spikes detected: ${result.spikes.spikes.length} day(s)` : "",
       ``,
       result.statusMessage,
       ``,
-      `Tracked with ChopMetr - chopmeter.app`,
-    ].join("\n");
+      `Tracked with ChopMetr - chopmeter.me`,
+    ].filter(Boolean).join("\n");
 
     if (navigator.share) {
       try {
@@ -333,7 +387,6 @@ export default function HealthCheckPage() {
 
                       {isSelected && sel && (
                         <div className="mt-3 flex items-center gap-4 pl-11 animate-fade-in-up">
-                          {/* Hours */}
                           <div className="flex-1">
                             <label className="text-gray-500 text-[10px] uppercase tracking-wider block mb-1">
                               Hours/day
@@ -343,16 +396,11 @@ export default function HealthCheckPage() {
                               inputMode="decimal"
                               value={sel.hours}
                               onChange={(e) =>
-                                updateHours(
-                                  appliance.id,
-                                  parseFloat(e.target.value) || 0
-                                )
+                                updateHours(appliance.id, parseFloat(e.target.value) || 0)
                               }
                               className="w-full h-8 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white text-sm font-bold px-2 text-center focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             />
                           </div>
-
-                          {/* Quantity */}
                           <div>
                             <label className="text-gray-500 text-[10px] uppercase tracking-wider block mb-1">
                               Qty
@@ -375,17 +423,12 @@ export default function HealthCheckPage() {
                               </button>
                             </div>
                           </div>
-
-                          {/* Per-item kWh */}
                           <div className="text-right">
                             <label className="text-gray-500 text-[10px] uppercase tracking-wider block mb-1">
                               kWh/day
                             </label>
                             <p className="text-blue-400 text-sm font-bold">
-                              {(
-                                (appliance.wattage * sel.hours * sel.quantity) /
-                                1000
-                              ).toFixed(1)}
+                              {((appliance.wattage * sel.hours * sel.quantity) / 1000).toFixed(1)}
                             </p>
                           </div>
                         </div>
@@ -476,22 +519,67 @@ export default function HealthCheckPage() {
             {/* Full results (only if enough data) */}
             {result.hasEnoughReadings && result.hasAppliances && result.readingDaysSpan >= 1 && (
               <div className="space-y-4 animate-fade-in-up">
+
+                {/* ═══ HEALTH SCORE GAUGE ═══ */}
+                <div className="glass-card p-6 text-center">
+                  <p className="text-gray-500 text-xs uppercase tracking-wider font-bold mb-2">
+                    Meter Health Score
+                  </p>
+                  <div className="flex justify-center">
+                    <ScoreGauge score={result.healthScore.overall} />
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <span
+                      className="text-sm font-extrabold px-3 py-1 rounded-full"
+                      style={{
+                        color: getScoreColor(result.healthScore.overall),
+                        backgroundColor: `${getScoreColor(result.healthScore.overall)}20`,
+                      }}
+                    >
+                      Grade {result.healthScore.grade}
+                    </span>
+                    <span className="text-gray-400 text-sm">
+                      {result.healthScore.gradeLabel}
+                    </span>
+                  </div>
+
+                  {/* Score breakdown */}
+                  <div className="grid grid-cols-2 gap-3 mt-5 text-left">
+                    {[
+                      { label: "Accuracy", score: result.healthScore.discrepancyScore, icon: "🎯" },
+                      { label: "Consistency", score: result.healthScore.consistencyScore, icon: "📊" },
+                      { label: "Night Check", score: result.healthScore.nightDrainScore, icon: "🌙" },
+                      { label: "Data Quality", score: result.healthScore.dataQualityScore, icon: "📈" },
+                    ].map((item) => (
+                      <div key={item.label} className="bg-white/[0.03] rounded-xl p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-gray-500 text-xs font-medium">{item.icon} {item.label}</span>
+                          <span className="text-white text-xs font-bold">{item.score}</span>
+                        </div>
+                        <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{
+                              width: `${item.score}%`,
+                              backgroundColor: getScoreColor(item.score),
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Status Badge */}
                 {(() => {
                   const config = STATUS_CONFIG[result.status];
                   const Icon = config.icon;
                   return (
-                    <div
-                      className={`glass-card p-6 text-center ${config.borderColor}`}
-                    >
-                      <div
-                        className={`w-20 h-20 rounded-full ${config.bgColor} flex items-center justify-center mx-auto mb-4 ring-4 ${config.ringColor}`}
-                      >
+                    <div className={`glass-card p-6 text-center ${config.borderColor}`}>
+                      <div className={`w-20 h-20 rounded-full ${config.bgColor} flex items-center justify-center mx-auto mb-4 ring-4 ${config.ringColor}`}>
                         <Icon size={40} className={config.color} />
                       </div>
-                      <p
-                        className={`text-2xl font-extrabold tracking-wider ${config.color}`}
-                      >
+                      <p className={`text-2xl font-extrabold tracking-wider ${config.color}`}>
                         {config.label}
                       </p>
                       <p className="text-gray-400 text-sm mt-2">
@@ -509,9 +597,7 @@ export default function HealthCheckPage() {
                     </p>
                     <p className="text-white text-xl font-extrabold">
                       {result.expectedDailyKwh.toFixed(1)}{" "}
-                      <span className="text-sm text-gray-500 font-medium">
-                        kWh/day
-                      </span>
+                      <span className="text-sm text-gray-500 font-medium">kWh/day</span>
                     </p>
                     <p className="text-gray-400 text-sm font-bold mt-1">
                       {currencySymbol} {result.expectedDailyCost.toFixed(2)}/day
@@ -520,35 +606,15 @@ export default function HealthCheckPage() {
                       {currencySymbol} {result.expectedMonthlyCost.toFixed(0)}/month
                     </p>
                   </div>
-                  <div
-                    className={`glass-card p-4 ${
-                      result.discrepancyPercent > 15
-                        ? "border-red-500/20"
-                        : "border-blue-500/10"
-                    }`}
-                  >
+                  <div className={`glass-card p-4 ${result.discrepancyPercent > 15 ? "border-red-500/20" : "border-blue-500/10"}`}>
                     <p className="text-gray-500 text-xs uppercase tracking-wider mb-2 font-medium">
                       Actual
                     </p>
-                    <p
-                      className={`text-xl font-extrabold ${
-                        result.discrepancyPercent > 15
-                          ? "text-red-400"
-                          : "text-white"
-                      }`}
-                    >
+                    <p className={`text-xl font-extrabold ${result.discrepancyPercent > 15 ? "text-red-400" : "text-white"}`}>
                       {result.actualDailyKwh.toFixed(1)}{" "}
-                      <span className="text-sm text-gray-500 font-medium">
-                        kWh/day
-                      </span>
+                      <span className="text-sm text-gray-500 font-medium">kWh/day</span>
                     </p>
-                    <p
-                      className={`text-sm font-bold mt-1 ${
-                        result.discrepancyPercent > 15
-                          ? "text-red-400"
-                          : "text-gray-400"
-                      }`}
-                    >
+                    <p className={`text-sm font-bold mt-1 ${result.discrepancyPercent > 15 ? "text-red-400" : "text-gray-400"}`}>
                       {currencySymbol} {result.actualDailyCost.toFixed(2)}/day
                     </p>
                     <p className="text-gray-600 text-xs mt-2">
@@ -563,47 +629,29 @@ export default function HealthCheckPage() {
                     <p className="text-gray-400 text-xs uppercase tracking-wider font-medium">
                       Discrepancy
                     </p>
-                    <p
-                      className={`text-lg font-extrabold ${
-                        result.discrepancyPercent > 30
-                          ? "text-red-400"
-                          : result.discrepancyPercent > 15
-                          ? "text-yellow-400"
-                          : "text-emerald-400"
-                      }`}
-                    >
+                    <p className={`text-lg font-extrabold ${
+                      result.discrepancyPercent > 30 ? "text-red-400"
+                      : result.discrepancyPercent > 15 ? "text-yellow-400"
+                      : "text-emerald-400"
+                    }`}>
                       {result.discrepancyPercent >= 0 ? "+" : ""}
                       {result.discrepancyPercent.toFixed(0)}%{" "}
                       <span className="text-xs font-medium text-gray-500">
-                        {result.discrepancyPercent > 0
-                          ? "higher than expected"
-                          : "lower than expected"}
+                        {result.discrepancyPercent > 0 ? "higher than expected" : "lower than expected"}
                       </span>
                     </p>
                   </div>
-
-                  {/* Visual comparison bar */}
                   <div className="space-y-2">
                     <div>
                       <div className="flex items-center justify-between text-xs mb-1">
                         <span className="text-gray-500">Expected</span>
-                        <span className="text-gray-400 font-bold">
-                          {result.expectedDailyKwh.toFixed(1)} kWh
-                        </span>
+                        <span className="text-gray-400 font-bold">{result.expectedDailyKwh.toFixed(1)} kWh</span>
                       </div>
                       <div className="h-3 bg-white/[0.05] rounded-full overflow-hidden">
                         <div
                           className="h-full bg-emerald-500 rounded-full"
                           style={{
-                            width: `${Math.min(
-                              100,
-                              (result.expectedDailyKwh /
-                                Math.max(
-                                  result.expectedDailyKwh,
-                                  result.actualDailyKwh
-                                )) *
-                                100
-                            )}%`,
+                            width: `${Math.min(100, (result.expectedDailyKwh / Math.max(result.expectedDailyKwh, result.actualDailyKwh)) * 100)}%`,
                           }}
                         />
                       </div>
@@ -611,35 +659,19 @@ export default function HealthCheckPage() {
                     <div>
                       <div className="flex items-center justify-between text-xs mb-1">
                         <span className="text-gray-500">Actual</span>
-                        <span
-                          className={`font-bold ${
-                            result.discrepancyPercent > 15
-                              ? "text-red-400"
-                              : "text-gray-400"
-                          }`}
-                        >
+                        <span className={`font-bold ${result.discrepancyPercent > 15 ? "text-red-400" : "text-gray-400"}`}>
                           {result.actualDailyKwh.toFixed(1)} kWh
                         </span>
                       </div>
                       <div className="h-3 bg-white/[0.05] rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full ${
-                            result.discrepancyPercent > 30
-                              ? "bg-red-500"
-                              : result.discrepancyPercent > 15
-                              ? "bg-yellow-500"
-                              : "bg-emerald-500"
+                            result.discrepancyPercent > 30 ? "bg-red-500"
+                            : result.discrepancyPercent > 15 ? "bg-yellow-500"
+                            : "bg-emerald-500"
                           }`}
                           style={{
-                            width: `${Math.min(
-                              100,
-                              (result.actualDailyKwh /
-                                Math.max(
-                                  result.expectedDailyKwh,
-                                  result.actualDailyKwh
-                                )) *
-                                100
-                            )}%`,
+                            width: `${Math.min(100, (result.actualDailyKwh / Math.max(result.expectedDailyKwh, result.actualDailyKwh)) * 100)}%`,
                           }}
                         />
                       </div>
@@ -654,19 +686,163 @@ export default function HealthCheckPage() {
                       Estimated Monthly Overpayment
                     </p>
                     <p className="text-red-400 text-3xl font-extrabold">
-                      {currencySymbol}{" "}
-                      {Math.abs(result.discrepancyCost * 30).toFixed(2)}
+                      {currencySymbol} {Math.abs(result.discrepancyCost * 30).toFixed(2)}
                     </p>
                     <p className="text-gray-500 text-xs mt-1">
-                      {currencySymbol} {Math.abs(result.discrepancyCost).toFixed(2)}{" "}
-                      extra per day
+                      {currencySymbol} {Math.abs(result.discrepancyCost).toFixed(2)} extra per day
                     </p>
                   </div>
                 )}
 
+                {/* ═══ NIGHT DRAIN DETECTION ═══ */}
+                {result.nightDrain.nightPairs.length > 0 && (
+                  <div className={`glass-card p-5 ${result.nightDrain.detected ? "border-orange-500/20" : "border-emerald-500/10"}`}>
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${result.nightDrain.detected ? "bg-orange-500/15" : "bg-emerald-500/15"}`}>
+                        <Moon size={16} className={result.nightDrain.detected ? "text-orange-400" : "text-emerald-400"} />
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-sm">Night Drain Analysis</p>
+                        <p className="text-gray-500 text-xs">Overnight ghost consumption check</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <div className="bg-white/[0.03] rounded-xl p-3">
+                        <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">Overnight Avg</p>
+                        <p className={`text-lg font-extrabold ${result.nightDrain.detected ? "text-orange-400" : "text-white"}`}>
+                          {result.nightDrain.averageOvernightKwh.toFixed(2)} <span className="text-xs text-gray-500 font-medium">kWh</span>
+                        </p>
+                      </div>
+                      <div className="bg-white/[0.03] rounded-xl p-3">
+                        <p className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">Expected Standby</p>
+                        <p className="text-emerald-400 text-lg font-extrabold">
+                          {result.nightDrain.expectedStandbyKwh.toFixed(2)} <span className="text-xs text-gray-500 font-medium">kWh</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {result.nightDrain.detected ? (
+                      <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-3">
+                        <p className="text-orange-400 text-sm font-bold flex items-center gap-2">
+                          <AlertTriangle size={14} />
+                          Suspicious overnight activity
+                        </p>
+                        <p className="text-gray-400 text-xs mt-1">
+                          Your meter consumed {result.nightDrain.excessKwh.toFixed(2)} kWh more than expected
+                          while you slept. This could indicate phantom loads, faulty wiring, or a fast-running meter.
+                        </p>
+                        <p className="text-gray-500 text-[10px] mt-2">
+                          Tip: Scan before bed and when you wake up to track this pattern.
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-emerald-400 text-sm flex items-center gap-2">
+                        <ShieldCheck size={14} />
+                        Overnight consumption looks normal
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* ═══ SPIKE DETECTION ═══ */}
+                {result.spikes.hasSpikes && (
+                  <div className="glass-card p-5 border-yellow-500/20">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-lg bg-yellow-500/15 flex items-center justify-center">
+                        <TrendingUp size={16} className="text-yellow-400" />
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-sm">Usage Spikes Detected</p>
+                        <p className="text-gray-500 text-xs">
+                          {result.spikes.spikes.length} day{result.spikes.spikes.length !== 1 ? "s" : ""} with unusually high usage
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      {result.spikes.spikes.slice(0, 5).map((spike) => (
+                        <div key={spike.date} className="flex items-center justify-between bg-white/[0.03] rounded-xl px-3 py-2">
+                          <span className="text-gray-400 text-sm">
+                            {new Date(spike.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+                          </span>
+                          <div className="text-right">
+                            <span className="text-yellow-400 text-sm font-bold">
+                              {spike.kwhUsed.toFixed(1)} kWh
+                            </span>
+                            <span className="text-gray-600 text-xs ml-2">
+                              +{spike.percentAboveAvg.toFixed(0)}% above avg
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-gray-600 text-xs mt-3">
+                      Average daily usage: {result.spikes.averageDailyKwh.toFixed(1)} kWh.
+                      Spike threshold: {result.spikes.spikeThreshold.toFixed(1)} kWh.
+                    </p>
+                  </div>
+                )}
+
+                {/* ═══ HOUSEHOLD BENCHMARK ═══ */}
+                {result.closestBenchmark && (
+                  <div className="glass-card p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center">
+                        <Home size={16} className="text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-sm">Household Comparison</p>
+                        <p className="text-gray-500 text-xs">How your usage compares to typical homes</p>
+                      </div>
+                    </div>
+
+                    <p className="text-gray-300 text-sm mb-4">
+                      {result.benchmarkComparison}
+                    </p>
+
+                    {/* Benchmark scale */}
+                    <div className="space-y-1.5">
+                      {HOUSEHOLD_BENCHMARKS.map((b) => {
+                        const isClosest = b.id === result.closestBenchmark?.id;
+                        const isUserHere = Math.abs(result.actualMonthlyKwh - b.typicalMonthlyKwh) <=
+                          Math.abs(result.actualMonthlyKwh - (result.closestBenchmark?.typicalMonthlyKwh ?? 0)) + 10;
+                        return (
+                          <div key={b.id} className="flex items-center gap-2">
+                            <span className={`text-[10px] w-20 text-right ${isClosest ? "text-blue-400 font-bold" : "text-gray-600"}`}>
+                              {b.label}
+                            </span>
+                            <div className="flex-1 h-2 bg-white/[0.04] rounded-full overflow-hidden relative">
+                              <div
+                                className={`h-full rounded-full ${isClosest ? "bg-blue-500" : "bg-white/[0.08]"}`}
+                                style={{ width: `${Math.min(100, (b.typicalMonthlyKwh / 700) * 100)}%` }}
+                              />
+                            </div>
+                            <span className={`text-[10px] w-12 ${isClosest ? "text-blue-400 font-bold" : "text-gray-600"}`}>
+                              {b.typicalMonthlyKwh}
+                            </span>
+                          </div>
+                        );
+                      })}
+                      {/* User marker */}
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] w-20 text-right text-violet-400 font-bold">You</span>
+                        <div className="flex-1 h-2 bg-transparent rounded-full relative">
+                          <div
+                            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-violet-500 rounded-full border-2 border-violet-300"
+                            style={{ left: `${Math.min(98, (result.actualMonthlyKwh / 700) * 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] w-12 text-violet-400 font-bold">
+                          {result.actualMonthlyKwh.toFixed(0)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Top-up Analysis */}
-                {(result.avgTopUpLifeDays !== null ||
-                  result.expectedTopUpLifeDays !== null) && (
+                {(result.avgTopUpLifeDays !== null || result.expectedTopUpLifeDays !== null) && (
                   <div className="glass-card p-4">
                     <p className="text-gray-400 text-xs uppercase tracking-wider font-medium mb-3">
                       Top-up Analysis
@@ -674,22 +850,14 @@ export default function HealthCheckPage() {
                     <div className="space-y-2">
                       {result.avgTopUpLifeDays !== null && (
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-400 text-sm">
-                            Average top-up lasts
-                          </span>
-                          <span className="text-white font-bold text-sm">
-                            {result.avgTopUpLifeDays.toFixed(1)} days
-                          </span>
+                          <span className="text-gray-400 text-sm">Average top-up lasts</span>
+                          <span className="text-white font-bold text-sm">{result.avgTopUpLifeDays.toFixed(1)} days</span>
                         </div>
                       )}
                       {result.expectedTopUpLifeDays !== null && (
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-400 text-sm">
-                            Expected to last
-                          </span>
-                          <span className="text-emerald-400 font-bold text-sm">
-                            {result.expectedTopUpLifeDays.toFixed(1)} days
-                          </span>
+                          <span className="text-gray-400 text-sm">Expected to last</span>
+                          <span className="text-emerald-400 font-bold text-sm">{result.expectedTopUpLifeDays.toFixed(1)} days</span>
                         </div>
                       )}
                     </div>
@@ -708,40 +876,20 @@ export default function HealthCheckPage() {
                   {result.status === "suspicious" || result.status === "alert" ? (
                     <div className="space-y-3">
                       <div className="flex items-start gap-3 text-sm">
-                        <ClipboardList
-                          size={18}
-                          className="text-blue-400 shrink-0 mt-0.5"
-                        />
-                        <p className="text-gray-400">
-                          Document your readings daily with photos
-                        </p>
+                        <ClipboardList size={18} className="text-blue-400 shrink-0 mt-0.5" />
+                        <p className="text-gray-400">Document your readings daily with photos</p>
                       </div>
                       <div className="flex items-start gap-3 text-sm">
-                        <Phone
-                          size={18}
-                          className="text-blue-400 shrink-0 mt-0.5"
-                        />
-                        <p className="text-gray-400">
-                          File a complaint with ECG customer service
-                        </p>
+                        <Phone size={18} className="text-blue-400 shrink-0 mt-0.5" />
+                        <p className="text-gray-400">File a complaint with ECG customer service</p>
                       </div>
                       <div className="flex items-start gap-3 text-sm">
-                        <FileText
-                          size={18}
-                          className="text-blue-400 shrink-0 mt-0.5"
-                        />
-                        <p className="text-gray-400">
-                          Request a meter audit from PURC
-                        </p>
+                        <FileText size={18} className="text-blue-400 shrink-0 mt-0.5" />
+                        <p className="text-gray-400">Request a meter audit from PURC</p>
                       </div>
                       <div className="flex items-start gap-3 text-sm">
-                        <Activity
-                          size={18}
-                          className="text-blue-400 shrink-0 mt-0.5"
-                        />
-                        <p className="text-gray-400">
-                          Use your ChopMetr Report as evidence
-                        </p>
+                        <Activity size={18} className="text-blue-400 shrink-0 mt-0.5" />
+                        <p className="text-gray-400">Use your ChopMetr Report as evidence</p>
                       </div>
                     </div>
                   ) : null}
@@ -753,23 +901,15 @@ export default function HealthCheckPage() {
                     href="/report"
                     className="glass-card p-4 text-center active:scale-[0.98] transition-transform hover:border-blue-500/30"
                   >
-                    <FileText
-                      size={24}
-                      className="text-blue-400 mx-auto mb-2"
-                    />
-                    <p className="text-white text-sm font-bold">
-                      Generate Report
-                    </p>
+                    <FileText size={24} className="text-blue-400 mx-auto mb-2" />
+                    <p className="text-white text-sm font-bold">Generate Report</p>
                     <p className="text-gray-600 text-xs">For ECG/PURC</p>
                   </Link>
                   <button
                     onClick={handleShare}
                     className="glass-card p-4 text-center active:scale-[0.98] transition-transform hover:border-blue-500/30"
                   >
-                    <Share2
-                      size={24}
-                      className="text-violet-400 mx-auto mb-2"
-                    />
+                    <Share2 size={24} className="text-violet-400 mx-auto mb-2" />
                     <p className="text-white text-sm font-bold">
                       {copied ? "Copied!" : "Share Results"}
                     </p>
@@ -807,6 +947,21 @@ export default function HealthCheckPage() {
             </p>
           </div>
         )}
+
+        {/* ═══ DISCLAIMER ═══ */}
+        <div className="mx-2 mt-6 mb-2 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-start gap-2.5">
+            <Info size={14} className="text-gray-500 shrink-0 mt-0.5" />
+            <p className="text-[11px] text-gray-500 leading-relaxed">
+              <span className="font-bold text-gray-400">Disclaimer:</span>{" "}
+              ChopMetr provides <span className="font-bold text-gray-400">estimates only</span> based
+              on PURC-published tariff rates and user-entered appliance data.{" "}
+              <span className="font-bold text-gray-400">This is not an official billing tool.</span>{" "}
+              For disputes, contact ECG or file a complaint with PURC.
+              Results depend on the accuracy of your appliance selections and meter readings.
+            </p>
+          </div>
+        </div>
       </main>
 
       <BottomNav active="dashboard" />

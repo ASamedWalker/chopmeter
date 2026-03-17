@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import InstallPrompt from "@/components/InstallPrompt";
 import SmoothScroll from "@/components/SmoothScroll";
+import { ThemeProvider } from "@/lib/ThemeContext";
 import "./globals.css";
 
 const siteUrl = "https://chopmeter.me";
@@ -89,7 +90,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -143,9 +144,11 @@ export default function RootLayout({
             y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
           })(window,document,"clarity","script","vvsu7kn5nz");`}
         </Script>
-        <SmoothScroll />
-        <InstallPrompt />
-        {children}
+        <ThemeProvider>
+          <SmoothScroll />
+          <InstallPrompt />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
