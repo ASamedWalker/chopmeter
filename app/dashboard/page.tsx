@@ -16,7 +16,7 @@ import {
   checkWeeklyReport,
 } from "@/lib/notifications";
 import type { MeterReading, UserSettings, DashboardMetrics, WeatherCache } from "@/lib/types";
-import { getCountry, getEffectiveRate } from "@/lib/countries";
+import { getCountry, getEffectiveRate, getDailyServiceCharge } from "@/lib/countries";
 import { getGreeting } from "@/lib/greeting";
 import { getBudgetStatus } from "@/lib/budget";
 import type { BudgetStatus } from "@/lib/budget";
@@ -86,7 +86,8 @@ function computeMetrics(
   const effectiveRate = country.tariffTiers
     ? getEffectiveRate(estimatedMonthlyKwh, country)
     : settings.tariffRate;
-  const dailyBurnRate = dailyKwh * effectiveRate;
+  // Daily burn = energy cost + prorated monthly service charge
+  const dailyBurnRate = dailyKwh * effectiveRate + getDailyServiceCharge(country);
 
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
@@ -895,6 +896,14 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Tariff disclaimer */}
+        {country.tariffEffective && (
+          <p className="text-[10px] text-gray-600 text-center mt-6 px-4">
+            Estimates based on PURC {country.tariffEffective} rates incl. levies.
+            For official billing, contact ECG/PDS.
+          </p>
+        )}
       </main>
       </PullToRefresh>
 

@@ -17,8 +17,12 @@ export interface CountryConfig {
   defaultTariff: number;
   /** Tiered tariff structure — if present, used instead of flat rate */
   tariffTiers?: TariffTier[];
-  /** Levy percentage added on top of energy charge (e.g. 0.10 = 10%) */
+  /** Levy percentage added on top of energy charge (e.g. 0.235 = 23.5%) */
   levyPercent?: number;
+  /** Monthly service charge deducted from prepaid credit */
+  serviceCharge?: number;
+  /** Effective date of tariff rates (for display) */
+  tariffEffective?: string;
   locale: string;
   /** Fallback city for weather when geolocation is unavailable */
   capitalName: string;
@@ -35,11 +39,14 @@ export const COUNTRIES: CountryConfig[] = [
     currencySymbol: "GH\u20B5",
     defaultTariff: 1.97,
     tariffTiers: [
-      { upTo: 30, rate: 0.87, label: "Lifeline (0-30 kWh)" },
-      { upTo: 300, rate: 1.97, label: "Residential (31-300 kWh)" },
-      { upTo: Infinity, rate: 2.60, label: "High Usage (301+ kWh)" },
+      { upTo: 30, rate: 0.869, label: "Lifeline (0-30 kWh)" },
+      { upTo: 300, rate: 1.9688, label: "Residential (31-300 kWh)" },
+      { upTo: Infinity, rate: 2.52, label: "High Usage (301+ kWh)" },
     ],
-    levyPercent: 0.10,
+    // PLL 3% + NESL 2% + GETFund 2.5% + NHIL 2.5% + CHRL 1% + VAT 12.5%
+    levyPercent: 0.235,
+    serviceCharge: 10.73,
+    tariffEffective: "Q2 2026",
     locale: "en-GH",
     capitalName: "Accra",
     capitalLat: 5.6037,
@@ -150,13 +157,21 @@ export function calcTieredCost(
 
 /**
  * Get the effective blended rate per kWh for a given monthly consumption.
- * Useful for daily burn rate estimates.
+ * Includes service charge prorated across kWh for burn rate estimates.
  */
 export function getEffectiveRate(
   monthlyKwh: number,
   country: CountryConfig
 ): number {
   if (monthlyKwh <= 0) return country.defaultTariff;
-  const totalCost = calcTieredCost(monthlyKwh, country);
-  return totalCost / monthlyKwh;
+  const energyCost = calcTieredCost(monthlyKwh, country);
+  const serviceCharge = country.serviceCharge ?? 0;
+  return (energyCost + serviceCharge) / monthlyKwh;
+}
+
+/**
+ * Daily service charge deduction from prepaid credit.
+ */
+export function getDailyServiceCharge(country: CountryConfig): number {
+  return (country.serviceCharge ?? 0) / 30;
 }
