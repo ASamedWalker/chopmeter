@@ -49,6 +49,7 @@ import {
   Plus,
   X,
   Info,
+  AlertTriangle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -710,29 +711,23 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        {/* Budget — slim bar */}
-        {budget ? (
-          <div className="glass-card p-3 mb-6 animate-fade-in-up">
-            <div className="flex justify-between items-center mb-1.5">
-              <span className="text-gray-400 text-xs font-display font-medium">Monthly Budget</span>
-              <span className="text-gray-400 text-xs font-display">
-                {currencySymbol}{budget.spent.toFixed(0)} / {currencySymbol}{budget.budget.toFixed(0)}
-              </span>
-            </div>
-            <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-              <div className={`h-full rounded-full transition-all ${
-                budget.status === 'on_track' ? 'bg-emerald-500' :
-                budget.status === 'warning' ? 'bg-amber-500' : 'bg-red-500'
-              }`} style={{ width: `${Math.min(100, budget.percentage)}%` }} />
+        {/* Budget Over-Spend Alert — only shows when spending exceeds 90% of budget */}
+        {budget && budget.percentage >= 90 && (
+          <div className={`flex items-center gap-3 p-3 rounded-xl mb-6 border animate-fade-in-up ${
+            budget.status === "over"
+              ? "bg-red-500/[0.08] border-red-500/20"
+              : "bg-amber-500/[0.08] border-amber-500/20"
+          }`}>
+            <AlertTriangle size={18} className={budget.status === "over" ? "text-red-500" : "text-amber-500"} />
+            <div className="flex-1">
+              <p className={`text-sm font-bold ${budget.status === "over" ? "text-red-500" : "text-amber-500"}`}>
+                {budget.status === "over" ? "Budget Exceeded" : "Approaching Budget Limit"}
+              </p>
+              <p className="text-gray-400 text-xs mt-0.5">
+                {currencySymbol}{budget.spent.toFixed(0)} spent of {currencySymbol}{budget.budget.toFixed(0)} monthly budget ({budget.percentage.toFixed(0)}%)
+              </p>
             </div>
           </div>
-        ) : (
-          <Link
-            href="/settings"
-            className="block text-center text-gray-500 text-xs font-display mb-6 hover:text-gray-400 transition-colors"
-          >
-            Set a monthly budget &rarr;
-          </Link>
         )}
 
         {/* Low Balance Alert */}
