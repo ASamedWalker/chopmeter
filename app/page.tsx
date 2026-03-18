@@ -35,19 +35,30 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
+  // Sync landing page theme with <html> class so globals.css
+  // light-mode overrides don't fight our token system.
+  const syncHtmlClass = (dark: boolean) => {
+    document.documentElement.classList.toggle("dark", dark);
+    document.documentElement.classList.toggle("light", !dark);
+  };
+
   useEffect(() => {
     const settings = getSettings();
     if (settings.onboardingComplete) setIsReturningUser(true);
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("chopmeter_landing_theme");
-      if (saved === "dark") setIsDark(true);
-      else if (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches) setIsDark(true);
+      let dark = false;
+      if (saved === "dark") dark = true;
+      else if (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches) dark = true;
+      setIsDark(dark);
+      syncHtmlClass(dark);
     }
   }, []);
 
   const toggleTheme = () => {
     const next = !isDark;
     setIsDark(next);
+    syncHtmlClass(next);
     localStorage.setItem("chopmeter_landing_theme", next ? "dark" : "light");
   };
 
@@ -191,7 +202,7 @@ export default function LandingPage() {
           )}
           <div className="relative mx-auto w-[320px]" style={{ transform: "perspective(1000px) rotateY(-15deg) rotateX(5deg)" }}>
             <div className={`rounded-[3rem] p-[2px] ${t(isDark, "bg-gradient-to-b from-gray-300 to-gray-100 shadow-2xl", "bg-gradient-to-b from-white/[0.15] to-white/[0.05] shadow-2xl shadow-blue-500/[0.08]")}`}>
-              <div className="rounded-[2.9rem] bg-gray-900 p-3.5">
+              <div className="keep-dark rounded-[2.9rem] bg-gray-900 p-3.5">
                 <div className="w-[80px] h-[24px] bg-black rounded-full mx-auto mb-4" />
                 <div className="space-y-3 px-1">
                   <div className="flex items-center justify-between px-0.5">
@@ -431,7 +442,7 @@ export default function LandingPage() {
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-500/[0.06] rounded-full blur-[100px]" />
           </div>
         )}
-        <div className={`relative max-w-5xl mx-auto px-6 lg:px-12 text-center bg-gradient-to-br from-[#0F1729] to-[#162040] rounded-[2.5rem] py-20 ${t(isDark, "shadow-2xl shadow-blue-900/30 border border-gray-200", "shadow-2xl shadow-blue-500/[0.08] border border-white/[0.08]")}`}>
+        <div className={`keep-dark relative max-w-5xl mx-auto px-6 lg:px-12 text-center bg-gradient-to-br from-[#0F1729] to-[#162040] rounded-[2.5rem] py-20 ${t(isDark, "shadow-2xl shadow-blue-900/30 border border-gray-200", "shadow-2xl shadow-blue-500/[0.08] border border-white/[0.08]")}`}>
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
             Take control of your electricity
           </h2>
