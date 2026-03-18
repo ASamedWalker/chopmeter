@@ -59,26 +59,27 @@ export default function LandingPage() {
     : "Start Tracking \u2014 It\u2019s Free";
 
   // Resolved theme tokens
-  const bg = t(isDark, "bg-white", "bg-[#09090b]");
-  const text = t(isDark, "text-gray-600", "text-white/70");
+  const bg = t(isDark, "bg-[#FAFBFC]", "bg-[#0A0E1A]");
+  const text = t(isDark, "text-gray-600", "text-gray-300");
   const heading = t(isDark, "text-gray-900", "text-white");
-  const subtext = t(isDark, "text-gray-500", "text-white/55");
-  const muted = t(isDark, "text-gray-400", "text-white/40");
-  const border = t(isDark, "border-gray-200", "border-white/[0.06]");
-  const navBg = t(isDark, "bg-white/80", "bg-[#09090b]/80");
-  const cardBg = t(isDark, "bg-gray-50", "bg-white/[0.02]");
-  const cardBorder = t(isDark, "border-gray-200", "border-white/[0.07]");
-  const cardHover = t(isDark, "hover:shadow-md", "hover:border-white/[0.12]");
-  const whiteBg = t(isDark, "bg-white", "bg-white/[0.02]");
-  const mobileBg = t(isDark, "bg-white/95", "bg-[#09090b]/95");
+  const subtext = t(isDark, "text-gray-500", "text-gray-400");
+  const muted = t(isDark, "text-gray-400", "text-gray-500");
+  const border = t(isDark, "border-gray-200/70", "border-white/[0.06]");
+  const navBg = t(isDark, "bg-white/80", "bg-[#0A0E1A]/80");
+  const cardBg = t(isDark, "bg-white", "bg-white/[0.04]");
+  const cardBorder = t(isDark, "border-gray-200/80", "border-white/[0.08]");
+  const cardHover = t(isDark, "hover:shadow-lg hover:shadow-gray-200/50 hover:border-gray-300", "hover:border-white/[0.15] hover:bg-white/[0.06]");
+  const whiteBg = t(isDark, "bg-white", "bg-white/[0.04]");
+  const mobileBg = t(isDark, "bg-white/95", "bg-[#0A0E1A]/95");
   const toggleBorder = t(isDark, "border-gray-200", "border-white/[0.1]");
-  const toggleText = t(isDark, "text-gray-500", "text-white/50");
+  const toggleText = t(isDark, "text-gray-500", "text-gray-400");
+  const sectionAlt = t(isDark, "bg-gray-50/80", "bg-white/[0.02]");
 
   return (
-    <div className={`min-h-screen ${bg} font-display ${text} overflow-x-hidden transition-colors duration-300`}>
+    <div className={`min-h-screen ${bg} font-display ${text} overflow-x-hidden transition-colors duration-500`}>
 
       {/* ============================== NAV ============================== */}
-      <nav className={`sticky top-0 z-50 w-full h-16 ${navBg} backdrop-blur-xl border-b ${border} flex items-center px-6 lg:px-12 justify-between transition-colors`}>
+      <nav className={`sticky top-0 z-50 w-full h-16 ${navBg} backdrop-blur-2xl border-b ${border} flex items-center px-6 lg:px-12 justify-between transition-colors duration-500`}>
         <div className="flex items-center gap-2.5">
           <ChopMeterLogo size={130} color={isDark ? "#FFFFFF" : "#111827"} />
         </div>
@@ -125,9 +126,16 @@ export default function LandingPage() {
       </nav>
 
       {/* ============================== HERO ============================== */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-32 grid lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <span className={`inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full text-sm font-medium ${t(isDark, "bg-blue-50 border-blue-100", "bg-blue-500/[0.06] border-blue-500/20")} text-primary border mb-6`}>
+      <section className="relative max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-32 grid lg:grid-cols-2 gap-12 items-center">
+        {/* Ambient glow — dark mode only */}
+        {isDark && (
+          <>
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/[0.07] rounded-full blur-[120px] -translate-y-1/2 pointer-events-none" />
+            <div className="absolute top-1/3 right-0 w-[400px] h-[400px] bg-violet-500/[0.05] rounded-full blur-[100px] pointer-events-none" />
+          </>
+        )}
+        <div className="relative z-10">
+          <span className={`inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full text-sm font-medium ${t(isDark, "bg-blue-50 border-blue-200/60", "bg-blue-500/[0.08] border-blue-500/20")} text-primary border mb-6`}>
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
@@ -146,7 +154,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-10">
             <button
               onClick={handleCTA}
-              className={`group bg-primary text-white px-8 py-4 rounded-xl text-lg font-bold ${t(isDark, "shadow-lg shadow-blue-200", "shadow-lg shadow-blue-500/20")} hover:bg-blue-600 hover:translate-y-[-2px] transition-all flex items-center justify-center gap-2.5`}
+              className={`group bg-primary text-white px-8 py-4 rounded-xl text-lg font-bold ${t(isDark, "shadow-lg shadow-blue-200/60", "shadow-[0_0_30px_rgba(59,130,246,0.3)]")} hover:bg-blue-600 hover:translate-y-[-2px] transition-all flex items-center justify-center gap-2.5`}
             >
               {ctaText}
               <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
@@ -171,8 +179,13 @@ export default function LandingPage() {
 
         {/* Phone Mockup */}
         <div className="relative hidden lg:block">
-          <div className="mx-auto w-[320px]" style={{ transform: "perspective(1000px) rotateY(-15deg) rotateX(5deg)" }}>
-            <div className={`rounded-[3rem] p-[2px] ${t(isDark, "bg-gradient-to-b from-gray-300 to-gray-100", "bg-gradient-to-b from-white/[0.15] to-white/[0.05]")} shadow-2xl`}>
+          {isDark && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[350px] h-[350px] bg-blue-500/[0.08] rounded-full blur-[80px]" />
+            </div>
+          )}
+          <div className="relative mx-auto w-[320px]" style={{ transform: "perspective(1000px) rotateY(-15deg) rotateX(5deg)" }}>
+            <div className={`rounded-[3rem] p-[2px] ${t(isDark, "bg-gradient-to-b from-gray-300 to-gray-100 shadow-2xl", "bg-gradient-to-b from-white/[0.15] to-white/[0.05] shadow-2xl shadow-blue-500/[0.08]")}`}>
               <div className="rounded-[2.9rem] bg-gray-900 p-3.5">
                 <div className="w-[80px] h-[24px] bg-black rounded-full mx-auto mb-4" />
                 <div className="space-y-3 px-1">
@@ -233,7 +246,7 @@ export default function LandingPage() {
       </section>
 
       {/* ============================== HOW IT WORKS ============================== */}
-      <section className={`py-24 lg:py-32 ${bg} border-t ${border}`} id="how-it-works">
+      <section className={`py-24 lg:py-32 ${sectionAlt} border-t ${border}`} id="how-it-works">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center">
           <h2 className={`text-3xl lg:text-4xl font-bold ${heading} mb-16`}>How ChopMetr Works</h2>
 
@@ -266,7 +279,7 @@ export default function LandingPage() {
             ].map((step) => (
               <div
                 key={step.num}
-                className={`${cardBg} p-8 rounded-2xl border ${cardBorder} text-left ${cardHover} transition-all`}
+                className={`${cardBg} p-8 rounded-2xl border ${cardBorder} text-left ${cardHover} transition-all duration-300`}
               >
                 <div className={`w-12 h-12 ${step.iconBg} rounded-lg flex items-center justify-center mb-6`}>
                   <span className={`${step.color} font-bold text-lg`}>{step.num}</span>
@@ -299,7 +312,7 @@ export default function LandingPage() {
       </section>
 
       {/* ============================== FEATURES ============================== */}
-      <section className={`py-24 lg:py-32 ${cardBg} border-t ${border}`} id="features">
+      <section className={`py-24 lg:py-32 ${bg} border-t ${border}`} id="features">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="mb-16">
             <h2 className={`text-3xl lg:text-4xl font-bold ${heading} mb-4`}>Powerful tracking tools</h2>
@@ -308,8 +321,8 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Camera OCR — large */}
-            <div className={`lg:col-span-2 ${whiteBg} p-8 rounded-2xl border ${cardBorder} ${cardHover} transition-all`}>
-              <div className={`w-10 h-10 ${t(isDark, "bg-blue-50", "bg-blue-500/10")} text-primary rounded-lg flex items-center justify-center mb-6`}>
+            <div className={`lg:col-span-2 ${whiteBg} p-8 rounded-2xl border ${cardBorder} ${cardHover} transition-all duration-300`}>
+              <div className={`w-10 h-10 ${t(isDark, "bg-blue-50", "bg-blue-500/10")} text-primary rounded-xl flex items-center justify-center mb-6`}>
                 <ScanLine size={22} />
               </div>
               <h3 className={`text-xl font-bold ${heading} mb-2`}>Smart Camera OCR</h3>
@@ -317,8 +330,8 @@ export default function LandingPage() {
             </div>
 
             {/* Privacy */}
-            <div className={`${whiteBg} p-8 rounded-2xl border ${cardBorder} ${cardHover} transition-all`}>
-              <div className={`w-10 h-10 ${t(isDark, "bg-emerald-50", "bg-emerald-500/10")} text-emerald-500 rounded-lg flex items-center justify-center mb-6`}>
+            <div className={`${whiteBg} p-8 rounded-2xl border ${cardBorder} ${cardHover} transition-all duration-300`}>
+              <div className={`w-10 h-10 ${t(isDark, "bg-emerald-50", "bg-emerald-500/10")} text-emerald-500 rounded-xl flex items-center justify-center mb-6`}>
                 <Shield size={22} />
               </div>
               <h3 className={`text-xl font-bold ${heading} mb-2`}>100% Privacy</h3>
@@ -326,8 +339,8 @@ export default function LandingPage() {
             </div>
 
             {/* Evidence */}
-            <div className={`${whiteBg} p-8 rounded-2xl border ${cardBorder} ${cardHover} transition-all`}>
-              <div className={`w-10 h-10 ${t(isDark, "bg-red-50", "bg-red-500/10")} text-red-500 rounded-lg flex items-center justify-center mb-6`}>
+            <div className={`${whiteBg} p-8 rounded-2xl border ${cardBorder} ${cardHover} transition-all duration-300`}>
+              <div className={`w-10 h-10 ${t(isDark, "bg-red-50", "bg-red-500/10")} text-red-500 rounded-xl flex items-center justify-center mb-6`}>
                 <FileText size={22} />
               </div>
               <h3 className={`text-xl font-bold ${heading} mb-2`}>Evidence PDF</h3>
@@ -335,7 +348,7 @@ export default function LandingPage() {
             </div>
 
             {/* Analytics — full width */}
-            <div className={`lg:col-span-4 ${whiteBg} p-10 rounded-2xl border ${cardBorder} flex flex-col md:flex-row items-center gap-10`}>
+            <div className={`lg:col-span-4 ${whiteBg} p-10 rounded-2xl border ${cardBorder} ${cardHover} transition-all duration-300 flex flex-col md:flex-row items-center gap-10`}>
               <div className="flex-1">
                 <div className={`w-10 h-10 ${t(isDark, "bg-blue-50", "bg-blue-500/10")} text-primary rounded-lg flex items-center justify-center mb-6`}>
                   <BarChart3 size={22} />
@@ -368,7 +381,7 @@ export default function LandingPage() {
       </section>
 
       {/* ============================== FAQ ============================== */}
-      <section className={`py-24 lg:py-32 ${bg}`} id="faq">
+      <section className={`py-24 lg:py-32 ${sectionAlt} border-t ${border}`} id="faq">
         <div className="max-w-3xl mx-auto px-6 lg:px-12">
           <h2 className={`text-3xl font-bold ${heading} text-center mb-16`}>Frequently Asked Questions</h2>
 
@@ -393,7 +406,7 @@ export default function LandingPage() {
             ].map((item, i) => (
               <details
                 key={i}
-                className={`group border ${cardBorder} rounded-xl px-6 py-4 ${cardBg} ${cardHover} transition-colors [&_summary::-webkit-details-marker]:hidden`}
+                className={`group border ${cardBorder} rounded-xl px-6 py-4 ${cardBg} ${cardHover} transition-all duration-300 [&_summary::-webkit-details-marker]:hidden`}
               >
                 <summary className="flex items-center justify-between cursor-pointer list-none">
                   <h5 className={`text-lg font-semibold ${t(isDark, "text-gray-900", "text-white/80")} pr-8`}>{item.q}</h5>
@@ -407,17 +420,22 @@ export default function LandingPage() {
       </section>
 
       {/* ============================== FINAL CTA ============================== */}
-      <section className={`py-24 lg:py-32 ${bg}`}>
-        <div className={`max-w-5xl mx-auto px-6 lg:px-12 text-center ${t(isDark, "bg-gray-900", "bg-white/[0.03] border border-white/[0.06]")} rounded-[2.5rem] py-20`}>
+      <section className={`relative py-24 lg:py-32 ${bg} border-t ${border} overflow-hidden`}>
+        {isDark && (
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-500/[0.06] rounded-full blur-[100px]" />
+          </div>
+        )}
+        <div className={`relative max-w-5xl mx-auto px-6 lg:px-12 text-center ${t(isDark, "bg-gradient-to-br from-gray-900 to-gray-800", "bg-gradient-to-br from-[#0F1729] to-[#162040] border border-white/[0.08]")} rounded-[2.5rem] py-20 ${t(isDark, "shadow-2xl", "shadow-2xl shadow-blue-500/[0.08]")}`}>
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
             Take control of your electricity
           </h2>
-          <p className={`${t(isDark, "text-blue-200", "text-white/45")} text-lg mb-10 max-w-xl mx-auto`}>
+          <p className={`${t(isDark, "text-gray-300", "text-gray-400")} text-lg mb-10 max-w-xl mx-auto`}>
             Join thousands of Ghanaians using ChopMetr to audit their bills and save money.
           </p>
           <button
             onClick={handleCTA}
-            className="group bg-primary hover:bg-blue-600 text-white px-10 py-5 rounded-2xl text-xl font-bold transition-all transform hover:scale-105 inline-flex items-center gap-2.5"
+            className={`group bg-primary hover:bg-blue-600 text-white px-10 py-5 rounded-2xl text-xl font-bold transition-all transform hover:scale-105 inline-flex items-center gap-2.5 ${t(isDark, "shadow-lg shadow-blue-200/30", "shadow-[0_0_30px_rgba(59,130,246,0.25)]")}`}
           >
             {ctaText}
             <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
