@@ -58,22 +58,27 @@ export default function LandingPage() {
     ? "Open Dashboard"
     : "Start Tracking \u2014 It\u2019s Free";
 
-  // Resolved theme tokens
-  const bg = t(isDark, "bg-[#FAFBFC]", "bg-[#0A0E1A]");
-  const text = t(isDark, "text-gray-600", "text-gray-300");
-  const heading = t(isDark, "text-gray-900", "text-white");
-  const subtext = t(isDark, "text-gray-500", "text-gray-400");
-  const muted = t(isDark, "text-gray-400", "text-gray-500");
-  const border = t(isDark, "border-gray-200/70", "border-white/[0.06]");
-  const navBg = t(isDark, "bg-white/80", "bg-[#0A0E1A]/80");
-  const cardBg = t(isDark, "bg-white", "bg-white/[0.04]");
-  const cardBorder = t(isDark, "border-gray-200/80", "border-white/[0.08]");
-  const cardHover = t(isDark, "hover:shadow-lg hover:shadow-gray-200/50 hover:border-gray-300", "hover:border-white/[0.15] hover:bg-white/[0.06]");
-  const whiteBg = t(isDark, "bg-white", "bg-white/[0.04]");
-  const mobileBg = t(isDark, "bg-white/95", "bg-[#0A0E1A]/95");
-  const toggleBorder = t(isDark, "border-gray-200", "border-white/[0.1]");
-  const toggleText = t(isDark, "text-gray-500", "text-gray-400");
-  const sectionAlt = t(isDark, "bg-gray-50/80", "bg-white/[0.02]");
+  // ─── DESIGN TOKENS ─────────────────────────────────────────
+  // Light: crisp white, real shadows, strong text hierarchy
+  // Dark: deep navy, solid card surfaces, visible borders
+  const bg         = t(isDark, "bg-white",             "bg-[#0A0E1A]");
+  const text       = t(isDark, "text-gray-600",        "text-gray-300");
+  const heading    = t(isDark, "text-gray-900",        "text-white");
+  const subtext    = t(isDark, "text-gray-500",        "text-gray-400");
+  const muted      = t(isDark, "text-gray-400",        "text-gray-500");
+  const border     = t(isDark, "border-gray-200",      "border-white/10");
+  const navBg      = t(isDark, "bg-white/90",          "bg-[#0A0E1A]/90");
+  const cardBg     = t(isDark, "bg-white shadow-sm shadow-gray-100",   "bg-[#111827]");
+  const cardBorder = t(isDark, "border-gray-200",      "border-gray-700/50");
+  const cardHover  = t(isDark,
+    "hover:shadow-md hover:shadow-gray-200/80 hover:border-gray-300",
+    "hover:border-gray-600 hover:bg-[#1a2235]"
+  );
+  const whiteBg    = t(isDark, "bg-white shadow-sm shadow-gray-100",   "bg-[#111827]");
+  const mobileBg   = t(isDark, "bg-white/98",          "bg-[#0A0E1A]/98");
+  const toggleBorder = t(isDark, "border-gray-300",    "border-gray-600");
+  const toggleText = t(isDark, "text-gray-500",        "text-gray-400");
+  const sectionAlt = t(isDark, "bg-gray-50",           "bg-[#0C1222]");
 
   return (
     <div className={`min-h-screen ${bg} font-display ${text} overflow-x-hidden transition-colors duration-500`}>
@@ -154,14 +159,14 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 mb-10">
             <button
               onClick={handleCTA}
-              className={`group bg-primary text-white px-8 py-4 rounded-xl text-lg font-bold ${t(isDark, "shadow-lg shadow-blue-200/60", "shadow-[0_0_30px_rgba(59,130,246,0.3)]")} hover:bg-blue-600 hover:translate-y-[-2px] transition-all flex items-center justify-center gap-2.5`}
+              className={`group bg-primary text-white px-8 py-4 rounded-xl text-lg font-bold ${t(isDark, "shadow-lg shadow-blue-500/30", "shadow-[0_0_30px_rgba(59,130,246,0.3)]")} hover:bg-blue-600 hover:translate-y-[-2px] transition-all flex items-center justify-center gap-2.5`}
             >
               {ctaText}
               <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
             </button>
             <a
               href="#how-it-works"
-              className={`h-14 px-8 rounded-xl font-bold text-base flex items-center justify-center border ${cardBorder} ${subtext} hover:text-primary hover:border-primary/30 transition-all`}
+              className={`h-14 px-8 rounded-xl font-bold text-base flex items-center justify-center border ${cardBorder} ${t(isDark, "text-gray-700", "text-gray-300")} hover:text-primary hover:border-primary/30 transition-all`}
             >
               See How It Works
             </a>
@@ -295,13 +300,13 @@ export default function LandingPage() {
             <p className={`text-sm font-semibold uppercase tracking-wider ${muted} mb-6`}>
               Our Analysis Verdict Scale
             </p>
-            <div className={`h-4 w-full rounded-full overflow-hidden mb-4 border ${t(isDark, "border-gray-100", "border-white/[0.04]")}`}>
+            <div className={`h-4 w-full rounded-full overflow-hidden mb-4 border ${t(isDark, "border-gray-200", "border-white/[0.06]")}`}>
               <div
                 className="h-full w-full rounded-full"
                 style={{ background: "linear-gradient(to right, #22C55E, #EAB308 35%, #F97316 60%, #EF4444)" }}
               />
             </div>
-            <div className={`flex justify-between text-xs font-bold ${t(isDark, "text-gray-700", "text-white/70")} px-2`}>
+            <div className={`flex justify-between text-xs font-bold ${t(isDark, "text-gray-700", "text-gray-300")} px-2`}>
               <span>HEALTHY</span>
               <span>WATCH</span>
               <span>SUSPICIOUS</span>
@@ -358,7 +363,7 @@ export default function LandingPage() {
                   See exactly which day of the week your credit &ldquo;disappears.&rdquo; Understand if your fridge is faulty or if the tariff changed without notice. Our dashboard breaks down costs per appliance category.
                 </p>
               </div>
-              <div className={`flex-1 w-full ${cardBg} p-6 rounded-xl border ${cardBorder} border-dashed`}>
+              <div className={`flex-1 w-full p-6 rounded-xl border border-dashed ${t(isDark, "bg-gray-50 border-gray-300", "bg-white/[0.03] border-gray-600")}`}>
                 <div className="space-y-4">
                   {[
                     { day: "Mon", w: "50%", cost: "GH₵ 4.2", color: "bg-primary" },
@@ -367,10 +372,10 @@ export default function LandingPage() {
                   ].map((row) => (
                     <div key={row.day} className="flex items-center justify-between gap-3">
                       <span className={`text-xs ${subtext} w-8`}>{row.day}</span>
-                      <div className={`h-2 flex-1 ${t(isDark, "bg-gray-100", "bg-white/[0.04]")} rounded-full overflow-hidden`}>
+                      <div className={`h-2 flex-1 ${t(isDark, "bg-gray-100", "bg-gray-700/50")} rounded-full overflow-hidden`}>
                         <div className={`h-full ${row.color} rounded-full`} style={{ width: row.w }} />
                       </div>
-                      <span className={`text-xs font-bold ${t(isDark, "text-gray-700", "text-white/70")} w-16 text-right`}>{row.cost}</span>
+                      <span className={`text-xs font-bold ${t(isDark, "text-gray-700", "text-gray-300")} w-16 text-right`}>{row.cost}</span>
                     </div>
                   ))}
                 </div>
@@ -409,7 +414,7 @@ export default function LandingPage() {
                 className={`group border ${cardBorder} rounded-xl px-6 py-4 ${cardBg} ${cardHover} transition-all duration-300 [&_summary::-webkit-details-marker]:hidden`}
               >
                 <summary className="flex items-center justify-between cursor-pointer list-none">
-                  <h5 className={`text-lg font-semibold ${t(isDark, "text-gray-900", "text-white/80")} pr-8`}>{item.q}</h5>
+                  <h5 className={`text-lg font-semibold ${heading} pr-8`}>{item.q}</h5>
                   <ChevronDown size={18} className={`${muted} shrink-0 transition-transform group-open:rotate-180`} />
                 </summary>
                 <p className={`mt-4 ${subtext} leading-relaxed`}>{item.a}</p>
@@ -426,16 +431,16 @@ export default function LandingPage() {
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-500/[0.06] rounded-full blur-[100px]" />
           </div>
         )}
-        <div className={`relative max-w-5xl mx-auto px-6 lg:px-12 text-center ${t(isDark, "bg-gradient-to-br from-gray-900 to-gray-800", "bg-gradient-to-br from-[#0F1729] to-[#162040] border border-white/[0.08]")} rounded-[2.5rem] py-20 ${t(isDark, "shadow-2xl", "shadow-2xl shadow-blue-500/[0.08]")}`}>
+        <div className={`relative max-w-5xl mx-auto px-6 lg:px-12 text-center bg-gradient-to-br from-[#0F1729] to-[#162040] rounded-[2.5rem] py-20 ${t(isDark, "shadow-2xl shadow-blue-900/30 border border-gray-200", "shadow-2xl shadow-blue-500/[0.08] border border-white/[0.08]")}`}>
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
             Take control of your electricity
           </h2>
-          <p className={`${t(isDark, "text-gray-300", "text-gray-400")} text-lg mb-10 max-w-xl mx-auto`}>
+          <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto">
             Join thousands of Ghanaians using ChopMetr to audit their bills and save money.
           </p>
           <button
             onClick={handleCTA}
-            className={`group bg-primary hover:bg-blue-600 text-white px-10 py-5 rounded-2xl text-xl font-bold transition-all transform hover:scale-105 inline-flex items-center gap-2.5 ${t(isDark, "shadow-lg shadow-blue-200/30", "shadow-[0_0_30px_rgba(59,130,246,0.25)]")}`}
+            className="group bg-primary hover:bg-blue-600 text-white px-10 py-5 rounded-2xl text-xl font-bold transition-all transform hover:scale-105 inline-flex items-center gap-2.5 shadow-[0_0_30px_rgba(59,130,246,0.25)]"
           >
             {ctaText}
             <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
@@ -449,11 +454,11 @@ export default function LandingPage() {
           <div className="flex items-start gap-3">
             <Info size={15} className={`${muted} shrink-0 mt-0.5`} />
             <p className={`text-[12px] ${subtext} leading-relaxed`}>
-              <span className={`font-bold ${t(isDark, "text-gray-700", "text-white/70")}`}>Disclaimer:</span>{" "}
-              ChopMetr is an <span className={`font-bold ${t(isDark, "text-gray-700", "text-white/70")}`}>independent consumer tool</span> and is{" "}
-              <span className={`font-bold ${t(isDark, "text-gray-700", "text-white/70")}`}>not affiliated with ECG, NEDCo, PDS, or PURC.</span>{" "}
+              <span className={`font-bold ${t(isDark, "text-gray-800", "text-gray-200")}`}>Disclaimer:</span>{" "}
+              ChopMetr is an <span className={`font-bold ${t(isDark, "text-gray-800", "text-gray-200")}`}>independent consumer tool</span> and is{" "}
+              <span className={`font-bold ${t(isDark, "text-gray-800", "text-gray-200")}`}>not affiliated with ECG, NEDCo, PDS, or PURC.</span>{" "}
               All estimates are based on publicly available PURC tariff rates and are for{" "}
-              <span className={`font-bold ${t(isDark, "text-gray-700", "text-white/70")}`}>informational purposes only.</span>{" "}
+              <span className={`font-bold ${t(isDark, "text-gray-800", "text-gray-200")}`}>informational purposes only.</span>{" "}
               This app is not an official billing tool. For official billing disputes, contact your utility provider or PURC directly.
             </p>
           </div>
@@ -464,7 +469,7 @@ export default function LandingPage() {
       <footer className={`py-12 border-t ${border}`}>
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-2">
-            <ChopMeterLogo size={110} color={isDark ? "rgba(255,255,255,0.3)" : "#111827"} />
+            <ChopMeterLogo size={110} color={isDark ? "rgba(255,255,255,0.3)" : "#9CA3AF"} />
             <ChopMeterTagline color={isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.35)"} />
           </div>
           <p className={`text-sm ${muted}`}>
