@@ -711,22 +711,48 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        {/* Budget Over-Spend Alert — only shows when spending exceeds 90% of budget */}
-        {budget && budget.percentage >= 90 && (
-          <div className={`flex items-center gap-3 p-3 rounded-xl mb-6 border animate-fade-in-up ${
-            budget.status === "over"
-              ? "bg-red-500/[0.08] border-red-500/20"
-              : "bg-amber-500/[0.08] border-amber-500/20"
-          }`}>
-            <AlertTriangle size={18} className={budget.status === "over" ? "text-red-500" : "text-amber-500"} />
-            <div className="flex-1">
-              <p className={`text-sm font-bold ${budget.status === "over" ? "text-red-500" : "text-amber-500"}`}>
-                {budget.status === "over" ? "Budget Exceeded" : "Approaching Budget Limit"}
-              </p>
-              <p className="text-gray-400 text-xs mt-0.5">
-                {currencySymbol}{budget.spent.toFixed(0)} spent of {currencySymbol}{budget.budget.toFixed(0)} monthly budget ({budget.percentage.toFixed(0)}%)
-              </p>
+        {/* Monthly Budget Tracker */}
+        {budget && (
+          <div className="glass-card p-4 mb-6 animate-fade-in-up">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Wallet size={14} className="text-blue-400" />
+                <span className="text-white text-xs font-bold uppercase tracking-wider">Monthly Budget</span>
+              </div>
+              <span className={`text-xs font-bold ${
+                budget.status === "on_track" ? "text-emerald-400" :
+                budget.status === "warning" ? "text-amber-400" :
+                "text-red-400"
+              }`}>
+                {budget.percentage.toFixed(0)}%
+              </span>
             </div>
+            <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden mb-2">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  budget.status === "on_track" ? "bg-emerald-500" :
+                  budget.status === "warning" ? "bg-amber-500" : "bg-red-500"
+                }`}
+                style={{ width: `${Math.min(100, budget.percentage)}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[11px]">
+              <span className="text-gray-400">
+                {currencySymbol}{budget.spent.toFixed(0)} spent
+              </span>
+              <span className="text-gray-500">
+                {currencySymbol}{budget.budget.toFixed(0)} budget
+              </span>
+            </div>
+            {budget.percentage >= 90 && (
+              <div className={`flex items-center gap-2 mt-2.5 pt-2.5 border-t border-white/[0.06]`}>
+                <AlertTriangle size={13} className={budget.status === "over" ? "text-red-400" : "text-amber-400"} />
+                <span className={`text-xs font-semibold ${budget.status === "over" ? "text-red-400" : "text-amber-400"}`}>
+                  {budget.status === "over" ? "Over budget!" : "Almost at limit"}
+                  {budget.safeDailyLimit > 0 && ` · ${currencySymbol}${budget.safeDailyLimit.toFixed(0)}/day safe limit`}
+                </span>
+              </div>
+            )}
           </div>
         )}
 
