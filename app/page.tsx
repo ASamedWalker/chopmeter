@@ -73,22 +73,22 @@ export default function LandingPage() {
   // Light: crisp white, real shadows, strong text hierarchy
   // Dark: deep navy, solid card surfaces, visible borders
   const bg         = t(isDark, "bg-white",             "bg-[#0A0E1A]");
-  const text       = t(isDark, "text-gray-600",        "text-gray-300");
+  const text       = t(isDark, "text-gray-600",        "text-white/80");
   const heading    = t(isDark, "text-gray-900",        "text-white");
-  const subtext    = t(isDark, "text-gray-500",        "text-gray-400");
-  const muted      = t(isDark, "text-gray-400",        "text-gray-500");
+  const subtext    = t(isDark, "text-gray-500",        "text-white/70");
+  const muted      = t(isDark, "text-gray-400",        "text-white/50");
   const border     = t(isDark, "border-gray-200",      "border-white/10");
   const navBg      = t(isDark, "bg-white/90",          "bg-[#0A0E1A]/90");
   const cardBg     = t(isDark, "bg-white shadow-sm shadow-gray-100",   "bg-[#111827]");
-  const cardBorder = t(isDark, "border-gray-200",      "border-gray-700/50");
+  const cardBorder = t(isDark, "border-gray-200",      "border-white/[0.08]");
   const cardHover  = t(isDark,
     "hover:shadow-md hover:shadow-gray-200/80 hover:border-gray-300",
-    "hover:border-gray-600 hover:bg-[#1a2235]"
+    "hover:border-white/20 hover:bg-[#1a2235]"
   );
   const whiteBg    = t(isDark, "bg-white shadow-sm shadow-gray-100",   "bg-[#111827]");
   const mobileBg   = t(isDark, "bg-white/98",          "bg-[#0A0E1A]/98");
-  const toggleBorder = t(isDark, "border-gray-300",    "border-gray-600");
-  const toggleText = t(isDark, "text-gray-500",        "text-gray-400");
+  const toggleBorder = t(isDark, "border-gray-300",    "border-white/20");
+  const toggleText = t(isDark, "text-gray-500",        "text-white/60");
   const sectionAlt = t(isDark, "bg-gray-50",           "bg-[#0C1222]");
 
   return (
@@ -177,7 +177,7 @@ export default function LandingPage() {
             </button>
             <a
               href="#how-it-works"
-              className={`h-14 px-8 rounded-xl font-bold text-base flex items-center justify-center border ${cardBorder} ${t(isDark, "text-gray-700", "text-gray-300")} hover:text-primary hover:border-primary/30 transition-all`}
+              className={`h-14 px-8 rounded-xl font-bold text-base flex items-center justify-center border ${cardBorder} ${t(isDark, "text-gray-700", "text-white/80")} hover:text-primary hover:border-primary/30 transition-all`}
             >
               See How It Works
             </a>
@@ -317,7 +317,7 @@ export default function LandingPage() {
                 style={{ background: "linear-gradient(to right, #22C55E, #EAB308 35%, #F97316 60%, #EF4444)" }}
               />
             </div>
-            <div className={`flex justify-between text-xs font-bold ${t(isDark, "text-gray-700", "text-gray-300")} px-2`}>
+            <div className={`flex justify-between text-xs font-bold ${t(isDark, "text-gray-700", "text-white/80")} px-2`}>
               <span>HEALTHY</span>
               <span>WATCH</span>
               <span>SUSPICIOUS</span>
@@ -386,7 +386,7 @@ export default function LandingPage() {
                       <div className={`h-2 flex-1 ${t(isDark, "bg-gray-100", "bg-gray-700/50")} rounded-full overflow-hidden`}>
                         <div className={`h-full ${row.color} rounded-full`} style={{ width: row.w }} />
                       </div>
-                      <span className={`text-xs font-bold ${t(isDark, "text-gray-700", "text-gray-300")} w-16 text-right`}>{row.cost}</span>
+                      <span className={`text-xs font-bold ${t(isDark, "text-gray-700", "text-white/80")} w-16 text-right`}>{row.cost}</span>
                     </div>
                   ))}
                 </div>
@@ -465,11 +465,11 @@ export default function LandingPage() {
           <div className="flex items-start gap-3">
             <Info size={15} className={`${muted} shrink-0 mt-0.5`} />
             <p className={`text-[12px] ${subtext} leading-relaxed`}>
-              <span className={`font-bold ${t(isDark, "text-gray-800", "text-gray-200")}`}>Disclaimer:</span>{" "}
-              ChopMetr is an <span className={`font-bold ${t(isDark, "text-gray-800", "text-gray-200")}`}>independent consumer tool</span> and is{" "}
-              <span className={`font-bold ${t(isDark, "text-gray-800", "text-gray-200")}`}>not affiliated with ECG, NEDCo, PDS, or PURC.</span>{" "}
+              <span className={`font-bold ${t(isDark, "text-gray-800", "text-white/90")}`}>Disclaimer:</span>{" "}
+              ChopMetr is an <span className={`font-bold ${t(isDark, "text-gray-800", "text-white/90")}`}>independent consumer tool</span> and is{" "}
+              <span className={`font-bold ${t(isDark, "text-gray-800", "text-white/90")}`}>not affiliated with ECG, NEDCo, PDS, or PURC.</span>{" "}
               All estimates are based on publicly available PURC tariff rates and are for{" "}
-              <span className={`font-bold ${t(isDark, "text-gray-800", "text-gray-200")}`}>informational purposes only.</span>{" "}
+              <span className={`font-bold ${t(isDark, "text-gray-800", "text-white/90")}`}>informational purposes only.</span>{" "}
               This app is not an official billing tool. For official billing disputes, contact your utility provider or PURC directly.
             </p>
           </div>
