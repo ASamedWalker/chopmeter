@@ -597,12 +597,6 @@ export default function SettingsPage() {
                   max="999999.99"
                   value={budgetAmount}
                   onChange={(e) => setBudgetAmount(e.target.value)}
-                  onBlur={() => {
-                    const val = Math.min(999999.99, Math.max(0, parseFloat(budgetAmount) || 0));
-                    saveSettings({ monthlyBudget: val });
-                    setBudgetAmount(val > 0 ? val.toString() : "");
-                    flash(val > 0 ? "Budget updated" : "Budget cleared");
-                  }}
                   placeholder="0.00"
                   className="w-full h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-sm font-bold pl-14 pr-4 placeholder:text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
@@ -611,6 +605,18 @@ export default function SettingsPage() {
                 Set a monthly spending target to track your electricity costs
               </p>
             </div>
+
+            <button
+              onClick={() => guardSave(() => {
+                const val = Math.min(999999.99, Math.max(0, parseFloat(budgetAmount) || 0));
+                saveSettings({ monthlyBudget: val });
+                setBudgetAmount(val > 0 ? val.toString() : "");
+                flash(val > 0 ? "Budget saved" : "Budget cleared");
+              })}
+              className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
+            >
+              Save Budget
+            </button>
           </div>
         </section>
 
