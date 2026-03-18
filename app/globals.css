@@ -243,6 +243,15 @@ html.light [class*="from-blue-500"][class*="to-violet-500"] {
   animation: bounce-subtle 1s ease-in-out infinite;
 }
 
+/* Achievement toast shimmer */
+@keyframes shimmer-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shimmer {
+  animation: shimmer-slide 2s ease-in-out infinite;
+}
+
 /* Light mode budget track */
 html.light .budget-track {
   background: rgba(0, 0, 0, 0.08) !important;

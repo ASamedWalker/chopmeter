@@ -14,6 +14,8 @@ import {
   checkLowBalanceNotification,
   checkDailyReminder,
   checkWeeklyReport,
+  checkStreakReminder,
+  checkUsageSpike,
 } from "@/lib/notifications";
 import type { MeterReading, UserSettings, DashboardMetrics, WeatherCache } from "@/lib/types";
 import { getCountry, getEffectiveRate, getDailyServiceCharge } from "@/lib/countries";
@@ -21,10 +23,19 @@ import { getGreeting } from "@/lib/greeting";
 import { getBudgetStatus } from "@/lib/budget";
 import type { BudgetStatus } from "@/lib/budget";
 import { fetchWeather, decodeWeatherCode } from "@/lib/weather";
+import { refreshWeeklyScans, checkStreakStatus, getTrackerLevel, getNextLevel } from "@/lib/streak";
+import { checkAchievements, getAllAchievements } from "@/lib/achievements";
+import { getWeeklyInsight } from "@/lib/insights";
+import { getActiveChallenge, generateChallenge } from "@/lib/challenges";
+import type { StreakData, Achievement, WeeklyInsight, Challenge } from "@/lib/types";
 import BottomNav from "@/components/BottomNav";
 import PullToRefresh from "@/components/PullToRefresh";
 import UsageChart from "@/components/UsageChart";
 import LowBalanceAlert from "@/components/LowBalanceAlert";
+import StreakCard from "@/components/StreakCard";
+import AchievementToast from "@/components/AchievementToast";
+import InsightsCard from "@/components/InsightsCard";
+import ChallengeCard from "@/components/ChallengeCard";
 
 import Link from "next/link";
 import {
@@ -145,6 +156,11 @@ export default function DashboardPage() {
   const [balanceSaved, setBalanceSaved] = useState(false);
   const [weather, setWeather] = useState<WeatherCache | null>(null);
   const [fabOpen, setFabOpen] = useState(false);
+  const [streak, setStreak] = useState<StreakData | null>(null);
+  const [streakStatus, setStreakStatus] = useState<"active" | "at_risk" | "lost">("lost");
+  const [weeklyInsight, setWeeklyInsight] = useState<WeeklyInsight | null>(null);
+  const [activeChallenge, setActiveChallenge] = useState<Challenge | null>(null);
+  const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
@@ -160,6 +176,36 @@ export default function DashboardPage() {
     setAllReadings(readings);
     setMetrics(computeMetrics(readings, s, s.countryCode));
     setRecentReadings(getRecentReadings(7).slice(0, 10));
+
+    // Engagement: streak, insights, challenges
+    const streakData = refreshWeeklyScans();
+    setStreak(streakData);
+    setStreakStatus(checkStreakStatus());
+
+    const insight = getWeeklyInsight(readings, s.countryCode, s.tariffRate);
+    setWeeklyInsight(insight);
+
+    // Check for new badge from scanner
+    const pendingBadge = sessionStorage.getItem("chopmeter_new_badge");
+    if (pendingBadge) {
+      try {
+        setAchievementToast(JSON.parse(pendingBadge));
+      } catch {}
+      sessionStorage.removeItem("chopmeter_new_badge");
+    }
+
+    let challenge = getActiveChallenge();
+    if (!challenge && readings.length >= 2) {
+      const country = getCountry(s.countryCode);
+      challenge = generateChallenge({
+        lastWeekCost: insight?.prevWeekCost ?? 0,
+        currencySymbol: country.currencySymbol,
+        currentStreak: streakData.currentStreak,
+        monthlyBudget: s.monthlyBudget,
+        dailyBurnRate: computeMetrics(readings, s, s.countryCode)?.dailyBurnRate ?? 0,
+      });
+    }
+    setActiveChallenge(challenge);
   }, [router]);
 
   useEffect(() => {
@@ -238,7 +284,18 @@ export default function DashboardPage() {
       const country = getCountry(settings.countryCode);
       checkWeeklyReport(metrics.weeklyUsage, country.currencySymbol, metrics.dailyBurnRate);
     }
-  }, [metrics, settings]);
+
+    // Streak at-risk reminder (evening)
+    if (streak) {
+      checkStreakReminder(streak.currentStreak, streakStatus === "active");
+    }
+
+    // Usage spike detection
+    if (metrics.dataAdequate && metrics.todayUsage > 0) {
+      const avgDaily = metrics.weeklyUsage / Math.max(metrics.dataSpanDays, 1);
+      checkUsageSpike(metrics.todayUsage, avgDaily);
+    }
+  }, [metrics, settings, streak, streakStatus]);
 
   const handleDeleteReading = (id: string) => {
     deleteReading(id);
@@ -323,6 +380,11 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-full grow flex-col bg-bg-dark font-display min-h-screen text-gray-50">
+      <AchievementToast
+        achievement={achievementToast}
+        onDismiss={() => setAchievementToast(null)}
+        onViewAll={() => router.push("/settings")}
+      />
       <PullToRefresh onRefresh={() => loadData()}>
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 pt-6 pb-24">
         {/* Greeting + Weather Row */}
@@ -355,6 +417,20 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Streak Card */}
+        {streak && (
+          <StreakCard
+            streak={streak}
+            level={getTrackerLevel(streak.totalScans)}
+            nextLevel={getNextLevel(streak.totalScans)}
+            status={streakStatus}
+            onScanNow={() => router.push("/scanner")}
+          />
+        )}
+
+        {/* Active Challenge */}
+        <ChallengeCard challenge={activeChallenge} currencySymbol={currencySymbol} />
 
         {/* Hero Balance Card — THE focal point */}
         <div
@@ -680,6 +756,13 @@ export default function DashboardPage() {
             />
           </div>
         )}
+
+        {/* Weekly Insights */}
+        <InsightsCard
+          insight={weeklyInsight}
+          currencySymbol={currencySymbol}
+          totalReadings={allReadings.length}
+        />
 
         {/* Meter Health Check Card — with trend badge */}
         <Link href="/health" className="block glass-card p-4 mb-6 animate-fade-in-up hover:border-blue-500/20 transition-colors">

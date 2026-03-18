@@ -121,3 +121,40 @@ export function checkWeeklyReport(
     "weekly-report"
   );
 }
+
+/** Check and trigger streak-at-risk reminder (call in evening) */
+export function checkStreakReminder(currentStreak: number, scannedToday: boolean) {
+  if (scannedToday || currentStreak === 0) return;
+
+  const now = new Date();
+  if (now.getHours() < 19) return; // Only remind after 7 PM
+
+  const lastShown = sessionStorage.getItem("chopmeter_streak_reminder_shown");
+  const today = now.toDateString();
+  if (lastShown === today) return;
+
+  sessionStorage.setItem("chopmeter_streak_reminder_shown", today);
+  showNotification(
+    `Your ${currentStreak}-day streak is at risk!`,
+    "Quick scan to keep your streak alive. Don't let it break!",
+    "streak-risk"
+  );
+}
+
+/** Check for unusual usage spike and notify */
+export function checkUsageSpike(todayUsage: number, avgDailyUsage: number) {
+  if (avgDailyUsage <= 0 || todayUsage <= 0) return;
+  const ratio = todayUsage / avgDailyUsage;
+  if (ratio < 2) return; // Only alert at 2x+ normal
+
+  const lastShown = sessionStorage.getItem("chopmeter_spike_shown");
+  const today = new Date().toDateString();
+  if (lastShown === today) return;
+
+  sessionStorage.setItem("chopmeter_spike_shown", today);
+  showNotification(
+    "Unusual Usage Detected",
+    `Today's usage is ${ratio.toFixed(1)}x your daily average. Check for unusual appliance activity.`,
+    "usage-spike"
+  );
+}

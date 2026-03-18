@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { saveReading, saveSettings, getSettings, generateId, getDefaultMeter } from "@/lib/storage";
 import { getCountry } from "@/lib/countries";
 import { recognizeMeterReading } from "@/lib/ocr";
+import { recordScan } from "@/lib/streak";
+import { checkAchievements } from "@/lib/achievements";
+import { getAllTopUps } from "@/lib/storage";
 import { X, Zap, Keyboard, Wallet, Check, RotateCcw, AlertCircle } from "lucide-react";
 
 type ScanState = "idle" | "scanning" | "success" | "manual";
@@ -160,6 +163,26 @@ export default function ScannerPage() {
         lastBalance: balNum,
         lastBalanceDate: Date.now(),
       });
+    }
+
+    // Engagement: record scan for streak + check achievements
+    const { streak: updatedStreak } = recordScan();
+    const settings = getSettings();
+    const topUps = getAllTopUps();
+    const newBadges = checkAchievements({
+      totalScans: updatedStreak.totalScans,
+      currentStreak: updatedStreak.currentStreak,
+      longestStreak: updatedStreak.longestStreak,
+      totalTopUps: topUps.length,
+      budgetSet: settings.monthlyBudget > 0,
+      budgetUnderCount: 0,
+      healthCheckRun: false,
+      healthGrade: null,
+      spikeDetected: false,
+      monthlySavingsPercent: 0,
+    });
+    if (newBadges.length > 0) {
+      sessionStorage.setItem("chopmeter_new_badge", JSON.stringify(newBadges[0]));
     }
 
     stopCamera();

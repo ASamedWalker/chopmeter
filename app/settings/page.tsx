@@ -61,6 +61,23 @@ import Link from "next/link";
 import { ChopMeterLogo, ChopMeterTagline } from "@/components/ChopMeterLogo";
 import { useTheme } from "@/lib/ThemeContext";
 import BottomNav from "@/components/BottomNav";
+import { getAllAchievements, getProgressHint, getAchievementStats } from "@/lib/achievements";
+import { getStreakData } from "@/lib/streak";
+import type { Achievement, UserProgress } from "@/lib/types";
+import {
+  ScanLine,
+  Wallet as WalletIcon,
+  PlusCircle,
+  Activity,
+  Flame,
+  Award,
+  Crown,
+  ShieldCheck,
+  Eye,
+  Search,
+  Trophy,
+  TrendingDown,
+} from "lucide-react";
 
 const METER_ICONS: { name: string; icon: LucideIcon; label: string }[] = [
   { name: "home", icon: Home, label: "Home" },
@@ -571,6 +588,77 @@ export default function SettingsPage() {
                 <span className="font-bold text-sm">Add Meter</span>
               </button>
             )}
+          </div>
+        </section>
+
+        {/* Achievements */}
+        <section className="glass-card p-5">
+          <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Trophy size={18} className="text-amber-400" />
+            Achievements
+            <span className="ml-auto text-gray-500 text-xs font-medium normal-case tracking-normal">
+              {getAchievementStats().unlocked}/{getAchievementStats().total}
+            </span>
+          </h3>
+
+          <div className="grid grid-cols-3 gap-3">
+            {getAllAchievements().map((badge) => {
+              const BADGE_ICON_MAP: Record<string, React.ElementType> = {
+                "scan-line": ScanLine, wallet: WalletIcon, "plus-circle": PlusCircle,
+                activity: Activity, flame: Flame, target: Target, award: Award,
+                crown: Crown, "shield-check": ShieldCheck, eye: Eye, search: Search,
+                trophy: Trophy, "trending-down": TrendingDown,
+              };
+              const Icon = BADGE_ICON_MAP[badge.icon] || Award;
+              const unlocked = badge.unlockedAt !== null;
+              const streakData = getStreakData();
+              const progress: UserProgress = {
+                totalScans: streakData.totalScans,
+                currentStreak: streakData.currentStreak,
+                longestStreak: streakData.longestStreak,
+                totalTopUps: 0,
+                budgetSet: false,
+                budgetUnderCount: 0,
+                healthCheckRun: false,
+                healthGrade: null,
+                spikeDetected: false,
+                monthlySavingsPercent: 0,
+              };
+              const hint = !unlocked ? getProgressHint(badge.id, progress) : null;
+
+              return (
+                <div
+                  key={badge.id}
+                  className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${
+                    unlocked
+                      ? "bg-white/[0.04] border-white/[0.08]"
+                      : "bg-white/[0.01] border-white/[0.04] opacity-50"
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                      unlocked ? "" : "grayscale"
+                    }`}
+                    style={{
+                      backgroundColor: unlocked ? `${badge.iconColor}20` : "rgba(255,255,255,0.04)",
+                      border: `1.5px solid ${unlocked ? `${badge.iconColor}40` : "rgba(255,255,255,0.06)"}`,
+                    }}
+                  >
+                    <Icon size={18} color={unlocked ? badge.iconColor : "#6B7280"} />
+                  </div>
+                  <p className="text-white text-[10px] font-bold leading-tight mb-0.5">
+                    {badge.name}
+                  </p>
+                  {unlocked ? (
+                    <p className="text-gray-500 text-[8px]">
+                      {new Date(badge.unlockedAt!).toLocaleDateString()}
+                    </p>
+                  ) : hint ? (
+                    <p className="text-gray-600 text-[8px] leading-tight">{hint}</p>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </section>
 

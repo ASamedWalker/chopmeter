@@ -310,6 +310,11 @@ export function clearAllData(): void {
   localStorage.removeItem(TOPUPS_KEY);
   localStorage.removeItem(APPLIANCE_SELECTIONS_KEY);
 
+  // Clear engagement data
+  localStorage.removeItem("chopmeter_streak");
+  localStorage.removeItem("chopmeter_achievements");
+  localStorage.removeItem("chopmeter_challenges");
+
   // Clear meter-specific keys
   const meters = getMeters();
   for (const meter of meters) {

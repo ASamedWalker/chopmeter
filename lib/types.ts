@@ -94,3 +94,82 @@ export interface EnergyTip {
   icon: string;
   iconColor: string;
 }
+
+// ─── Engagement System ───────────────────────────────────────
+
+/** Daily scanning streak data */
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  /** "YYYY-MM-DD" of last scan */
+  lastScanDate: string;
+  /** Earned 1 per 7-day milestone, lets you skip a day */
+  streakFreezes: number;
+  totalScans: number;
+  /** Last 7 days scanning activity [oldest → newest] */
+  weeklyScans: boolean[];
+}
+
+/** Tracker level based on total engagement */
+export type TrackerLevel = "starter" | "bronze" | "silver" | "gold" | "platinum";
+
+export interface TrackerLevelInfo {
+  level: TrackerLevel;
+  name: string;
+  minScans: number;
+  color: string;
+  icon: string;
+}
+
+/** Achievement / badge */
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  iconColor: string;
+  tier: "bronze" | "silver" | "gold" | "platinum";
+  /** null = locked */
+  unlockedAt: number | null;
+}
+
+/** Aggregated user progress for achievement checks */
+export interface UserProgress {
+  totalScans: number;
+  currentStreak: number;
+  longestStreak: number;
+  totalTopUps: number;
+  budgetSet: boolean;
+  budgetUnderCount: number;
+  healthCheckRun: boolean;
+  healthGrade: string | null;
+  spikeDetected: boolean;
+  monthlySavingsPercent: number;
+}
+
+/** Weekly usage insight */
+export interface WeeklyInsight {
+  weekUsage: number;
+  weekCost: number;
+  prevWeekCost: number;
+  changePercent: number;
+  changeDirection: "up" | "down" | "flat";
+  savingsAmount: number;
+  daysTracked: number;
+  burnRateComparison: string;
+}
+
+/** Savings challenge */
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  type: "weekly" | "monthly";
+  target: number;
+  current: number;
+  unit: "currency" | "days" | "kWh";
+  startDate: number;
+  endDate: number;
+  status: "active" | "completed" | "failed";
+  rewardBadgeId: string | null;
+}
