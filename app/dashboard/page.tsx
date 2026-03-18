@@ -49,7 +49,7 @@ import {
   Plus,
   X,
   Info,
-  AlertTriangle,
+  Flame,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -719,19 +719,32 @@ export default function DashboardPage() {
                 <Wallet size={14} className="text-blue-400" />
                 <span className="text-white text-xs font-bold uppercase tracking-wider">Monthly Budget</span>
               </div>
-              <span className={`text-xs font-bold ${
-                budget.status === "on_track" ? "text-emerald-400" :
-                budget.status === "warning" ? "text-amber-400" :
-                "text-red-400"
-              }`}>
-                {budget.percentage.toFixed(0)}%
-              </span>
+              <div className="flex items-center gap-1.5">
+                {budget.percentage >= 50 && (
+                  <Flame
+                    size={budget.percentage >= 90 ? 16 : budget.percentage >= 70 ? 14 : 12}
+                    className={`${
+                      budget.percentage >= 90 ? "text-red-400 animate-pulse" :
+                      budget.percentage >= 70 ? "text-amber-400 animate-bounce-subtle" :
+                      "text-yellow-400"
+                    } transition-all duration-500`}
+                  />
+                )}
+                <span className={`text-xs font-bold ${
+                  budget.status === "on_track" ? "text-emerald-400" :
+                  budget.status === "warning" ? "text-amber-400" :
+                  "text-red-400"
+                }`}>
+                  {budget.percentage.toFixed(0)}%
+                </span>
+              </div>
             </div>
-            <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden mb-2">
+            <div className="h-2.5 bg-black/[0.08] dark:bg-white/[0.06] rounded-full overflow-hidden mb-2 budget-track">
               <div
-                className={`h-full rounded-full transition-all ${
-                  budget.status === "on_track" ? "bg-emerald-500" :
-                  budget.status === "warning" ? "bg-amber-500" : "bg-red-500"
+                className={`h-full rounded-full transition-all duration-700 ease-out ${
+                  budget.status === "on_track" ? "bg-gradient-to-r from-emerald-500 to-emerald-400" :
+                  budget.status === "warning" ? "bg-gradient-to-r from-amber-500 to-orange-400" :
+                  "bg-gradient-to-r from-red-500 to-red-400"
                 }`}
                 style={{ width: `${Math.min(100, budget.percentage)}%` }}
               />
@@ -745,10 +758,10 @@ export default function DashboardPage() {
               </span>
             </div>
             {budget.percentage >= 90 && (
-              <div className={`flex items-center gap-2 mt-2.5 pt-2.5 border-t border-white/[0.06]`}>
-                <AlertTriangle size={13} className={budget.status === "over" ? "text-red-400" : "text-amber-400"} />
+              <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-black/[0.06] dark:border-white/[0.06]">
+                <Flame size={14} className={`${budget.status === "over" ? "text-red-400" : "text-amber-400"} animate-pulse`} />
                 <span className={`text-xs font-semibold ${budget.status === "over" ? "text-red-400" : "text-amber-400"}`}>
-                  {budget.status === "over" ? "Over budget!" : "Almost at limit"}
+                  {budget.status === "over" ? "Over budget! Slow down" : "Budget running hot"}
                   {budget.safeDailyLimit > 0 && ` · ${currencySymbol}${budget.safeDailyLimit.toFixed(0)}/day safe limit`}
                 </span>
               </div>

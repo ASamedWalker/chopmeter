@@ -234,6 +234,20 @@ html.light [class*="from-blue-500"][class*="to-violet-500"] {
   100% { transform: scale(1) rotate(45deg); }
 }
 
+/* Budget fire animation */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+.animate-bounce-subtle {
+  animation: bounce-subtle 1s ease-in-out infinite;
+}
+
+/* Light mode budget track */
+html.light .budget-track {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
 /* Print styles for PDF report export */
 @media print {
   .no-print,
