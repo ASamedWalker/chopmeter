@@ -18,6 +18,7 @@ import {
   Camera,
   Moon,
   Sun,
+  Info,
 } from "lucide-react";
 import { ChopMeterLogo, ChopMeterTagline } from "@/components/ChopMeterLogo";
 
@@ -423,6 +424,23 @@ export default function LandingPage() {
           </button>
         </div>
       </section>
+
+      {/* ============================== DISCLAIMER ============================== */}
+      <div className={`max-w-3xl mx-auto px-6 lg:px-12 pb-10`}>
+        <div className={`px-5 py-4 rounded-xl border ${cardBorder} ${cardBg}`}>
+          <div className="flex items-start gap-3">
+            <Info size={15} className={`${muted} shrink-0 mt-0.5`} />
+            <p className={`text-[12px] ${subtext} leading-relaxed`}>
+              <span className={`font-bold ${t(isDark, "text-gray-700", "text-white/70")}`}>Disclaimer:</span>{" "}
+              ChopMetr is an <span className={`font-bold ${t(isDark, "text-gray-700", "text-white/70")}`}>independent consumer tool</span> and is{" "}
+              <span className={`font-bold ${t(isDark, "text-gray-700", "text-white/70")}`}>not affiliated with ECG, NEDCo, PDS, or PURC.</span>{" "}
+              All estimates are based on publicly available PURC tariff rates and are for{" "}
+              <span className={`font-bold ${t(isDark, "text-gray-700", "text-white/70")}`}>informational purposes only.</span>{" "}
+              This app is not an official billing tool. For official billing disputes, contact your utility provider or PURC directly.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* ============================== FOOTER ============================== */}
       <footer className={`py-12 border-t ${border}`}>
