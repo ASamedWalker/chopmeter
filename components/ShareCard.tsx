@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useCallback, useState } from "react";
-import html2canvas from "html2canvas";
+import type { default as Html2Canvas } from "html2canvas";
 import { Share2, Download, MessageCircle, Loader2 } from "lucide-react";
 
 interface ShareCardProps {
@@ -46,6 +46,7 @@ export default function ShareCard({ type, summary, achievement }: ShareCardProps
     if (!cardRef.current) return null;
     setGenerating(true);
     try {
+      const html2canvas = (await import("html2canvas")).default;
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: "#0A0E1A",
         scale: 2,

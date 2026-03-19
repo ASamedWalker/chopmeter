@@ -99,7 +99,7 @@ const METER_COLORS = [
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const { theme, isDark, setTheme } = useTheme();
   const [settings, setSettingsLocal] = useState<UserSettings | null>(null);
   const [country, setCountry] = useState<CountryConfig>(COUNTRIES[0]);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
@@ -1142,9 +1142,9 @@ export default function SettingsPage() {
         <section className="glass-card p-5">
           <div className="flex flex-col items-center text-center py-4">
             <div className="mb-3">
-              <ChopMeterLogo size={180} color="#FFFFFF" />
+              <ChopMeterLogo size={180} color={isDark ? "#FFFFFF" : "#0A0E1A"} />
             </div>
-            <ChopMeterTagline color="rgba(255,255,255,0.4)" />
+            <ChopMeterTagline color={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />
             <p className="text-gray-500 text-xs mt-3">Version 1.0.0</p>
             <p className="text-gray-400 text-sm mt-3 max-w-[260px] leading-relaxed">
               Track your prepaid electricity usage and spending with ease.
