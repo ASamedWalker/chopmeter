@@ -201,6 +201,21 @@ html.light nav > div {
   box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.06) !important;
 }
 
+/* Gauge arc background */
+html.light .gauge-arc-bg { stroke: rgba(0, 0, 0, 0.1) !important; }
+
+/* Streak card empty dots */
+html.light .streak-dot-empty {
+  background: rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* White-opacity borders/backgrounds → dark equivalents in light mode */
+html.light .border-white\/\[0\.06\] { border-color: rgba(0, 0, 0, 0.08) !important; }
+html.light .border-white\/\[0\.08\] { border-color: rgba(0, 0, 0, 0.1) !important; }
+html.light .bg-white\/\[0\.03\] { background: rgba(0, 0, 0, 0.03) !important; }
+html.light .bg-white\/\[0\.06\] { background: rgba(0, 0, 0, 0.06) !important; }
+
 /* Gradient buttons should keep white text */
 html.light .btn-primary,
 html.light [class*="from-blue-500"][class*="to-violet-500"] {

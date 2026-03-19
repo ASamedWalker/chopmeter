@@ -102,7 +102,7 @@ export default function StreakCard({
               className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
                 streak.weeklyScans[i]
                   ? "bg-gradient-to-br from-blue-500 to-violet-500 shadow-sm shadow-blue-500/30"
-                  : "bg-white/[0.06] border border-white/[0.08]"
+                  : "bg-white/[0.06] border border-white/[0.08] streak-dot-empty"
               }`}
             >
               {streak.weeklyScans[i] && (

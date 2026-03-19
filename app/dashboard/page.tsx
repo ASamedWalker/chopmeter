@@ -626,7 +626,7 @@ export default function DashboardPage() {
                 <path
                   d="M 10 65 A 50 50 0 0 1 110 65"
                   fill="none"
-                  stroke="rgba(255,255,255,0.06)"
+                  className="stroke-white/[0.06] gauge-arc-bg"
                   strokeWidth="8"
                   strokeLinecap="round"
                 />
