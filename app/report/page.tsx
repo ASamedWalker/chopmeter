@@ -10,10 +10,12 @@ import {
 } from "@/lib/storage";
 import { getCountry } from "@/lib/countries";
 import { getBudgetStatus } from "@/lib/budget";
+import { getStreakData, getTrackerLevel } from "@/lib/streak";
 import type { UserSettings, MeterReading, TopUp, Meter } from "@/lib/types";
 import type { BudgetStatus } from "@/lib/budget";
 import BottomNav from "@/components/BottomNav";
-import { FileText, Download, ArrowLeft, Printer } from "lucide-react";
+import ShareCard from "@/components/ShareCard";
+import { FileText, Download, ArrowLeft, Printer, Share2 } from "lucide-react";
 
 interface MonthOption {
   label: string;
@@ -70,6 +72,7 @@ export default function ReportPage() {
   const [allTopUps, setAllTopUps] = useState<TopUp[]>([]);
   const [activeMeter, setActiveMeter] = useState<Meter | null>(null);
   const [selectedMonthIdx, setSelectedMonthIdx] = useState(0);
+  const [showShareCard, setShowShareCard] = useState(false);
 
   const monthOptions = useMemo(() => getMonthOptions(12), []);
 
@@ -165,13 +168,23 @@ export default function ReportPage() {
             <span className="text-sm font-bold">Back</span>
           </button>
           <h1 className="text-white font-bold text-sm">Monthly Report</h1>
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm py-2 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
-          >
-            <Download size={16} />
-            PDF
-          </button>
+          <div className="flex items-center gap-2">
+            {readingCount >= 2 && (
+              <button
+                onClick={() => setShowShareCard(true)}
+                className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] text-white font-bold text-sm py-2 px-3 rounded-xl hover:bg-white/[0.08] transition-all active:scale-[0.98]"
+              >
+                <Share2 size={16} />
+              </button>
+            )}
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold text-sm py-2 px-4 rounded-xl hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
+            >
+              <Download size={16} />
+              PDF
+            </button>
+          </div>
         </div>
       </header>
 
@@ -486,16 +499,58 @@ export default function ReportPage() {
           </div>
         </div>
 
-        {/* Print button at bottom - screen only */}
-        <div className="no-print mt-6">
+        {/* Action buttons at bottom - screen only */}
+        <div className="no-print mt-6 space-y-3">
+          {readingCount >= 2 && (
+            <button
+              onClick={() => setShowShareCard(true)}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold py-3 px-6 rounded-xl text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
+            >
+              <Share2 size={18} />
+              Share Monthly Summary
+            </button>
+          )}
           <button
             onClick={handlePrint}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-bold py-3 px-6 rounded-xl text-sm hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 bg-white/[0.05] border border-white/[0.08] text-white font-bold py-3 px-6 rounded-xl text-sm hover:bg-white/[0.08] transition-all active:scale-[0.98]"
           >
             <Printer size={18} />
             Print / Save as PDF
           </button>
         </div>
+
+        {/* Share Card Modal */}
+        {showShareCard && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) setShowShareCard(false); }}
+          >
+            <div className="max-w-sm w-full">
+              <ShareCard
+                type="monthly-summary"
+                summary={{
+                  month: monthLabel,
+                  totalUsage,
+                  totalCost,
+                  dailyAverage,
+                  readingCount,
+                  changePercent: hasPrevData ? changePercent : 0,
+                  changeDirection: !hasPrevData ? "flat" : changePercent < -2 ? "down" : changePercent > 2 ? "up" : "flat",
+                  currencySymbol: country.currencySymbol,
+                  userName: settings.displayName || "",
+                  streakDays: getStreakData().currentStreak,
+                  trackerLevel: getTrackerLevel(getStreakData().totalScans).name,
+                }}
+              />
+              <button
+                onClick={() => setShowShareCard(false)}
+                className="w-full mt-3 text-gray-400 text-sm font-bold py-2 hover:text-white transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
       <BottomNav active="dashboard" />

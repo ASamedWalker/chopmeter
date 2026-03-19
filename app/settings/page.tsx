@@ -64,6 +64,7 @@ import BottomNav from "@/components/BottomNav";
 import { getAllAchievements, getProgressHint, getAchievementStats } from "@/lib/achievements";
 import { getStreakData } from "@/lib/streak";
 import type { Achievement, UserProgress } from "@/lib/types";
+import ShareCard from "@/components/ShareCard";
 import {
   ScanLine,
   Wallet as WalletIcon,
@@ -121,6 +122,7 @@ export default function SettingsPage() {
   const [meterFormIcon, setMeterFormIcon] = useState("home");
   const [meterFormColor, setMeterFormColor] = useState(METER_COLORS[0]);
   const [deletingMeterId, setDeletingMeterId] = useState<string | null>(null);
+  const [sharingBadge, setSharingBadge] = useState<Achievement | null>(null);
 
   useEffect(() => {
     const s = getSettings();
@@ -629,9 +631,10 @@ export default function SettingsPage() {
               return (
                 <div
                   key={badge.id}
+                  onClick={() => unlocked && setSharingBadge(badge)}
                   className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${
                     unlocked
-                      ? "bg-white/[0.04] border-white/[0.08]"
+                      ? "bg-white/[0.04] border-white/[0.08] cursor-pointer hover:border-blue-500/30"
                       : "bg-white/[0.01] border-white/[0.04] opacity-50"
                   }`}
                 >
@@ -650,8 +653,8 @@ export default function SettingsPage() {
                     {badge.name}
                   </p>
                   {unlocked ? (
-                    <p className="text-gray-500 text-[8px]">
-                      {new Date(badge.unlockedAt!).toLocaleDateString()}
+                    <p className="text-blue-400/60 text-[8px]">
+                      Tap to share
                     </p>
                   ) : hint ? (
                     <p className="text-gray-600 text-[8px] leading-tight">{hint}</p>
@@ -1152,6 +1155,33 @@ export default function SettingsPage() {
       </PullToRefresh>
 
       <BottomNav active="settings" />
+
+      {/* Achievement Share Modal */}
+      {sharingBadge && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setSharingBadge(null); }}
+        >
+          <div className="max-w-sm w-full">
+            <ShareCard
+              type="achievement"
+              achievement={{
+                name: sharingBadge.name,
+                description: sharingBadge.description,
+                tier: sharingBadge.tier,
+                iconColor: sharingBadge.iconColor,
+                userName: settings?.displayName || "",
+              }}
+            />
+            <button
+              onClick={() => setSharingBadge(null)}
+              className="w-full mt-3 text-gray-400 text-sm font-bold py-2 hover:text-white transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
