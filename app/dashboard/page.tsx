@@ -36,6 +36,7 @@ import StreakCard from "@/components/StreakCard";
 import AchievementToast from "@/components/AchievementToast";
 import InsightsCard from "@/components/InsightsCard";
 import ChallengeCard from "@/components/ChallengeCard";
+import SplashScreen from "@/components/SplashScreen";
 
 import Link from "next/link";
 import {
@@ -161,6 +162,11 @@ export default function DashboardPage() {
   const [weeklyInsight, setWeeklyInsight] = useState<WeeklyInsight | null>(null);
   const [activeChallenge, setActiveChallenge] = useState<Challenge | null>(null);
   const [achievementToast, setAchievementToast] = useState<Achievement | null>(null);
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const shown = sessionStorage.getItem("chopmeter_splash_shown");
+    return !shown;
+  });
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
@@ -380,6 +386,12 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-full grow flex-col bg-bg-dark font-display min-h-screen text-gray-50">
+      {showSplash && (
+        <SplashScreen onFinish={() => {
+          setShowSplash(false);
+          sessionStorage.setItem("chopmeter_splash_shown", "1");
+        }} />
+      )}
       <AchievementToast
         achievement={achievementToast}
         onDismiss={() => setAchievementToast(null)}
