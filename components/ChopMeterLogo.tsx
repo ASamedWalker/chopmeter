@@ -73,7 +73,7 @@ export function ChopMeterTagline({
       className={`text-sm font-semibold tracking-[0.25em] uppercase ${className}`}
       style={{ color }}
     >
-      Predict. Plan. Power.
+      Your meter. Your money. Your control.
     </p>
   );
 }
