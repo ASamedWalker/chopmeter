@@ -70,7 +70,7 @@ export function ChopMeterTagline({
 }) {
   return (
     <p
-      className={`text-sm font-semibold tracking-[0.25em] uppercase ${className}`}
+      className={`text-xs font-semibold tracking-[0.12em] uppercase whitespace-nowrap ${className}`}
       style={{ color }}
     >
       Your meter. Your money. Your control.
